@@ -6,7 +6,7 @@ services:
     container_name: electronica-vallarta-app
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_URLS: http://0.0.0.0:8080
       ConnectionStrings__ConexionSqlServer: ${CADENA_CONEXION_SQLSERVER}
     ports:
       - "8080:8080"
