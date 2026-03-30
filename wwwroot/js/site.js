@@ -196,6 +196,49 @@ function inicializarCalculadoraPublica() {
     }
 }
 
+function inicializarFormularioTasaCambio() {
+    const formulario = document.getElementById("formulario-tasa-cambio");
+    if (!formulario) {
+        return;
+    }
+
+    const selectorPais = document.getElementById("paisId");
+    const selectorSucursal = document.getElementById("sucursalId");
+    if (!selectorPais || !selectorSucursal) {
+        return;
+    }
+
+    const sucursales = obtenerJsonDesdeElemento("datos-sucursales-tasa-cambio");
+    const sucursalSeleccionada = Number(formulario.dataset.sucursalSeleccionada || 0);
+
+    function cargarSucursalesPorPais() {
+        const paisId = Number(selectorPais.value || 0);
+        selectorSucursal.innerHTML = "";
+
+        const opcionInicial = document.createElement("option");
+        opcionInicial.value = "";
+        opcionInicial.textContent = paisId ? "Selecciona una sucursal o canal" : "Selecciona primero un pais";
+        selectorSucursal.appendChild(opcionInicial);
+
+        if (!paisId) {
+            return;
+        }
+
+        const sucursalesFiltradas = sucursales.filter(sucursal => Number(sucursal.paisId) === paisId);
+        sucursalesFiltradas.forEach(sucursal => {
+            const opcion = document.createElement("option");
+            opcion.value = String(sucursal.id);
+            opcion.textContent = sucursal.nombre;
+            opcion.selected = sucursalSeleccionada > 0 && sucursalSeleccionada === Number(sucursal.id);
+            selectorSucursal.appendChild(opcion);
+        });
+    }
+
+    selectorPais.addEventListener("change", cargarSucursalesPorPais);
+    cargarSucursalesPorPais();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     inicializarCalculadoraPublica();
+    inicializarFormularioTasaCambio();
 });

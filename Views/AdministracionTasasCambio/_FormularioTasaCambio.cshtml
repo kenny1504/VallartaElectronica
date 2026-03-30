@@ -1,6 +1,15 @@
 @model ElectronicaVallarta.ViewModels.FormularioTasaCambioViewModel
 
-<form method="post" class="mx-auto max-w-5xl rounded-[2rem] border border-white/70 bg-white/90 p-8 shadow-panel">
+@{
+    var datosSucursales = System.Text.Json.JsonSerializer.Serialize(
+        Model.Sucursales,
+        new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
+}
+
+<form method="post"
+      class="mx-auto max-w-5xl rounded-[2rem] border border-white/70 bg-white/90 p-8 shadow-panel"
+      id="formulario-tasa-cambio"
+      data-sucursal-seleccionada="@Model.SucursalId">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
 
@@ -54,33 +63,4 @@
         <a asp-action="Index" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700">Volver</a>
     </div>
 </form>
-
-<script>
-    (() => {
-        const sucursales = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Sucursales));
-        const selectorPais = document.getElementById("paisId");
-        const selectorSucursal = document.getElementById("sucursalId");
-        const sucursalSeleccionada = "@Model.SucursalId";
-
-        function cargarSucursales() {
-            const paisId = Number(selectorPais.value);
-            selectorSucursal.innerHTML = "";
-            const opcionInicial = document.createElement("option");
-            opcionInicial.value = "";
-            opcionInicial.textContent = paisId ? "Selecciona una sucursal o canal" : "Selecciona primero un pais";
-            selectorSucursal.appendChild(opcionInicial);
-            if (!paisId) return;
-
-            sucursales.filter(sucursal => sucursal.paisId === paisId).forEach(sucursal => {
-                const option = document.createElement("option");
-                option.value = sucursal.id;
-                option.textContent = sucursal.nombre;
-                option.selected = sucursalSeleccionada && Number(sucursalSeleccionada) === sucursal.id;
-                selectorSucursal.appendChild(option);
-            });
-        }
-
-        selectorPais.addEventListener("change", cargarSucursales);
-        cargarSucursales();
-    })();
-</script>
+<script id="datos-sucursales-tasa-cambio" type="application/json">@Html.Raw(datosSucursales)</script>

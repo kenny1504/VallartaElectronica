@@ -2,11 +2,15 @@
 @{
     ViewData["Title"] = "Crear pais";
 }
-<div class="mb-6">
-    <p class="text-xs font-bold uppercase tracking-[0.25em] text-mar">Nuevo registro</p>
-    <h1 class="mt-2 text-3xl font-black text-tinta">Crear pais</h1>
-</div>
-<partial name="_FormularioPais" model="Model" />
+<section class="space-y-6">
+    <partial name="~/Views/Shared/_BarraAdministracion.cshtml" />
+
+    <div class="mb-6">
+        <p class="text-xs font-bold uppercase tracking-[0.25em] text-mar">Nuevo registro</p>
+        <h1 class="mt-2 text-3xl font-black text-tinta">Crear pais</h1>
+    </div>
+    <partial name="_FormularioPais" model="Model" />
+</section>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
