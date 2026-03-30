@@ -1,9 +1,6 @@
 using ElectronicaVallarta.Datos;
 using ElectronicaVallarta.Datos.Inicializacion;
-using ElectronicaVallarta.Interfaces.Repositorios;
-using ElectronicaVallarta.Interfaces.Servicios;
-using ElectronicaVallarta.Repositorios;
-using ElectronicaVallarta.Servicios;
+using ElectronicaVallarta.Extensiones;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,17 +19,7 @@ builder.Services.AddDbContext<ContextoAplicacion>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("ConexionSqlServer"),
         sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
-
-builder.Services.AddScoped<IRepositorioPais, RepositorioPais>();
-builder.Services.AddScoped<IRepositorioSucursal, RepositorioSucursal>();
-builder.Services.AddScoped<IRepositorioTasaCambio, RepositorioTasaCambio>();
-builder.Services.AddScoped<IRepositorioUsuarioAdministrador, RepositorioUsuarioAdministrador>();
-builder.Services.AddScoped<IServicioPais, ServicioPais>();
-builder.Services.AddScoped<IServicioSucursal, ServicioSucursal>();
-builder.Services.AddScoped<IServicioTasaCambio, ServicioTasaCambio>();
-builder.Services.AddScoped<IServicioCalculadora, ServicioCalculadora>();
-builder.Services.AddScoped<IServicioAutenticacionAdministrador, ServicioAutenticacionAdministrador>();
-builder.Services.AddScoped<InicializadorDatos>();
+builder.Services.AgregarDependenciasAplicacion();
 
 var app = builder.Build();
 
