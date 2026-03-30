@@ -86,9 +86,21 @@ public class HomeController(
         return PartialView("_ResultadoCalculo", resultado);
     }
 
+    [HttpGet("/error/{codigoEstado:int?}")]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    public IActionResult Error(int? codigoEstado = null)
     {
+        if (codigoEstado == StatusCodes.Status404NotFound)
+        {
+            Response.StatusCode = StatusCodes.Status404NotFound;
+            return View("NoEncontrado");
+        }
+
+        if (codigoEstado.HasValue)
+        {
+            Response.StatusCode = codigoEstado.Value;
+        }
+
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

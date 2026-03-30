@@ -38,7 +38,7 @@ var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler("/error");
     app.UseHsts();
 }
 
@@ -49,6 +49,7 @@ using (var alcance = app.Services.CreateScope())
 }
 
 app.UseRouting();
+app.UseStatusCodePagesWithReExecute("/error/{0}");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapStaticAssets();

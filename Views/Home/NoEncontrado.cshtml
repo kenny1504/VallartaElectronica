@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = "Pagina no encontrada";
+}
+
+<section class="mx-auto max-w-3xl space-y-6 rounded-[2rem] border border-white/70 bg-white/90 p-8 text-center shadow-panel sm:p-10">
+    <div class="inline-flex self-center rounded-full bg-azulClaroMarca px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-azulMarca">
+        Error 404
+    </div>
+    <div class="space-y-3">
+        <h1 class="text-center text-4xl font-black text-tinta sm:text-5xl mx-auto max-w-2xl  ">La pagina que buscas no existe</h1>
+        <p class="mx-auto max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+            La direccion puede estar mal escrita o el contenido ya no esta disponible. Puedes volver a la calculadora principal desde aqui.
+        </p>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-3">
+        <a asp-controller="Home" asp-action="Index" class="rounded-2xl bg-tinta px-5 py-3 text-sm font-bold text-white transition hover:bg-mar">
+            Ir a la calculadora
+        </a>
+    </div>
+</section>
