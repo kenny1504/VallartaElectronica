@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Electronica Vallarta</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ElectronicaVallarta.styles.css" asp-append-version="true" />
+</head>
+<body class="min-h-full bg-cieloMarca text-tinta antialiased">
+    <div class="min-h-screen bg-[linear-gradient(180deg,_#dcefff_0%,_#eaf5ff_18%,_#d7ebff_52%,_#eef7ff_100%)]">
+        <header class="sticky top-0 z-40 border-b border-borde bg-white/90 backdrop-blur-xl">
+            <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+                <a asp-controller="Home" asp-action="Index" class="flex items-center">
+                    <img src="~/img/electronica.png"
+                         asp-append-version="true"
+                         alt="Electronica Vallarta"
+                         class="h-12 w-auto sm:h-14" />
+                </a>
+
+                <div class="flex items-center gap-3 text-sm font-semibold">
+                    <a asp-controller="Home" asp-action="Index" class="rounded-full px-4 py-2 text-slate-700 transition hover:bg-azulClaroMarca hover:text-azulMarca">Calculadora</a>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a asp-controller="Administracion" asp-action="Index" class="rounded-full px-4 py-2 text-slate-700 transition hover:bg-azulClaroMarca hover:text-azulMarca">Administracion</a>
+                        <form asp-controller="Cuenta" asp-action="Salir" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="rounded-full bg-rojoMarca px-4 py-2 text-white transition hover:bg-red-700">Salir</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a asp-controller="Cuenta" asp-action="Ingresar" class="rounded-full border border-borde bg-white px-4 py-2 text-tinta transition hover:bg-azulClaroMarca">Ingreso admin</a>
+                    }
+                </div>
+            </nav>
+        </header>
+
+        <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

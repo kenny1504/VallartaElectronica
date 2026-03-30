@@ -1,0 +1,13 @@
+@if (TempData["MensajeExito"] is string mensajeExito)
+{
+    <div class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-emerald-800 shadow-sm">
+        @mensajeExito
+    </div>
+}
+
+@if (TempData["MensajeError"] is string mensajeError)
+{
+    <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-4 text-rose-800 shadow-sm">
+        @mensajeError
+    </div>
+}

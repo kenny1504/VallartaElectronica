@@ -1,0 +1,13 @@
+services:
+  aplicacion:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: electronica-vallarta-app
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__ConexionSqlServer: ${CADENA_CONEXION_SQLSERVER}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped

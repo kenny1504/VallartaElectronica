@@ -1,0 +1,116 @@
+@model ElectronicaVallarta.ViewModels.CalculadoraViewModel
+
+@{
+    ViewData["Title"] = "Tipo de cambio";
+    var datosSucursales = System.Text.Json.JsonSerializer.Serialize(
+        Model.Sucursales,
+        new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
+    var datosTasas = System.Text.Json.JsonSerializer.Serialize(
+        Model.TasasActivas,
+        new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
+}
+
+<section class="space-y-6 sm:space-y-8" id="modulo-calculadora-publica"
+         data-url-calcular="@Url.Action("Calcular", "Home")"
+         data-pais-inicial="@Model.Solicitud.PaisId"
+         data-sucursal-inicial="@Model.Solicitud.SucursalId">
+    <div class="overflow-hidden rounded-4xl bg-[linear-gradient(135deg,_#ffffff_0%,_#dff2ff_40%,_#69b5f5_100%)] p-4 shadow-panel sm:p-8">
+        <div class="grid gap-4 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-6">
+            <div>
+                <div class="inline-flex rounded-full bg-white/80 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-rojoMarca sm:px-4 sm:py-2 sm:text-xs">
+                    Tipo de cambio
+                </div>
+                <h1 class="mt-3 text-3xl font-black tracking-tight text-tinta sm:mt-5 sm:text-5xl">Convierte y envia dinero con confianza</h1>
+                <p class="mt-3 max-w-2xl text-sm leading-7 text-slate-700 sm:mt-4 sm:text-lg sm:leading-8">
+                    Consulta el tipo de cambio del dia, selecciona tu canal y obten al instante cuanto recibe tu cliente en destino.
+                </p>
+            </div>
+
+            <div class="rounded-[1.5rem] bg-white/75 p-4 shadow-panel backdrop-blur-sm sm:max-w-sm sm:p-5 lg:justify-self-end">
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-azulMarca sm:text-sm">Actualizado</p>
+                        <p class="mt-1 text-xl font-black text-tinta sm:mt-2 sm:text-3xl">@DateTime.Today.ToString("dd/MM/yyyy")</p>
+                    </div>
+                    <p class="hidden max-w-[12rem] text-right text-sm leading-6 text-slate-600 sm:block">
+                        Tasas visibles para consulta rapida y cotizacion inmediata.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
+        <div class="tarjeta-panel overflow-hidden">
+            <div class="border-b border-borde px-5 py-4 sm:px-7 sm:py-5">
+                <h2 class="text-2xl font-black text-tinta">Calculadora publica</h2>
+                <p class="mt-2 text-sm leading-7 text-slate-600">Tu envias en USD y te mostramos de inmediato cuanto recibe tu cliente.</p>
+            </div>
+
+            <div class="space-y-5 px-5 py-5 sm:px-7 sm:py-6">
+                <form id="formulario-calculadora" asp-action="Calcular" method="post" class="space-y-5">
+                    @Html.AntiForgeryToken()
+                    <div class="grid gap-5 md:grid-cols-2">
+                        <div class="space-y-2">
+                            <label asp-for="Solicitud.PaisId" class="text-sm font-semibold text-slate-700"></label>
+                            <select asp-for="Solicitud.PaisId" asp-items="Model.Paises" id="paisId" class="campo-base">
+                                <option value="">Selecciona un pais</option>
+                            </select>
+                            <span asp-validation-for="Solicitud.PaisId" class="text-sm text-rojoMarca"></span>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label asp-for="Solicitud.SucursalId" class="text-sm font-semibold text-slate-700">Selecciona el canal</label>
+                            <select asp-for="Solicitud.SucursalId" id="sucursalId" class="campo-base">
+                                <option value="">Selecciona un canal</option>
+                            </select>
+                            <span asp-validation-for="Solicitud.SucursalId" class="text-sm text-rojoMarca"></span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="Solicitud.MontoUsd" class="text-sm font-semibold text-slate-700">Ingresa el monto</label>
+                        <div class="flex overflow-hidden rounded-2xl border border-borde bg-white focus-within:border-azulMarca focus-within:ring-4 focus-within:ring-azulMarca/10">
+                            <span class="inline-flex items-center bg-azulClaroMarca px-4 text-sm font-bold text-azulMarca">USD</span>
+                            <input asp-for="Solicitud.MontoUsd" type="number" step="0.01" min="0.01" placeholder="0.00" class="w-full px-4 py-3 outline-none" />
+                        </div>
+                        <span asp-validation-for="Solicitud.MontoUsd" class="text-sm text-rojoMarca"></span>
+                    </div>
+                    
+                </form>
+
+                <div id="contenedor-resultado" class="rounded-[1.75rem] border border-borde bg-azulClaroMarca/70 p-5 text-sm leading-7 text-slate-600">
+                    Completa los datos para ver la cotizacion en tiempo real.
+                </div>
+            </div>
+        </div>
+
+        <aside class="space-y-4">
+            <div class="tarjeta-panel overflow-hidden">
+                <div class="border-b border-borde px-6 py-5 sm:px-7">
+                    <h2 class="text-2xl font-black text-tinta">Tasas del dia</h2>
+                    <p id="descripcion-tasas" class="mt-2 text-sm leading-7 text-slate-600">Consulta las tasas activas por rango y canal.</p>
+                </div>
+
+                <div class="grid gap-5 px-6 py-6 sm:px-7 lg:grid-cols-2">
+                    <section>
+                        <div class="mb-4 flex items-center justify-center">
+                            <span class="etiqueta-rango">Menos de $1000</span>
+                        </div>
+                        <div id="tasas-menores" class="space-y-3"></div>
+                    </section>
+
+                    <section>
+                        <div class="mb-4 flex items-center justify-center">
+                            <span class="etiqueta-rango">Mas de $1000</span>
+                        </div>
+                        <div id="tasas-mayores" class="space-y-3"></div>
+                    </section>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script id="datos-sucursales-calculadora" type="application/json">@Html.Raw(datosSucursales)</script>
+    <script id="datos-tasas-calculadora" type="application/json">@Html.Raw(datosTasas)</script>
+</section>

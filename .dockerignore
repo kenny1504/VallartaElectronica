@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+**/*.suo
+**/*.dbmdl
+**/*.cache
+**/TestResults/
+.git/
+.gitignore
+README.md

@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+@layer components {
+  .campo-base {
+    @apply w-full rounded-2xl border border-borde bg-white px-4 py-3 text-tinta outline-none transition focus:border-azulMarca focus:ring-4 focus:ring-azulMarca/10;
+  }
+
+  .boton-primario {
+    @apply rounded-2xl bg-rojoMarca px-5 py-3 text-sm font-bold text-white transition hover:bg-red-600;
+  }
+
+  .boton-secundario {
+    @apply rounded-2xl border border-borde bg-white px-5 py-3 text-sm font-bold text-tinta transition hover:bg-azulClaroMarca;
+  }
+
+  .tarjeta-panel {
+    @apply rounded-4xl border border-white bg-panel shadow-panel;
+  }
+
+  .etiqueta-rango {
+    @apply inline-flex rounded-full bg-amarilloMarca px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-white;
+  }
+
+  .tarjeta-tasa {
+    @apply rounded-3xl border border-borde bg-white p-4 shadow-sm transition;
+  }
+
+  .tarjeta-tasa-activa {
+    @apply border-rojoMarca bg-red-50 ring-2 ring-rojoMarca/15;
+  }
+}

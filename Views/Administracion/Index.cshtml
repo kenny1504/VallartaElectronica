@@ -1,0 +1,35 @@
+@{
+    ViewData["Title"] = "Administracion";
+}
+
+<section class="space-y-8">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-mar">Panel privado</p>
+            <h1 class="mt-2 text-4xl font-black text-tinta">Gestion administrativa</h1>
+            <p class="mt-3 max-w-2xl text-base leading-8 text-slate-600">Administra catalogos, canales y tasas del dia desde un panel privado disponible solo para el usuario administrador.</p>
+        </div>
+        <div class="rounded-3xl border border-white/70 bg-white/80 px-5 py-4 shadow-panel">
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Sesion activa</p>
+            <p class="mt-2 text-lg font-bold text-tinta">@User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value</p>
+        </div>
+    </div>
+
+    <div class="grid gap-5 md:grid-cols-3">
+        <a asp-controller="AdministracionPaises" asp-action="Index" class="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-panel transition hover:-translate-y-1">
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-coral">Catalogo</p>
+            <h2 class="mt-4 text-2xl font-black text-tinta">Paises</h2>
+            <p class="mt-3 text-sm leading-7 text-slate-600">Configura destinos, moneda y disponibilidad para la calculadora publica.</p>
+        </a>
+        <a asp-controller="AdministracionSucursales" asp-action="Index" class="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-panel transition hover:-translate-y-1">
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-coral">Canales</p>
+            <h2 class="mt-4 text-2xl font-black text-tinta">Sucursales</h2>
+            <p class="mt-3 text-sm leading-7 text-slate-600">Define negocios, ventanillas y cuentas por cada pais destino.</p>
+        </a>
+        <a asp-controller="AdministracionTasasCambio" asp-action="Index" class="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-panel transition hover:-translate-y-1">
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-coral">Operacion</p>
+            <h2 class="mt-4 text-2xl font-black text-tinta">Tasas del dia</h2>
+            <p class="mt-3 text-sm leading-7 text-slate-600">Gestiona rangos por monto y evita traslapes para cada fecha operativa.</p>
+        </a>
+    </div>
+</section>

@@ -1,0 +1,13 @@
+@model ElectronicaVallarta.ViewModels.FormularioTasaCambioViewModel
+@{
+    ViewData["Title"] = "Editar tasa";
+}
+<div class="mb-6">
+    <p class="text-xs font-bold uppercase tracking-[0.25em] text-mar">Actualizacion</p>
+    <h1 class="mt-2 text-3xl font-black text-tinta">Editar tasa de cambio por rango</h1>
+</div>
+<partial name="_FormularioTasaCambio" model="Model" />
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

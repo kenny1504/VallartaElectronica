@@ -1,0 +1,86 @@
+@model ElectronicaVallarta.ViewModels.FormularioTasaCambioViewModel
+
+<form method="post" class="mx-auto max-w-5xl rounded-[2rem] border border-white/70 bg-white/90 p-8 shadow-panel">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div asp-validation-summary="ModelOnly" class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"></div>
+
+    <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div class="space-y-2">
+            <label asp-for="PaisId" class="text-sm font-semibold text-slate-700"></label>
+            <select asp-for="PaisId" asp-items="Model.Paises" id="paisId" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10">
+                <option value="">Selecciona un pais</option>
+            </select>
+            <span asp-validation-for="PaisId" class="text-sm text-rose-600"></span>
+        </div>
+        <div class="space-y-2">
+            <label asp-for="SucursalId" class="text-sm font-semibold text-slate-700"></label>
+            <select asp-for="SucursalId" id="sucursalId" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10">
+                <option value="">Selecciona primero un pais</option>
+            </select>
+            <span asp-validation-for="SucursalId" class="text-sm text-rose-600"></span>
+        </div>
+        <div class="space-y-2">
+            <label asp-for="FechaTasa" class="text-sm font-semibold text-slate-700"></label>
+            <input asp-for="FechaTasa" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
+            <span asp-validation-for="FechaTasa" class="text-sm text-rose-600"></span>
+        </div>
+        <div class="space-y-2">
+            <label asp-for="MontoDesdeUsd" class="text-sm font-semibold text-slate-700"></label>
+            <input asp-for="MontoDesdeUsd" class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
+            <span asp-validation-for="MontoDesdeUsd" class="text-sm text-rose-600"></span>
+        </div>
+        <div class="space-y-2">
+            <label asp-for="MontoHastaUsd" class="text-sm font-semibold text-slate-700"></label>
+            <input asp-for="MontoHastaUsd" class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
+            <p class="text-xs leading-6 text-slate-500">Dejalo vacio para indicar un rango abierto en adelante.</p>
+            <span asp-validation-for="MontoHastaUsd" class="text-sm text-rose-600"></span>
+        </div>
+        <div class="space-y-2">
+            <label asp-for="TasaCambio" class="text-sm font-semibold text-slate-700"></label>
+            <input asp-for="TasaCambio" class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
+            <span asp-validation-for="TasaCambio" class="text-sm text-rose-600"></span>
+        </div>
+    </div>
+
+    <label class="mt-6 flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-4">
+        <input asp-for="EstaActivo" class="h-5 w-5 rounded border-slate-300 text-mar focus:ring-mar" />
+        <span class="text-sm font-semibold text-slate-700">Mantener tasa activa</span>
+    </label>
+
+    <div class="mt-8 flex flex-wrap gap-3">
+        <button type="submit" class="rounded-2xl bg-tinta px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:bg-mar">Guardar</button>
+        <a asp-action="Index" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700">Volver</a>
+    </div>
+</form>
+
+<script>
+    (() => {
+        const sucursales = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Sucursales));
+        const selectorPais = document.getElementById("paisId");
+        const selectorSucursal = document.getElementById("sucursalId");
+        const sucursalSeleccionada = "@Model.SucursalId";
+
+        function cargarSucursales() {
+            const paisId = Number(selectorPais.value);
+            selectorSucursal.innerHTML = "";
+            const opcionInicial = document.createElement("option");
+            opcionInicial.value = "";
+            opcionInicial.textContent = paisId ? "Selecciona una sucursal o canal" : "Selecciona primero un pais";
+            selectorSucursal.appendChild(opcionInicial);
+            if (!paisId) return;
+
+            sucursales.filter(sucursal => sucursal.paisId === paisId).forEach(sucursal => {
+                const option = document.createElement("option");
+                option.value = sucursal.id;
+                option.textContent = sucursal.nombre;
+                option.selected = sucursalSeleccionada && Number(sucursalSeleccionada) === sucursal.id;
+                selectorSucursal.appendChild(option);
+            });
+        }
+
+        selectorPais.addEventListener("change", cargarSucursales);
+        cargarSucursales();
+    })();
+</script>

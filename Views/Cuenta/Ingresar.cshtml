@@ -1,0 +1,53 @@
+@model ElectronicaVallarta.ViewModels.FormularioInicioSesionViewModel
+
+@{
+    ViewData["Title"] = "Ingreso administrativo";
+}
+
+<section class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+    <div class="space-y-6">
+        <div class="inline-flex rounded-full border border-coral/20 bg-white/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-coral">
+            Acceso privado
+        </div>
+        <h1 class="text-4xl font-black leading-tight text-tinta sm:text-5xl">Solo un usuario administrador puede gestionar paises, sucursales y tasas.</h1>
+        <p class="max-w-xl text-lg leading-8 text-slate-600">
+            El modulo administrativo ahora esta protegido por autenticacion con cookies y rol de administrador. Inicia sesion para continuar.
+        </p>
+        @* <div class="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-panel"> *@
+        @*     <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Credenciales iniciales</p> *@
+        @*     <p class="mt-3 text-sm leading-7 text-slate-600">Usuario: <strong>admin</strong></p> *@
+        @*     <p class="text-sm leading-7 text-slate-600">Clave: <strong>Admin123!</strong></p> *@
+        @* </div> *@
+    </div>
+
+    <div class="rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-panel sm:p-8">
+        <h2 class="text-2xl font-black text-tinta">Ingreso administrativo</h2>
+        <p class="mt-2 text-sm leading-7 text-slate-600">Ingresa con la cuenta autorizada para acceder al panel privado.</p>
+
+        <form method="post" class="mt-6 space-y-5">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="UrlRetorno" />
+            <div asp-validation-summary="ModelOnly" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"></div>
+
+            <div class="space-y-2">
+                <label asp-for="NombreUsuario" class="text-sm font-semibold text-slate-700"></label>
+                <input asp-for="NombreUsuario" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
+                <span asp-validation-for="NombreUsuario" class="text-sm text-rose-600"></span>
+            </div>
+
+            <div class="space-y-2">
+                <label asp-for="Clave" class="text-sm font-semibold text-slate-700"></label>
+                <input asp-for="Clave" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
+                <span asp-validation-for="Clave" class="text-sm text-rose-600"></span>
+            </div>
+
+            <button type="submit" class="w-full rounded-2xl bg-tinta px-5 py-4 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:bg-mar">
+                Ingresar
+            </button>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

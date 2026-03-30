@@ -1,0 +1,13 @@
+@model ElectronicaVallarta.ViewModels.FormularioPaisViewModel
+@{
+    ViewData["Title"] = "Editar pais";
+}
+<div class="mb-6">
+    <p class="text-xs font-bold uppercase tracking-[0.25em] text-mar">Actualizacion</p>
+    <h1 class="mt-2 text-3xl font-black text-tinta">Editar pais</h1>
+</div>
+<partial name="_FormularioPais" model="Model" />
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,36 @@
+@model ElectronicaVallarta.ViewModels.FormularioPaisViewModel
+
+<form method="post" class="mx-auto max-w-4xl rounded-[2rem] border border-white/70 bg-white/90 p-8 shadow-panel">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div asp-validation-summary="ModelOnly" class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"></div>
+
+    <div class="grid gap-5 md:grid-cols-2">
+        <div class="space-y-2">
+            <label asp-for="Nombre" class="text-sm font-semibold text-slate-700"></label>
+            <input asp-for="Nombre" class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
+            <span asp-validation-for="Nombre" class="text-sm text-rose-600"></span>
+        </div>
+        <div class="space-y-2">
+            <label asp-for="CodigoMoneda" class="text-sm font-semibold text-slate-700"></label>
+            <input asp-for="CodigoMoneda" class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
+            <span asp-validation-for="CodigoMoneda" class="text-sm text-rose-600"></span>
+        </div>
+        <div class="space-y-2 md:col-span-2">
+            <label asp-for="SimboloMoneda" class="text-sm font-semibold text-slate-700"></label>
+            <input asp-for="SimboloMoneda" class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
+            <span asp-validation-for="SimboloMoneda" class="text-sm text-rose-600"></span>
+        </div>
+    </div>
+
+    <label class="mt-6 flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-4">
+        <input asp-for="EstaActivo" class="h-5 w-5 rounded border-slate-300 text-mar focus:ring-mar" />
+        <span class="text-sm font-semibold text-slate-700">Mantener pais activo</span>
+    </label>
+
+    <div class="mt-8 flex flex-wrap gap-3">
+        <button type="submit" class="rounded-2xl bg-tinta px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:bg-mar">Guardar</button>
+        <a asp-action="Index" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700">Volver</a>
+    </div>
+</form>
