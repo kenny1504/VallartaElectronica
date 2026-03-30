@@ -10,7 +10,7 @@ namespace ElectronicaVallarta.Controllers;
 public class CuentaController(IServicioAutenticacionAdministrador servicioAutenticacionAdministrador) : Controller
 {
     [AllowAnonymous]
-    [HttpGet]
+    [HttpGet("/acceso")]
     public IActionResult Ingresar(string? returnUrl = null)
     {
         if (User.Identity?.IsAuthenticated == true)
@@ -22,7 +22,7 @@ public class CuentaController(IServicioAutenticacionAdministrador servicioAutent
     }
 
     [AllowAnonymous]
-    [HttpPost]
+    [HttpPost("/acceso")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Ingresar(FormularioInicioSesionViewModel modelo)
     {

@@ -13,8 +13,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Cuenta/Ingresar";
-        options.AccessDeniedPath = "/Cuenta/Ingresar";
+        options.LoginPath = "/acceso";
+        options.AccessDeniedPath = "/acceso";
         options.Cookie.Name = "ElectronicaVallarta.Admin";
         options.SlidingExpiration = true;
     });
