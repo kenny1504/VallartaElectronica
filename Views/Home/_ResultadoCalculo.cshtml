@@ -21,7 +21,7 @@ else
             </div>
         </div>
 
-        <div class="mt-4 grid grid-cols-2 gap-3 sm:mt-5 sm:gap-4">
+        <div class="mt-4 grid grid-cols-1 gap-3 sm:mt-5 sm:grid-cols-2 sm:gap-4">
             <div class="rounded-3xl bg-white p-3 shadow-sm sm:p-4">
                 <p class="text-sm font-semibold text-slate-500">Canal seleccionado</p>
                 <p class="mt-2 text-xl font-black text-tinta sm:text-2xl">@Model.NombreSucursal</p>
@@ -29,7 +29,7 @@ else
             </div>
             <div class="rounded-3xl bg-white p-3 shadow-sm sm:p-4">
                 <p class="text-sm font-semibold text-slate-500">Actualizado</p>
-                <p class="mt-2 text-xl font-black text-tinta sm:text-2xl">@Model.FechaTasa.ToString("dd/MM/yyyy")</p>
+                <p class="mt-2 break-words text-lg font-black leading-tight text-tinta sm:text-2xl">@Model.FechaTasa.ToString("dd/MM/yyyy")</p>
                 <p class="mt-1 text-xs leading-5 text-slate-600 sm:text-sm">Informacion vigente para la cotizacion de hoy.</p>
             </div>
         </div>

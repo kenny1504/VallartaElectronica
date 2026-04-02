@@ -55,15 +55,19 @@ function inicializarCalculadoraPublica() {
     const paisInicial = modulo.dataset.paisInicial ?? "";
     const sucursalInicial = modulo.dataset.sucursalInicial ?? "";
     let temporizadorCalculo = null;
+    let debeDesplazarResultado = false;
 
     function desplazarResultadoEnMovil() {
         if (window.innerWidth >= 768) {
             return;
         }
 
-        contenedorResultado.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
+        const margenSuperior = 88;
+        const posicionObjetivo = contenedorResultado.getBoundingClientRect().top + window.scrollY - margenSuperior;
+
+        window.scrollTo({
+            top: Math.max(posicionObjetivo, 0),
+            behavior: "smooth"
         });
     }
 
@@ -167,14 +171,21 @@ function inicializarCalculadoraPublica() {
         });
 
         contenedorResultado.innerHTML = await respuesta.text();
-        desplazarResultadoEnMovil();
+        if (debeDesplazarResultado) {
+            desplazarResultadoEnMovil();
+        }
+
+        debeDesplazarResultado = false;
     }
 
-    function programarCalculo() {
+    function programarCalculo(opciones = {}) {
+        const { desplazar = false } = opciones;
+
         if (temporizadorCalculo !== null) {
             window.clearTimeout(temporizadorCalculo);
         }
 
+        debeDesplazarResultado = desplazar;
         temporizadorCalculo = window.setTimeout(() => {
             calcularCotizacion();
         }, 280);
@@ -189,12 +200,12 @@ function inicializarCalculadoraPublica() {
     });
 
     selectorSucursal.addEventListener("change", programarCalculo);
-    campoMonto.addEventListener("input", programarCalculo);
-    campoMonto.addEventListener("blur", programarCalculo);
+    campoMonto.addEventListener("input", () => programarCalculo());
+    campoMonto.addEventListener("blur", () => programarCalculo({ desplazar: true }));
 
     botonEjemplo?.addEventListener("click", () => {
         campoMonto.value = "1250";
-        programarCalculo();
+        programarCalculo({ desplazar: true });
     });
 
     formulario.addEventListener("submit", async evento => {
@@ -258,9 +269,16 @@ function inicializarToasts() {
 
     toasts.forEach(toast => {
         const botonCerrar = toast.querySelector("[data-toast-cerrar]");
+        toast.classList.add("toast-oculto");
+
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                toast.classList.remove("toast-oculto");
+            });
+        });
 
         function cerrarToast() {
-            toast.classList.add("opacity-0", "translate-y-2");
+            toast.classList.add("toast-oculto");
             window.setTimeout(() => {
                 toast.remove();
             }, 220);

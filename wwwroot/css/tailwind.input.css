@@ -35,6 +35,10 @@
     @apply rounded-2xl border border-borde bg-white px-5 py-3 text-sm font-bold text-tinta transition hover:bg-azulClaroMarca;
   }
 
+  .boton-exito {
+    @apply rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:bg-emerald-700;
+  }
+
   .tarjeta-panel {
     @apply rounded-4xl border border-white bg-panel shadow-panel;
   }
@@ -53,18 +57,26 @@
 
   .toast-notificacion {
     @apply fixed bottom-5 left-1/2 z-50 flex w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 items-start justify-between gap-4 rounded-[1.5rem] border bg-white px-4 py-4 shadow-panel sm:bottom-6;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+    transition: opacity 220ms ease, transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .toast-exito {
-    @apply border-emerald-200 bg-emerald-50/95;
+    @apply border-emerald-200 bg-emerald-50;
   }
 
   .toast-error {
-    @apply border-rose-200 bg-rose-50/95;
+    @apply border-rose-200 bg-rose-50;
   }
 
   .toast-cerrar {
     @apply inline-flex h-8 w-8 flex-none items-center justify-center rounded-full border border-black/5 bg-white/80 text-lg font-bold leading-none text-slate-500 transition hover:text-tinta;
+  }
+
+  .toast-oculto {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px) scale(0.96);
   }
 
   .boton-whatsapp-flotante {
