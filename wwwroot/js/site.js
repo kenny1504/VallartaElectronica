@@ -56,6 +56,17 @@ function inicializarCalculadoraPublica() {
     const sucursalInicial = modulo.dataset.sucursalInicial ?? "";
     let temporizadorCalculo = null;
 
+    function desplazarResultadoEnMovil() {
+        if (window.innerWidth >= 768) {
+            return;
+        }
+
+        contenedorResultado.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+
     function obtenerPaisSeleccionado() {
         return Number(selectorPais.value || 0);
     }
@@ -96,11 +107,11 @@ function inicializarCalculadoraPublica() {
         descripcionTasas.textContent = `Tasas vigentes para ${nombrePais}.`;
 
         contenedorMenores.innerHTML = menores.length
-            ? menores.map(tasa => crearTarjetaTasa(tasa, tasaAplicable !== null && tasa.sucursalId === tasaAplicable.sucursalId && tasa.montoDesdeUsd === tasaAplicable.montoDesdeUsd)).join("")
+            ? menores.map(tasa => crearTarjetaTasa(tasa, tasaAplicable != null && tasa.sucursalId === tasaAplicable.sucursalId && tasa.montoDesdeUsd === tasaAplicable.montoDesdeUsd)).join("")
             : "<p class='rounded-3xl border border-borde bg-white p-4 text-sm text-slate-500'>No hay tasas configuradas para este rango.</p>";
 
         contenedorMayores.innerHTML = mayores.length
-            ? mayores.map(tasa => crearTarjetaTasa(tasa, tasaAplicable !== null && tasa.sucursalId === tasaAplicable.sucursalId && tasa.montoDesdeUsd === tasaAplicable.montoDesdeUsd)).join("")
+            ? mayores.map(tasa => crearTarjetaTasa(tasa, tasaAplicable != null && tasa.sucursalId === tasaAplicable.sucursalId && tasa.montoDesdeUsd === tasaAplicable.montoDesdeUsd)).join("")
             : "<p class='rounded-3xl border border-borde bg-white p-4 text-sm text-slate-500'>No hay tasas configuradas para este rango.</p>";
     }
 
@@ -156,6 +167,7 @@ function inicializarCalculadoraPublica() {
         });
 
         contenedorResultado.innerHTML = await respuesta.text();
+        desplazarResultadoEnMovil();
     }
 
     function programarCalculo() {
@@ -238,7 +250,29 @@ function inicializarFormularioTasaCambio() {
     cargarSucursalesPorPais();
 }
 
+function inicializarToasts() {
+    const toasts = document.querySelectorAll("[data-toast]");
+    if (toasts.length === 0) {
+        return;
+    }
+
+    toasts.forEach(toast => {
+        const botonCerrar = toast.querySelector("[data-toast-cerrar]");
+
+        function cerrarToast() {
+            toast.classList.add("opacity-0", "translate-y-2");
+            window.setTimeout(() => {
+                toast.remove();
+            }, 220);
+        }
+
+        botonCerrar?.addEventListener("click", cerrarToast);
+        window.setTimeout(cerrarToast, 4200);
+    });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     inicializarCalculadoraPublica();
     inicializarFormularioTasaCambio();
+    inicializarToasts();
 });

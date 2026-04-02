@@ -9,7 +9,7 @@ public class ServicioTasaCambio(
     IRepositorioPais repositorioPais,
     IRepositorioSucursal repositorioSucursal) : IServicioTasaCambio
 {
-    public Task<IReadOnlyCollection<TasaCambioRango>> ObtenerTasasAsync() => repositorioTasaCambio.ObtenerTodosAsync();
+    public Task<IReadOnlyCollection<TasaCambioRango>> ObtenerTasasAsync(DateTime? fechaFiltro = null) => repositorioTasaCambio.ObtenerTodosAsync(fechaFiltro);
     public Task<TasaCambioRango?> ObtenerTasaPorIdAsync(int id, bool soloLectura = true) => repositorioTasaCambio.ObtenerPorIdAsync(id, soloLectura);
 
     public async Task CrearAsync(TasaCambioRango tasaCambioRango)

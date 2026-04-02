@@ -2,41 +2,41 @@
 
 @if (!Model.EsExitoso)
 {
-    <div class="rounded-[1.75rem] border border-red-200 bg-red-50 p-5 text-red-700">
+    <div class="rounded-[1.75rem] border border-red-200 bg-red-50 p-4 text-red-700 sm:p-5">
         <p class="text-xs font-black uppercase tracking-[0.22em] text-rojoMarca">No disponible</p>
-        <h3 class="mt-3 text-xl font-black text-tinta">No pudimos calcular tu cotizacion</h3>
-        <p class="mt-3 text-sm leading-7">@Model.Mensaje</p>
+        <h3 class="mt-2 text-lg font-black text-tinta sm:mt-3 sm:text-xl">No pudimos calcular tu cotizacion</h3>
+        <p class="mt-2 text-sm leading-6 sm:mt-3 sm:leading-7">@Model.Mensaje</p>
     </div>
 }
 else
 {
-    <div class="rounded-[1.75rem] border border-emerald-200 bg-[linear-gradient(180deg,_#f6fffb_0%,_#edfef7_100%)] p-5 text-tinta">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div class="rounded-[1.75rem] border border-emerald-200 bg-[linear-gradient(180deg,_#f6fffb_0%,_#edfef7_100%)] p-4 text-tinta sm:p-5">
+        <div class="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
                 <p class="text-sm font-semibold text-slate-600">Tu envias</p>
-                <h3 class="mt-2 text-4xl font-black text-tinta">USD @Model.MontoUsd.ToString("N2")</h3>
+                <h3 class="mt-1 text-3xl font-black text-tinta sm:mt-2 sm:text-4xl">USD @Model.MontoUsd.ToString("N2")</h3>
             </div>
-            <div class="rounded-full bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-700">
+            <div class="rounded-full bg-emerald-100 px-3 py-2 text-xs font-bold text-emerald-700 sm:px-4 sm:text-sm">
                 Tipo de cambio aplicado: @Model.TasaCambioAplicada.ToString("N2")
             </div>
         </div>
 
-        <div class="mt-5 grid gap-4 md:grid-cols-2">
-            <div class="rounded-3xl bg-white p-4 shadow-sm">
+        <div class="mt-4 grid grid-cols-2 gap-3 sm:mt-5 sm:gap-4">
+            <div class="rounded-3xl bg-white p-3 shadow-sm sm:p-4">
                 <p class="text-sm font-semibold text-slate-500">Canal seleccionado</p>
-                <p class="mt-2 text-2xl font-black text-tinta">@Model.NombreSucursal</p>
+                <p class="mt-2 text-xl font-black text-tinta sm:text-2xl">@Model.NombreSucursal</p>
                 <p class="mt-1 text-sm text-slate-600">@Model.NombrePais</p>
             </div>
-            <div class="rounded-3xl bg-white p-4 shadow-sm">
+            <div class="rounded-3xl bg-white p-3 shadow-sm sm:p-4">
                 <p class="text-sm font-semibold text-slate-500">Actualizado</p>
-                <p class="mt-2 text-2xl font-black text-tinta">@Model.FechaTasa.ToString("dd/MM/yyyy")</p>
-                <p class="mt-1 text-sm text-slate-600">Informacion vigente para la cotizacion de hoy.</p>
+                <p class="mt-2 text-xl font-black text-tinta sm:text-2xl">@Model.FechaTasa.ToString("dd/MM/yyyy")</p>
+                <p class="mt-1 text-xs leading-5 text-slate-600 sm:text-sm">Informacion vigente para la cotizacion de hoy.</p>
             </div>
         </div>
 
-        <div class="mt-4 rounded-3xl bg-tinta p-5 text-white shadow-sm">
+        <div class="mt-3 rounded-3xl bg-tinta p-4 text-white shadow-sm sm:mt-4 sm:p-5">
             <p class="text-sm font-semibold text-slate-300">Recibe en pais destino</p>
-            <p class="mt-3 text-5xl font-black text-emerald-300">@Model.MonedaDestino @Model.MontoRecibe.ToString("N2")</p>
+            <p class="mt-2 text-4xl font-black text-emerald-300 sm:mt-3 sm:text-5xl">@Model.MonedaDestino @Model.MontoRecibe.ToString("N2")</p>
         </div>
     </div>
 }

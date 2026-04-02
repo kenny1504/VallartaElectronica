@@ -13,7 +13,17 @@ public class AdministracionTasasCambioController(
     IServicioPais servicioPais,
     IServicioSucursal servicioSucursal) : Controller
 {
-    public async Task<IActionResult> Index() => View(await servicioTasaCambio.ObtenerTasasAsync());
+    public async Task<IActionResult> Index(DateTime? fechaFiltro)
+    {
+        var fechaAplicada = (fechaFiltro ?? DateTime.Today).Date;
+        var modelo = new ListadoTasasCambioViewModel
+        {
+            FechaFiltro = fechaAplicada,
+            Tasas = await servicioTasaCambio.ObtenerTasasAsync(fechaAplicada)
+        };
+
+        return View(modelo);
+    }
 
     public async Task<IActionResult> Crear() => View(await ConstruirFormularioAsync(new FormularioTasaCambioViewModel { EstaActivo = true, FechaTasa = DateTime.Today }));
 

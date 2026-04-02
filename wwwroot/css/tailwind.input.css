@@ -12,6 +12,14 @@
     -webkit-appearance: none;
     margin: 0;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animacion-entrada-vista {
+      animation: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
+  }
 }
 
 @layer components {
@@ -41,5 +49,41 @@
 
   .tarjeta-tasa-activa {
     @apply border-rojoMarca bg-red-50 ring-2 ring-rojoMarca/15;
+  }
+
+  .toast-notificacion {
+    @apply fixed bottom-5 left-1/2 z-50 flex w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 items-start justify-between gap-4 rounded-[1.5rem] border bg-white px-4 py-4 shadow-panel sm:bottom-6;
+  }
+
+  .toast-exito {
+    @apply border-emerald-200 bg-emerald-50/95;
+  }
+
+  .toast-error {
+    @apply border-rose-200 bg-rose-50/95;
+  }
+
+  .toast-cerrar {
+    @apply inline-flex h-8 w-8 flex-none items-center justify-center rounded-full border border-black/5 bg-white/80 text-lg font-bold leading-none text-slate-500 transition hover:text-tinta;
+  }
+
+  .boton-whatsapp-flotante {
+    @apply fixed bottom-5 right-5 z-40 inline-flex items-center gap-3 rounded-full bg-[#25D366] px-4 py-3 text-sm font-black !text-white shadow-panel transition hover:scale-[1.02] hover:bg-[#1fb859] sm:bottom-6 sm:right-6;
+  }
+
+  .animacion-entrada-vista {
+    animation: aparecerVista 480ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@keyframes aparecerVista {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

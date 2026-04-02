@@ -49,6 +49,5 @@ public class InicializadorDatos(ContextoAplicacion contexto, ILogger<Inicializad
         );
 
         await contexto.SaveChangesAsync();
-        logger.LogInformation("Se cargaron datos iniciales de demostracion.");
     }
 }

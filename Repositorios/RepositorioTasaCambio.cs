@@ -7,15 +7,26 @@ namespace ElectronicaVallarta.Repositorios;
 
 public class RepositorioTasaCambio(ContextoAplicacion contexto) : IRepositorioTasaCambio
 {
-    public async Task<IReadOnlyCollection<TasaCambioRango>> ObtenerTodosAsync() =>
-        await contexto.TasasCambioRango.AsNoTracking()
+    public async Task<IReadOnlyCollection<TasaCambioRango>> ObtenerTodosAsync(DateTime? fechaFiltro = null)
+    {
+        var consulta = contexto.TasasCambioRango.AsNoTracking()
             .Include(x => x.Pais)
             .Include(x => x.Sucursal)
+            .AsQueryable();
+
+        if (fechaFiltro.HasValue)
+        {
+            var fecha = fechaFiltro.Value.Date;
+            consulta = consulta.Where(x => x.FechaTasa == fecha);
+        }
+
+        return await consulta
             .OrderByDescending(x => x.FechaTasa)
             .ThenBy(x => x.Pais!.Nombre)
             .ThenBy(x => x.Sucursal!.Nombre)
             .ThenBy(x => x.MontoDesdeUsd)
             .ToListAsync();
+    }
 
     public async Task<TasaCambioRango?> ObtenerPorIdAsync(int id, bool soloLectura = true)
     {

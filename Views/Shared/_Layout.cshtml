@@ -20,10 +20,21 @@
             </nav>
         </header>
 
-        <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <main class="animacion-entrada-vista mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             @RenderBody()
         </main>
     </div>
+
+    <a href="https://wa.me/19519435215"
+       target="_blank"
+       rel="noopener noreferrer"
+       aria-label="Contactar por WhatsApp"
+       class="boton-whatsapp-flotante">
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="h-7 w-7 fill-current">
+            <path d="M19.05 4.91A9.82 9.82 0 0 0 12.03 2c-5.46 0-9.9 4.44-9.9 9.9 0 1.74.45 3.43 1.31 4.93L2 22l5.32-1.39a9.9 9.9 0 0 0 4.71 1.2h.01c5.46 0 9.9-4.44 9.9-9.9 0-2.64-1.03-5.11-2.89-7m-7.02 15.23h-.01a8.26 8.26 0 0 1-4.2-1.15l-.3-.18-3.16.83.84-3.08-.2-.32a8.23 8.23 0 0 1-1.27-4.35c0-4.54 3.69-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.41a8.18 8.18 0 0 1 2.4 5.82c0 4.54-3.69 8.24-8.23 8.24m4.51-6.16c-.25-.13-1.47-.72-1.7-.8s-.39-.12-.56.12-.64.8-.78.96-.28.19-.53.06a6.77 6.77 0 0 1-1.99-1.23 7.5 7.5 0 0 1-1.38-1.71c-.14-.25-.02-.39.11-.52.11-.11.25-.28.37-.42s.16-.24.25-.4.04-.31-.02-.44-.56-1.35-.77-1.85c-.2-.48-.4-.41-.56-.42h-.47c-.17 0-.44.06-.67.31s-.88.86-.88 2.1.9 2.45 1.02 2.62 1.76 2.69 4.27 3.77c.6.26 1.06.41 1.42.52.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.17s.21-1.06.15-1.17-.22-.17-.47-.3"/>
+        </svg>
+        <span class="hidden sm:inline">WhatsApp</span>
+    </a>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
