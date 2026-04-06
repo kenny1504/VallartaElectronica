@@ -10,3 +10,4 @@ build/
 *.log
 coverage/
 .vscode/
+.codex-build

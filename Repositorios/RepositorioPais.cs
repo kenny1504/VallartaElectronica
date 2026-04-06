@@ -16,19 +16,20 @@ public class RepositorioPais(ContextoAplicacion contexto) : IRepositorioPais
     public async Task<Pais?> ObtenerPorIdAsync(int id, bool soloLectura = true)
     {
         var consulta = contexto.Paises.AsQueryable();
-        if (soloLectura)
-        {
-            consulta = consulta.AsNoTracking();
-        }
+        consulta = soloLectura ? consulta.AsNoTracking() : consulta.AsTracking();
 
         return await consulta.FirstOrDefaultAsync(x => x.Id == id);
     }
 
+    public Task<bool> ExisteActivoAsync(int id) =>
+        contexto.Paises.AsNoTracking().AnyAsync(x => x.Id == id && x.EstaActivo);
+
     public async Task<bool> ExisteNombreDuplicadoAsync(string nombre, int? idExcluir = null)
     {
-        var nombreNormalizado = nombre.Trim().ToUpper();
+        // Evita aplicar funciones sobre la columna para que el índice por nombre siga siendo utilizable.
+        var nombreNormalizado = nombre.Trim();
         return await contexto.Paises.AsNoTracking()
-            .AnyAsync(x => x.Nombre.ToUpper() == nombreNormalizado && (!idExcluir.HasValue || x.Id != idExcluir.Value));
+            .AnyAsync(x => x.Nombre == nombreNormalizado && (!idExcluir.HasValue || x.Id != idExcluir.Value));
     }
 
     public async Task AgregarAsync(Pais pais)

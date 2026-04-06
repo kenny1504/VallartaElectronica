@@ -7,6 +7,7 @@ namespace ElectronicaVallarta.Servicios;
 public class ServicioSucursal(IRepositorioSucursal repositorioSucursal, IRepositorioPais repositorioPais) : IServicioSucursal
 {
     public Task<IReadOnlyCollection<Sucursal>> ObtenerSucursalesAsync() => repositorioSucursal.ObtenerTodosAsync();
+    public Task<IReadOnlyCollection<Sucursal>> ObtenerSucursalesActivasAsync() => repositorioSucursal.ObtenerActivasAsync();
     public Task<IReadOnlyCollection<Sucursal>> ObtenerSucursalesActivasPorPaisAsync(int paisId) => repositorioSucursal.ObtenerActivasPorPaisAsync(paisId);
     public Task<Sucursal?> ObtenerSucursalPorIdAsync(int id, bool soloLectura = true) => repositorioSucursal.ObtenerPorIdAsync(id, soloLectura);
 
@@ -51,7 +52,7 @@ public class ServicioSucursal(IRepositorioSucursal repositorioSucursal, IReposit
 
     private async Task ValidarPaisAsync(int paisId)
     {
-        if (await repositorioPais.ObtenerPorIdAsync(paisId) is null)
+        if (!await repositorioPais.ExisteActivoAsync(paisId))
         {
             throw new InvalidOperationException("El pais seleccionado no existe.");
         }

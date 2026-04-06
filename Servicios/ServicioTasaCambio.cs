@@ -1,6 +1,7 @@
 using ElectronicaVallarta.Dominio.Entidades;
 using ElectronicaVallarta.Interfaces.Repositorios;
 using ElectronicaVallarta.Interfaces.Servicios;
+using ElectronicaVallarta.Modelos.Dto;
 
 namespace ElectronicaVallarta.Servicios;
 
@@ -10,6 +11,7 @@ public class ServicioTasaCambio(
     IRepositorioSucursal repositorioSucursal) : IServicioTasaCambio
 {
     public Task<IReadOnlyCollection<TasaCambioRango>> ObtenerTasasAsync(DateTime? fechaFiltro = null) => repositorioTasaCambio.ObtenerTodosAsync(fechaFiltro);
+    public Task<IReadOnlyCollection<RegistroTasaCambioListadoDto>> ObtenerListadoTasasAsync(DateTime? fechaFiltro = null) => repositorioTasaCambio.ObtenerListadoAsync(fechaFiltro);
     public Task<TasaCambioRango?> ObtenerTasaPorIdAsync(int id, bool soloLectura = true) => repositorioTasaCambio.ObtenerPorIdAsync(id, soloLectura);
 
     public async Task CrearAsync(TasaCambioRango tasaCambioRango)
@@ -67,13 +69,12 @@ public class ServicioTasaCambio(
             throw new InvalidOperationException("La tasa de cambio debe ser mayor a cero.");
         }
 
-        if (await repositorioPais.ObtenerPorIdAsync(tasaCambioRango.PaisId) is null)
+        if (!await repositorioPais.ExisteActivoAsync(tasaCambioRango.PaisId))
         {
             throw new InvalidOperationException("El pais seleccionado no existe.");
         }
 
-        var sucursal = await repositorioSucursal.ObtenerPorIdAsync(tasaCambioRango.SucursalId);
-        if (sucursal is null || sucursal.PaisId != tasaCambioRango.PaisId)
+        if (!await repositorioSucursal.ExisteActivaEnPaisAsync(tasaCambioRango.SucursalId, tasaCambioRango.PaisId))
         {
             throw new InvalidOperationException("La sucursal seleccionada no pertenece al pais indicado.");
         }

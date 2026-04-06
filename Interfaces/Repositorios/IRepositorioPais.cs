@@ -36,6 +36,7 @@ public interface IRepositorioPais
     /// de lo contrario, <c>null</c>.
     /// </returns>
     Task<Pais?> ObtenerPorIdAsync(int id, bool soloLectura = true);
+    Task<bool> ExisteActivoAsync(int id);
 
     /// Verifica si existe un país con un nombre duplicado en el almacenamiento.
     /// <param name="nombre">

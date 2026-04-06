@@ -16,36 +16,40 @@ public class ServicioCalculadora(
             return new ResultadoCalculoDto { EsExitoso = false, Mensaje = "Completa todos los datos para realizar el calculo." };
         }
 
-        var pais = await repositorioPais.ObtenerPorIdAsync(solicitud.PaisId.Value);
-        if (pais is null || !pais.EstaActivo)
+        // El caso exitoso se resuelve con una sola consulta proyectada desde tasas.
+        var datosCalculo = await repositorioTasaCambio.ObtenerDatosCalculoAsync(
+            solicitud.PaisId.Value,
+            solicitud.SucursalId.Value,
+            DateTime.Today,
+            solicitud.MontoUsd.Value);
+
+        if (datosCalculo is not null)
+        {
+            return new ResultadoCalculoDto
+            {
+                EsExitoso = true,
+                Mensaje = "Calculo realizado correctamente.",
+                MontoUsd = solicitud.MontoUsd.Value,
+                MontoRecibe = Math.Round(solicitud.MontoUsd.Value * datosCalculo.TasaCambio, 2, MidpointRounding.AwayFromZero),
+                TasaCambioAplicada = datosCalculo.TasaCambio,
+                MonedaDestino = datosCalculo.CodigoMoneda,
+                SimboloMoneda = datosCalculo.SimboloMoneda,
+                NombrePais = datosCalculo.NombrePais,
+                NombreSucursal = datosCalculo.NombreSucursal,
+                FechaTasa = datosCalculo.FechaTasa
+            };
+        }
+
+        if (!await repositorioPais.ExisteActivoAsync(solicitud.PaisId.Value))
         {
             return new ResultadoCalculoDto { EsExitoso = false, Mensaje = "El pais seleccionado no esta disponible." };
         }
 
-        var sucursal = await repositorioSucursal.ObtenerPorIdAsync(solicitud.SucursalId.Value);
-        if (sucursal is null || !sucursal.EstaActivo || sucursal.PaisId != pais.Id)
+        if (!await repositorioSucursal.ExisteActivaEnPaisAsync(solicitud.SucursalId.Value, solicitud.PaisId.Value))
         {
             return new ResultadoCalculoDto { EsExitoso = false, Mensaje = "La sucursal o canal seleccionado no corresponde al pais indicado." };
         }
 
-        var tasaAplicable = await repositorioTasaCambio.ObtenerTasaAplicableAsync(pais.Id, sucursal.Id, DateTime.Today, solicitud.MontoUsd.Value);
-        if (tasaAplicable is null)
-        {
-            return new ResultadoCalculoDto { EsExitoso = false, Mensaje = "No encontramos una tasa configurada para hoy con ese monto. Intenta con otro canal o consulta con administracion." };
-        }
-
-        return new ResultadoCalculoDto
-        {
-            EsExitoso = true,
-            Mensaje = "Calculo realizado correctamente.",
-            MontoUsd = solicitud.MontoUsd.Value,
-            MontoRecibe = Math.Round(solicitud.MontoUsd.Value * tasaAplicable.TasaCambio, 2, MidpointRounding.AwayFromZero),
-            TasaCambioAplicada = tasaAplicable.TasaCambio,
-            MonedaDestino = pais.CodigoMoneda,
-            SimboloMoneda = pais.SimboloMoneda,
-            NombrePais = pais.Nombre,
-            NombreSucursal = sucursal.Nombre,
-            FechaTasa = tasaAplicable.FechaTasa
-        };
+        return new ResultadoCalculoDto { EsExitoso = false, Mensaje = "No encontramos una tasa configurada para hoy con ese monto. Intenta con otro canal o consulta con administracion." };
     }
 }

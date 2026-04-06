@@ -14,6 +14,7 @@ public interface IRepositorioSucursal
     /// El resultado contiene una colección de solo lectura de objetos de tipo Sucursal.
     /// </return>
     Task<IReadOnlyCollection<Sucursal>> ObtenerTodosAsync();
+    Task<IReadOnlyCollection<Sucursal>> ObtenerActivasAsync();
 
     /// <summary>
     /// Obtiene una colección de sucursales activas asociadas a un país especificado.
@@ -38,6 +39,7 @@ public interface IRepositorioSucursal
     /// de lo contrario, retorna null.
     /// </return>
     Task<Sucursal?> ObtenerPorIdAsync(int id, bool soloLectura = true);
+    Task<bool> ExisteActivaEnPaisAsync(int sucursalId, int paisId);
 
     /// Verifies if there is a duplicate name for a branch within the specified country,
     /// optionally excluding a specific branch by its identifier.

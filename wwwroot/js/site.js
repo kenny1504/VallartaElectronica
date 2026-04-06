@@ -11,26 +11,31 @@ function obtenerJsonDesdeElemento(idElemento) {
     }
 }
 
-function crearTarjetaTasa(tasa, estaActiva) {
-    const claseActiva = estaActiva ? " tarjeta-tasa-activa" : "";
-    const rangoHasta = tasa.montoHastaUsd === null ? "En adelante" : `Hasta ${Number(tasa.montoHastaUsd).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`;
+function formatearMontoUsd(monto) {
+    return Number(monto).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function obtenerTextoRango(tasa) {
+    const hasta = tasa.montoHastaUsd === null ? "En adelante" : formatearMontoUsd(tasa.montoHastaUsd);
+    return `${formatearMontoUsd(tasa.montoDesdeUsd)} - ${hasta}`;
+}
+
+function crearFilaTasaCompacta(tasa, estaActiva) {
+    const claseActiva = estaActiva ? " fila-tasa-activa" : "";
 
     return `
-        <article class="tarjeta-tasa${claseActiva}">
-            <div class="flex items-start justify-between gap-3">
-                <div>
-                    <p class="text-xs font-black uppercase tracking-[0.18em] text-slate-500">${tasa.nombrePais}</p>
-                    <h3 class="mt-2 text-lg font-black text-tinta">${tasa.nombreSucursal}</h3>
+        <article class="fila-tasa-compacta${claseActiva}">
+            <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                    <p class="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">${tasa.nombrePais}</p>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-600">${obtenerTextoRango(tasa)} USD</span>
                 </div>
-                <span class="rounded-full bg-azulClaroMarca px-3 py-1 text-sm font-black text-azulMarca">
-                    ${Number(tasa.tasaCambio).toFixed(2)}
-                </span>
+                <h3 class="mt-2 truncate text-base font-black text-tinta">${tasa.nombreSucursal}</h3>
             </div>
-            <p class="mt-3 text-4xl font-black leading-none text-tinta">${Number(tasa.tasaCambio).toFixed(2)}</p>
-            <p class="mt-3 text-sm leading-6 text-slate-600">
-                Desde ${Number(tasa.montoDesdeUsd).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
-                <span class="block">${rangoHasta}</span>
-            </p>
+            <div class="text-right">
+                <p class="text-2xl font-black leading-none text-tinta">${Number(tasa.tasaCambio).toFixed(2)}</p>
+                <p class="mt-1 text-xs font-semibold text-slate-500">${tasa.codigoMoneda}</p>
+            </div>
         </article>`;
 }
 
@@ -47,15 +52,19 @@ function inicializarCalculadoraPublica() {
     const selectorSucursal = document.getElementById("sucursalId");
     const campoMonto = document.getElementById("Solicitud_MontoUsd");
     const contenedorResultado = document.getElementById("contenedor-resultado");
-    const contenedorMenores = document.getElementById("tasas-menores");
-    const contenedorMayores = document.getElementById("tasas-mayores");
+    const contenedorListaTasas = document.getElementById("lista-tasas");
     const descripcionTasas = document.getElementById("descripcion-tasas");
+    const tituloListadoTasas = document.getElementById("titulo-listado-tasas");
+    const pestanaRangoMenor = document.getElementById("tab-rango-menor");
+    const pestanaRangoMayor = document.getElementById("tab-rango-mayor");
     const botonEjemplo = document.getElementById("boton-ejemplo");
     const urlCalcular = modulo.dataset.urlCalcular;
     const paisInicial = modulo.dataset.paisInicial ?? "";
     const sucursalInicial = modulo.dataset.sucursalInicial ?? "";
     let temporizadorCalculo = null;
     let debeDesplazarResultado = false;
+    let rangoVisible = "menor";
+    let ultimaClaveCalculada = "";
 
     function desplazarResultadoEnMovil() {
         if (window.innerWidth >= 768) {
@@ -83,9 +92,21 @@ function inicializarCalculadoraPublica() {
         return Number(campoMonto.value || 0);
     }
 
+    function obtenerClaveSolicitudActual() {
+        const paisId = obtenerPaisSeleccionado();
+        const sucursalId = obtenerSucursalSeleccionada();
+        const montoNormalizado = campoMonto.value.trim();
+        return `${paisId}|${sucursalId}|${montoNormalizado}`;
+    }
+
     function obtenerTasasFiltradasPorPais() {
         const paisId = obtenerPaisSeleccionado();
         return tasas.filter(tasa => tasa.paisId === paisId);
+    }
+
+    function obtenerRangoSugerido() {
+        const monto = obtenerMontoActual();
+        return monto >= 1000 ? "mayor" : "menor";
     }
 
     function obtenerTasaAplicableEnPantalla() {
@@ -101,21 +122,57 @@ function inicializarCalculadoraPublica() {
             (tasa.montoHastaUsd === null || monto <= Number(tasa.montoHastaUsd)));
     }
 
+    function actualizarEstadoPestanas() {
+        [pestanaRangoMenor, pestanaRangoMayor].forEach(boton => {
+            if (!boton) {
+                return;
+            }
+
+            const esActivo = boton.dataset.rango === rangoVisible;
+            boton.classList.toggle("bg-white", esActivo);
+            boton.classList.toggle("text-tinta", esActivo);
+            boton.classList.toggle("shadow-sm", esActivo);
+            boton.classList.toggle("text-slate-500", !esActivo);
+        });
+    }
+
     function renderizarTasas() {
         const tasasPais = obtenerTasasFiltradasPorPais();
         const tasaAplicable = obtenerTasaAplicableEnPantalla();
+        const sucursalSeleccionada = obtenerSucursalSeleccionada();
         const menores = tasasPais.filter(tasa => Number(tasa.montoDesdeUsd) < 1000);
         const mayores = tasasPais.filter(tasa => Number(tasa.montoDesdeUsd) >= 1000 || tasa.montoHastaUsd === null);
         const nombrePais = selectorPais.options[selectorPais.selectedIndex]?.text || "el pais seleccionado";
+        const tasasDelRango = rangoVisible === "mayor" ? mayores : menores;
+        const tasasOrdenadas = [...tasasDelRango].sort((a, b) => {
+            const prioridadA = tasaAplicable != null && a.sucursalId === tasaAplicable.sucursalId && a.montoDesdeUsd === tasaAplicable.montoDesdeUsd
+                ? 0
+                : a.sucursalId === sucursalSeleccionada ? 1 : 2;
+            const prioridadB = tasaAplicable != null && b.sucursalId === tasaAplicable.sucursalId && b.montoDesdeUsd === tasaAplicable.montoDesdeUsd
+                ? 0
+                : b.sucursalId === sucursalSeleccionada ? 1 : 2;
+
+            if (prioridadA !== prioridadB) {
+                return prioridadA - prioridadB;
+            }
+
+            if (Number(a.montoDesdeUsd) !== Number(b.montoDesdeUsd)) {
+                return Number(a.montoDesdeUsd) - Number(b.montoDesdeUsd);
+            }
+
+            return a.nombreSucursal.localeCompare(b.nombreSucursal, "es");
+        });
 
         descripcionTasas.textContent = `Tasas vigentes para ${nombrePais}.`;
+        tituloListadoTasas.textContent = rangoVisible === "mayor"
+            ? "Montos mayores a $1000"
+            : "Montos menores a $1000";
+        actualizarEstadoPestanas();
 
-        contenedorMenores.innerHTML = menores.length
-            ? menores.map(tasa => crearTarjetaTasa(tasa, tasaAplicable != null && tasa.sucursalId === tasaAplicable.sucursalId && tasa.montoDesdeUsd === tasaAplicable.montoDesdeUsd)).join("")
-            : "<p class='rounded-3xl border border-borde bg-white p-4 text-sm text-slate-500'>No hay tasas configuradas para este rango.</p>";
-
-        contenedorMayores.innerHTML = mayores.length
-            ? mayores.map(tasa => crearTarjetaTasa(tasa, tasaAplicable != null && tasa.sucursalId === tasaAplicable.sucursalId && tasa.montoDesdeUsd === tasaAplicable.montoDesdeUsd)).join("")
+        contenedorListaTasas.innerHTML = tasasOrdenadas.length
+            ? tasasOrdenadas.map(tasa => crearFilaTasaCompacta(
+                tasa,
+                tasaAplicable != null && tasa.sucursalId === tasaAplicable.sucursalId && tasa.montoDesdeUsd === tasaAplicable.montoDesdeUsd)).join("")
             : "<p class='rounded-3xl border border-borde bg-white p-4 text-sm text-slate-500'>No hay tasas configuradas para este rango.</p>";
     }
 
@@ -125,7 +182,7 @@ function inicializarCalculadoraPublica() {
 
         const opcionInicial = document.createElement("option");
         opcionInicial.value = "";
-        opcionInicial.textContent = paisId ? "Selecciona el canal" : "Selecciona primero un pais";
+        opcionInicial.textContent = paisId ? "Selecciona el pagador" : "Selecciona primero un pais";
         selectorSucursal.appendChild(opcionInicial);
 
         if (!paisId) {
@@ -154,11 +211,22 @@ function inicializarCalculadoraPublica() {
         const paisId = obtenerPaisSeleccionado();
         const sucursalId = obtenerSucursalSeleccionada();
         const monto = obtenerMontoActual();
+        const claveActual = obtenerClaveSolicitudActual();
 
         renderizarTasas();
 
         if (!paisId || !sucursalId || monto <= 0) {
+            ultimaClaveCalculada = "";
             contenedorResultado.innerHTML = "<div class='rounded-[1.75rem] border border-borde bg-white p-5 text-sm leading-7 text-slate-500'>Selecciona pais, canal e ingresa un monto valido para ver tu cotizacion.</div>";
+            return;
+        }
+
+        if (claveActual === ultimaClaveCalculada) {
+            if (debeDesplazarResultado) {
+                desplazarResultadoEnMovil();
+                debeDesplazarResultado = false;
+            }
+
             return;
         }
 
@@ -171,6 +239,7 @@ function inicializarCalculadoraPublica() {
         });
 
         contenedorResultado.innerHTML = await respuesta.text();
+        ultimaClaveCalculada = claveActual;
         if (debeDesplazarResultado) {
             desplazarResultadoEnMovil();
         }
@@ -192,20 +261,44 @@ function inicializarCalculadoraPublica() {
     }
 
     selectorPais.value = paisInicial;
+    rangoVisible = obtenerRangoSugerido();
     cargarSucursales(true);
 
     selectorPais.addEventListener("change", () => {
         cargarSucursales(false);
+        rangoVisible = obtenerRangoSugerido();
+        renderizarTasas();
         programarCalculo();
     });
 
-    selectorSucursal.addEventListener("change", programarCalculo);
-    campoMonto.addEventListener("input", () => programarCalculo());
+    selectorSucursal.addEventListener("change", () => {
+        renderizarTasas();
+        programarCalculo();
+    });
+
+    campoMonto.addEventListener("input", () => {
+        rangoVisible = obtenerRangoSugerido();
+        renderizarTasas();
+        programarCalculo();
+    });
+
     campoMonto.addEventListener("blur", () => programarCalculo({ desplazar: true }));
 
     botonEjemplo?.addEventListener("click", () => {
         campoMonto.value = "1250";
+        rangoVisible = "mayor";
+        renderizarTasas();
         programarCalculo({ desplazar: true });
+    });
+
+    pestanaRangoMenor?.addEventListener("click", () => {
+        rangoVisible = "menor";
+        renderizarTasas();
+    });
+
+    pestanaRangoMayor?.addEventListener("click", () => {
+        rangoVisible = "mayor";
+        renderizarTasas();
     });
 
     formulario.addEventListener("submit", async evento => {

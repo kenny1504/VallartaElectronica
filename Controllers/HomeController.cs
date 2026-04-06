@@ -18,12 +18,12 @@ public class HomeController(
     public async Task<IActionResult> Index()
     {
         var paisesActivos = await servicioPais.ObtenerPaisesActivosAsync();
-        var sucursales = await servicioSucursal.ObtenerSucursalesAsync();
-        var tasas = await servicioTasaCambio.ObtenerTasasAsync();
+        var sucursales = await servicioSucursal.ObtenerSucursalesActivasAsync();
+        var tasas = await servicioTasaCambio.ObtenerTasasAsync(DateTime.Today);
         var paisMexico = paisesActivos.FirstOrDefault(x => x.Nombre.Equals("Mexico", StringComparison.OrdinalIgnoreCase));
         var paisPredeterminado = paisMexico ?? paisesActivos.FirstOrDefault();
         var sucursalPredeterminada = sucursales
-            .Where(x => x.EstaActivo && x.PaisId == paisPredeterminado?.Id)
+            .Where(x => x.PaisId == paisPredeterminado?.Id)
             .OrderBy(x => x.Nombre)
             .FirstOrDefault();
 
@@ -35,22 +35,15 @@ public class HomeController(
                 SucursalId = sucursalPredeterminada?.Id
             },
             Paises = paisesActivos
-                .OrderBy(x => x.Nombre)
                 .Select(x => new SelectListItem(x.Nombre, x.Id.ToString(), x.Id == paisPredeterminado?.Id))
                 .ToList(),
             Sucursales = sucursales
-                .Where(x => x.EstaActivo
-                            && x.Pais is not null
-                            && x.Pais.EstaActivo)
                 .Select(x => new OpcionSucursalViewModel { Id = x.Id, PaisId = x.PaisId, Nombre = x.Nombre })
-                .OrderBy(x => x.PaisId)
-                .ThenBy(x => x.Nombre)
                 .ToList(),
             TasasActivas = tasas
                 .Where(x => x.EstaActivo
                             && x.Pais is not null
-                            && x.Sucursal is not null
-                            && x.FechaTasa.Date == DateTime.Today)
+                            && x.Sucursal is not null)
                 .Select(x => new TasaActivaViewModel
                 {
                     PaisId = x.PaisId,
@@ -62,9 +55,6 @@ public class HomeController(
                     TasaCambio = x.TasaCambio,
                     CodigoMoneda = x.Pais!.CodigoMoneda
                 })
-                .OrderBy(x => x.PaisId)
-                .ThenBy(x => x.MontoDesdeUsd)
-                .ThenBy(x => x.NombreSucursal)
                 .ToList()
         };
 

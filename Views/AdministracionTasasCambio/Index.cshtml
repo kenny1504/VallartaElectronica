@@ -50,9 +50,9 @@
                 @foreach (var tasa in Model.Tasas)
                 {
                     <tr class="hover:bg-slate-50/70">
-                        <td class="px-6 py-4 text-slate-600">@tasa.FechaTasa.ToString("dd/MM/yyyy")</td>
-                        <td class="px-6 py-4 text-slate-700">@tasa.Pais?.Nombre</td>
-                        <td class="px-6 py-4 font-semibold text-tinta">@tasa.Sucursal?.Nombre</td>
+                        <td class="px-6 py-4 text-slate-600">@tasa.FechaTasa.ToString("MM/dd/yyyy")</td>
+                        <td class="px-6 py-4 text-slate-700">@tasa.NombrePais</td>
+                        <td class="px-6 py-4 font-semibold text-tinta">@tasa.NombreSucursal</td>
                         <td class="px-6 py-4 text-slate-600">@tasa.MontoDesdeUsd.ToString("N2") - @(tasa.MontoHastaUsd.HasValue ? tasa.MontoHastaUsd.Value.ToString("N2") : "En adelante")</td>
                         <td class="px-6 py-4 text-slate-700">@tasa.TasaCambio.ToString("N4")</td>
                         <td class="px-6 py-4">

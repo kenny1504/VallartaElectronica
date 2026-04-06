@@ -5,6 +5,7 @@ namespace ElectronicaVallarta.Interfaces.Servicios;
 public interface IServicioSucursal
 {
     Task<IReadOnlyCollection<Sucursal>> ObtenerSucursalesAsync();
+    Task<IReadOnlyCollection<Sucursal>> ObtenerSucursalesActivasAsync();
     Task<IReadOnlyCollection<Sucursal>> ObtenerSucursalesActivasPorPaisAsync(int paisId);
     Task<Sucursal?> ObtenerSucursalPorIdAsync(int id, bool soloLectura = true);
     Task CrearAsync(Sucursal sucursal);

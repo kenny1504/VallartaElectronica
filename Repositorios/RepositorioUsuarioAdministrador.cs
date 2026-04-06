@@ -10,13 +10,10 @@ public class RepositorioUsuarioAdministrador(ContextoAplicacion contexto) : IRep
     public async Task<UsuarioAdministrador?> ObtenerPorNombreUsuarioAsync(string nombreUsuario, bool soloLectura = true)
     {
         var consulta = contexto.UsuariosAdministradores.AsQueryable();
-        if (soloLectura)
-        {
-            consulta = consulta.AsNoTracking();
-        }
+        consulta = soloLectura ? consulta.AsNoTracking() : consulta.AsTracking();
 
-        var nombreNormalizado = nombreUsuario.Trim().ToUpper();
-        return await consulta.FirstOrDefaultAsync(x => x.NombreUsuario.ToUpper() == nombreNormalizado && x.EstaActivo);
+        var nombreNormalizado = nombreUsuario.Trim();
+        return await consulta.FirstOrDefaultAsync(x => x.NombreUsuario == nombreNormalizado && x.EstaActivo);
     }
 
     public Task<bool> ExisteAlgunAdministradorAsync()

@@ -14,6 +14,13 @@ public class RepositorioSucursal(ContextoAplicacion contexto) : IRepositorioSucu
             .ThenBy(x => x.Nombre)
             .ToListAsync();
 
+    public async Task<IReadOnlyCollection<Sucursal>> ObtenerActivasAsync() =>
+        await contexto.Sucursales.AsNoTracking()
+            .Where(x => x.EstaActivo && x.Pais != null && x.Pais.EstaActivo)
+            .OrderBy(x => x.PaisId)
+            .ThenBy(x => x.Nombre)
+            .ToListAsync();
+
     public async Task<IReadOnlyCollection<Sucursal>> ObtenerActivasPorPaisAsync(int paisId) =>
         await contexto.Sucursales.AsNoTracking()
             .Where(x => x.PaisId == paisId && x.EstaActivo)
@@ -22,20 +29,29 @@ public class RepositorioSucursal(ContextoAplicacion contexto) : IRepositorioSucu
 
     public async Task<Sucursal?> ObtenerPorIdAsync(int id, bool soloLectura = true)
     {
-        var consulta = contexto.Sucursales.Include(x => x.Pais).AsQueryable();
+        IQueryable<Sucursal> consulta = contexto.Sucursales;
         if (soloLectura)
         {
-            consulta = consulta.AsNoTracking();
+            consulta = consulta.AsNoTracking().Include(x => x.Pais);
+        }
+        else
+        {
+            consulta = consulta.AsTracking();
         }
 
         return await consulta.FirstOrDefaultAsync(x => x.Id == id);
     }
 
+    public Task<bool> ExisteActivaEnPaisAsync(int sucursalId, int paisId) =>
+        contexto.Sucursales.AsNoTracking()
+            .AnyAsync(x => x.Id == sucursalId && x.PaisId == paisId && x.EstaActivo && x.Pais != null && x.Pais.EstaActivo);
+
     public async Task<bool> ExisteNombreDuplicadoAsync(int paisId, string nombre, int? idExcluir = null)
     {
-        var nombreNormalizado = nombre.Trim().ToUpper();
+        // Evita funciones sobre la columna para aprovechar el índice compuesto de pais y nombre.
+        var nombreNormalizado = nombre.Trim();
         return await contexto.Sucursales.AsNoTracking()
-            .AnyAsync(x => x.PaisId == paisId && x.Nombre.ToUpper() == nombreNormalizado && (!idExcluir.HasValue || x.Id != idExcluir.Value));
+            .AnyAsync(x => x.PaisId == paisId && x.Nombre == nombreNormalizado && (!idExcluir.HasValue || x.Id != idExcluir.Value));
     }
 
     public async Task AgregarAsync(Sucursal sucursal)

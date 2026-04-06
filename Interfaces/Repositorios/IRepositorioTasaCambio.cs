@@ -1,4 +1,5 @@
 using ElectronicaVallarta.Dominio.Entidades;
+using ElectronicaVallarta.Modelos.Dto;
 
 namespace ElectronicaVallarta.Interfaces.Repositorios;
 
@@ -16,6 +17,7 @@ public interface IRepositorioTasaCambio
     /// El valor de la tarea contiene una colección inmutable de objetos TasaCambioRango.
     /// </return>
     Task<IReadOnlyCollection<TasaCambioRango>> ObtenerTodosAsync(DateTime? fechaFiltro = null);
+    Task<IReadOnlyCollection<RegistroTasaCambioListadoDto>> ObtenerListadoAsync(DateTime? fechaFiltro = null);
 
     /// <summary>
     /// Obtiene una entidad <see cref="TasaCambioRango"/> por su identificador único.
@@ -42,6 +44,7 @@ public interface IRepositorioTasaCambio
     /// basada en los parámetros proporcionados, o <see langword="null"/> si no existe una tasa aplicable.
     /// </returns>
     Task<TasaCambioRango?> ObtenerTasaAplicableAsync(int paisId, int sucursalId, DateTime fechaTasa, decimal montoUsd);
+    Task<DatosCalculoCotizacionDto?> ObtenerDatosCalculoAsync(int paisId, int sucursalId, DateTime fechaTasa, decimal montoUsd);
 
     /// <summary>
     /// Verifica si existe traslape entre el rango de tasas de cambio especificado y otros registros existentes.

@@ -55,6 +55,18 @@
     @apply border-rojoMarca bg-red-50 ring-2 ring-rojoMarca/15;
   }
 
+  .boton-tab-tasa {
+    @apply rounded-full px-4 py-2 text-xs font-black uppercase tracking-[0.18em] transition sm:text-[13px];
+  }
+
+  .fila-tasa-compacta {
+    @apply flex items-center justify-between gap-4 rounded-[1.35rem] border border-slate-200 bg-white px-4 py-3 transition;
+  }
+
+  .fila-tasa-activa {
+    @apply border-rojoMarca bg-red-50 ring-2 ring-rojoMarca/15;
+  }
+
   .toast-notificacion {
     @apply fixed bottom-5 left-1/2 z-50 flex w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 items-start justify-between gap-4 rounded-[1.5rem] border bg-white px-4 py-4 shadow-panel sm:bottom-6;
     opacity: 1;

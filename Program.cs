@@ -22,9 +22,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.SlidingExpiration = true;
     });
 builder.Services.AddDbContext<ContextoAplicacion>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("ConexionSqlServer"),
-        sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
+    options
+        .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+        .UseSqlServer(
+            builder.Configuration.GetConnectionString("ConexionSqlServer"),
+            sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
 builder.Services.AgregarDependenciasAplicacion();
 
 var app = builder.Build();

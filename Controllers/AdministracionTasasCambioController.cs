@@ -20,7 +20,7 @@ public class AdministracionTasasCambioController(
         {
             FechaFiltro = fechaAplicada,
             MostrarTodos = mostrarTodos,
-            Tasas = await servicioTasaCambio.ObtenerTasasAsync(fechaAplicada)
+            Tasas = await servicioTasaCambio.ObtenerListadoTasasAsync(fechaAplicada)
         };
 
         return View(modelo);

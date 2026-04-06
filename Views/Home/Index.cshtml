@@ -10,7 +10,7 @@
         new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
 }
 
-<section class="space-y-6 sm:space-y-8" id="modulo-calculadora-publica"
+<section class="space-y-6 overflow-x-hidden sm:space-y-8" id="modulo-calculadora-publica"
          data-url-calcular="@Url.Action("Calcular", "Home")"
          data-pais-inicial="@Model.Solicitud.PaisId"
          data-sucursal-inicial="@Model.Solicitud.SucursalId">
@@ -22,7 +22,7 @@
                 </div>
                 <h1 class="mt-3 text-3xl font-black tracking-tight text-tinta sm:mt-5 sm:text-5xl">Convierte y envia dinero con confianza</h1>
                 <p class="mt-3 max-w-2xl text-sm leading-7 text-slate-700 sm:mt-4 sm:text-lg sm:leading-8">
-                    Consulta el tipo de cambio del dia, selecciona tu canal y obten al instante cuanto recibe en el pais destino.
+                    Consulta el tipo de cambio del dia, selecciona tu pagador y obten al instante cuanto recibe en el pais destino.
                 </p>
             </div>
 
@@ -30,7 +30,7 @@
                 <div class="flex items-center justify-center gap-4">
                     <div class="text-center">
                         <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-azulMarca sm:text-sm">Actualizado</p>
-                        <p class="mt-1 text-xl font-black text-tinta sm:mt-2 sm:text-3xl">@DateTime.Today.ToString("dd/MM/yyyy")</p>
+                        <p class="mt-1 text-xl font-black text-tinta sm:mt-2 sm:text-3xl">@DateTime.Today.ToString("MM/dd/yyyy")</p>
                     </div>
                     <p class="hidden max-w-[12rem] text-right text-sm leading-6 text-slate-600 sm:block">
                         Tasas visibles para consulta rapida y cotizacion inmediata.
@@ -40,8 +40,8 @@
         </div>
     </div>
 
-    <div class="grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
-        <div class="tarjeta-panel overflow-hidden">
+    <div class="grid gap-6 xl:grid-cols-[minmax(0,1.28fr)_minmax(21rem,0.82fr)]">
+        <div class="min-w-0 tarjeta-panel overflow-hidden">
             <div class="border-b border-borde px-5 py-4 sm:px-7 sm:py-5">
                 <h2 class="text-2xl font-black text-tinta">Calculadora de Envio</h2>
                 <p class="mt-2 text-sm leading-7 text-slate-600">Tu envias en USD y te mostramos de inmediato cuanto recibe en el pais destino.</p>
@@ -60,9 +60,9 @@
                         </div>
 
                         <div class="space-y-2">
-                            <label asp-for="Solicitud.SucursalId" class="text-sm font-semibold text-slate-700">Selecciona el canal</label>
+                            <label asp-for="Solicitud.SucursalId" class="text-sm font-semibold text-slate-700">Selecciona el pagador</label>
                             <select asp-for="Solicitud.SucursalId" id="sucursalId" class="campo-base">
-                                <option value="">Selecciona un canal</option>
+                                <option value="">Selecciona un pagador</option>
                             </select>
                             <span asp-validation-for="Solicitud.SucursalId" class="text-sm text-rojoMarca"></span>
                         </div>
@@ -79,33 +79,42 @@
                     
                 </form>
 
-                <div id="contenedor-resultado" class="rounded-[1.75rem] border border-borde bg-azulClaroMarca/70 p-5 text-sm leading-7 text-slate-600">
+                <div id="contenedor-resultado" class="overflow-x-hidden rounded-[1.75rem] border border-borde bg-azulClaroMarca/70 p-5 text-sm leading-7 text-slate-600">
                     Completa los datos para ver la cotizacion en tiempo real.
                 </div>
             </div>
         </div>
 
-        <aside class="space-y-4">
+        <aside class="min-w-0 space-y-4">
             <div class="tarjeta-panel overflow-hidden">
                 <div class="border-b border-borde px-6 py-5 sm:px-7">
-                    <h2 class="text-2xl font-black text-tinta">Tasas del dia</h2>
-                    <p id="descripcion-tasas" class="mt-2 text-sm leading-7 text-slate-600">Consulta las tasas activas por rango y canal.</p>
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                        <div class="min-w-0">
+                            <h2 class="text-xl font-black text-tinta sm:text-2xl">Tasas del dia</h2>
+                            <p id="descripcion-tasas" class="mt-2 text-sm leading-7 text-slate-600">Consulta las tasas activas por rango y canal.</p>
+                        </div>
+                       
+                    </div>
                 </div>
 
-                <div class="grid gap-5 px-6 py-6 sm:px-7 lg:grid-cols-2">
-                    <section>
-                        <div class="mb-4 flex items-center justify-center">
-                            <span class="etiqueta-rango">Menos de $1000</span>
-                        </div>
-                        <div id="tasas-menores" class="space-y-3"></div>
-                    </section>
+                <div class="space-y-4 px-6 py-5 sm:px-7 sm:py-6">
+                    <div class="grid grid-cols-2 gap-2 rounded-[1.5rem] bg-slate-100 p-1 sm:flex sm:rounded-full">
+                        <button type="button" id="tab-rango-menor" data-rango="menor" class="boton-tab-tasa min-w-0 flex-1">
+                            Menos de $1000
+                        </button>
+                        <button type="button" id="tab-rango-mayor" data-rango="mayor" class="boton-tab-tasa min-w-0 flex-1">
+                            Mas de $1000
+                        </button>
+                    </div>
 
-                    <section>
-                        <div class="mb-4 flex items-center justify-center">
-                            <span class="etiqueta-rango">Mas de $1000</span>
+                    <div class="rounded-[1.5rem] border border-borde bg-white">
+                        <div class="border-b border-borde px-4 py-3">
+                            <p id="titulo-listado-tasas" class="text-sm font-bold text-tinta">Canales disponibles</p>
                         </div>
-                        <div id="tasas-mayores" class="space-y-3"></div>
-                    </section>
+                        <div class="max-h-[24rem] overflow-y-auto px-3 py-3 sm:max-h-[28rem]">
+                            <div id="lista-tasas" class="space-y-2"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </aside>
