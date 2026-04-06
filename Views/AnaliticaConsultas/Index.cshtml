@@ -8,18 +8,53 @@
     totalPaginas = Math.Max(totalPaginas, 1);
     var fechaDesde = Model.Filtro.FechaDesde?.ToString("yyyy-MM-dd");
     var fechaHasta = Model.Filtro.FechaHasta?.ToString("yyyy-MM-dd");
-    var maximoSerie = Model.Resumen.SeriePorDia.Any() ? Model.Resumen.SeriePorDia.Max(x => x.Total) : 0;
+
+    var puntosSerie = Model.Resumen.SeriePorDia.ToList();
+    var altoGrafico = 260m;
+    var anchoGrafico = 760m;
+    var margenIzquierdo = 52m;
+    var margenDerecho = 18m;
+    var margenSuperior = 24m;
+    var margenInferior = 34m;
+    var anchoUtil = anchoGrafico - margenIzquierdo - margenDerecho;
+    var altoUtil = altoGrafico - margenSuperior - margenInferior;
+    var maximoSerie = puntosSerie.Any() ? puntosSerie.Max(x => x.Total) : 0;
+    var puntosGrafico = new List<string>();
+
+    if (puntosSerie.Count == 1)
+    {
+        var punto = puntosSerie[0];
+        var x = margenIzquierdo + (anchoUtil / 2m);
+        var y = margenSuperior + altoUtil - ((decimal)punto.Total / Math.Max(maximoSerie, 1)) * altoUtil;
+        puntosGrafico.Add($"{x:0.##},{y:0.##}");
+    }
+    else if (puntosSerie.Count > 1)
+    {
+        for (var i = 0; i < puntosSerie.Count; i++)
+        {
+            var punto = puntosSerie[i];
+            var proporcionX = i / (decimal)(puntosSerie.Count - 1);
+            var x = margenIzquierdo + (proporcionX * anchoUtil);
+            var y = margenSuperior + altoUtil - ((decimal)punto.Total / Math.Max(maximoSerie, 1)) * altoUtil;
+            puntosGrafico.Add($"{x:0.##},{y:0.##}");
+        }
+    }
+
+    var polilinea = string.Join(" ", puntosGrafico);
+    var areaGrafico = puntosGrafico.Any()
+        ? $"{margenIzquierdo:0.##},{margenSuperior + altoUtil:0.##} {polilinea} {margenIzquierdo + anchoUtil:0.##},{margenSuperior + altoUtil:0.##}"
+        : string.Empty;
 }
 
 <section class="space-y-6">
     <partial name="~/Views/Shared/_Mensajes.cshtml" />
     <partial name="~/Views/Shared/_BarraAdministracion.cshtml" />
 
-    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
             <p class="text-xs font-bold uppercase tracking-[0.25em] text-mar">Panel oculto</p>
             <h1 class="mt-2 text-3xl font-black text-tinta">Analitica de consultas</h1>
-            <p class="mt-2 max-w-3xl text-sm leading-7 text-slate-600">Monitorea el uso real del simulador publico, revisa tendencias, filtra resultados y exporta el historico sin exponer esta seccion en la navegacion general.</p>
+            <p class="mt-2 max-w-3xl text-sm leading-7 text-slate-600">Visualiza el comportamiento del simulador, identifica fechas con mayor trafico, errores frecuentes y pagadores con mas interes comercial.</p>
         </div>
         <form asp-action="Exportar" method="get" class="flex">
             <input type="hidden" name="fechaDesde" value="@fechaDesde" />
@@ -132,17 +167,17 @@
         </article>
     </div>
 
-    <div class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <div class="space-y-6">
-            <section class="grid gap-4 lg:grid-cols-3">
+    <div class="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(22rem,0.95fr)]">
+        <div class="min-w-0 space-y-6">
+            <div class="grid gap-4 lg:grid-cols-3">
                 <article class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
                     <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Pagador lider</p>
-                    <p class="mt-3 text-2xl font-black text-tinta">@Model.Resumen.SucursalMasConsultada</p>
+                    <p class="mt-3 text-2xl font-black text-tinta break-words">@Model.Resumen.SucursalMasConsultada</p>
                     <p class="mt-2 text-sm text-slate-500">Pagador mas consultado en el simulador.</p>
                 </article>
                 <article class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
                     <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Rango dominante</p>
-                    <p class="mt-3 text-2xl font-black text-tinta">@Model.Resumen.RangoMasConsultado</p>
+                    <p class="mt-3 text-2xl font-black text-tinta break-words">@Model.Resumen.RangoMasConsultado</p>
                     <p class="mt-2 text-sm text-slate-500">Rango de monto con mayor interes.</p>
                 </article>
                 <article class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
@@ -150,31 +185,60 @@
                     <p class="mt-3 text-2xl font-black text-tinta">@Model.Resumen.PromedioTiempoRespuestaMs.ToString("N0") ms</p>
                     <p class="mt-2 text-sm text-slate-500">Tiempo promedio de respuesta del simulador.</p>
                 </article>
-            </section>
+            </div>
 
             <section class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Tendencia diaria</p>
-                        <h2 class="mt-2 text-xl font-black text-tinta">Pulso de uso del simulador</h2>
+                        <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Trafico por fecha</p>
+                        <h2 class="mt-2 text-xl font-black text-tinta">Dias con mayor uso de la calculadora</h2>
                     </div>
-                    <div class="text-sm text-slate-500">Consultas filtradas por dia</div>
+                    <div class="text-sm text-slate-500">Pico actual: @maximoSerie consultas</div>
                 </div>
 
-                @if (Model.Resumen.SeriePorDia.Any())
+                @if (puntosSerie.Any())
                 {
-                    <div class="mt-5 space-y-3">
-                        @foreach (var punto in Model.Resumen.SeriePorDia)
-                        {
-                            var ancho = maximoSerie == 0 ? 0 : Math.Max(12, (int)Math.Round((decimal)punto.Total * 100m / maximoSerie));
-                            <div class="grid grid-cols-[92px_1fr_44px] items-center gap-3">
-                                <span class="text-sm font-semibold text-slate-500">@punto.Fecha.ToString("MM/dd")</span>
-                                <div class="h-3 overflow-hidden rounded-full bg-slate-100">
-                                    <div class="h-full rounded-full bg-[linear-gradient(90deg,_#1d4ed8,_#60a5fa)]" style="width:@(ancho)%"></div>
-                                </div>
-                                <span class="text-right text-sm font-bold text-tinta">@punto.Total</span>
-                            </div>
-                        }
+                    <div class="mt-5 overflow-x-auto">
+                        <svg viewBox="0 0 @anchoGrafico @altoGrafico" class="min-w-[42rem]">
+                            <defs>
+                                <linearGradient id="graficoArea" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.35"></stop>
+                                    <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.03"></stop>
+                                </linearGradient>
+                                <linearGradient id="graficoLinea" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#2563eb"></stop>
+                                    <stop offset="100%" stop-color="#f59e0b"></stop>
+                                </linearGradient>
+                            </defs>
+
+                            @for (var i = 0; i <= 4; i++)
+                            {
+                                var y = margenSuperior + (altoUtil * i / 4m);
+                                <line x1="@margenIzquierdo" y1="@y" x2="@(margenIzquierdo + anchoUtil)" y2="@y" stroke="#E2E8F0" stroke-width="1" />
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(areaGrafico))
+                            {
+                                <polygon points="@areaGrafico" fill="url(#graficoArea)" />
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(polilinea))
+                            {
+                                <polyline points="@polilinea" fill="none" stroke="url(#graficoLinea)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+                            }
+
+                            @for (var i = 0; i < puntosSerie.Count; i++)
+                            {
+                                var punto = puntosSerie[i];
+                                var x = puntosSerie.Count == 1
+                                    ? margenIzquierdo + (anchoUtil / 2m)
+                                    : margenIzquierdo + (i / (decimal)(puntosSerie.Count - 1)) * anchoUtil;
+                                var y = margenSuperior + altoUtil - ((decimal)punto.Total / Math.Max(maximoSerie, 1)) * altoUtil;
+                                <circle cx="@x" cy="@y" r="5.5" fill="#ffffff" stroke="#2563eb" stroke-width="3" />
+                                @:<text x="@x" y="@(altoGrafico - 10)" text-anchor="middle" fill="#64748b" font-size="12" font-weight="700">@punto.Fecha.ToString("MM/dd")</text>
+                                @:<text x="@x" y="@(y - 12)" text-anchor="middle" fill="#0f172a" font-size="12" font-weight="700">@punto.Total</text>
+                            }
+                        </svg>
                     </div>
                 }
                 else
@@ -231,7 +295,7 @@
                         @if (!Model.Listado.Registros.Any())
                         {
                             <tr>
-                                <td colspan="9" class="px-4 py-10 text-center text-sm text-slate-500">No hay consultas registradas con los filtros seleccionados.</td>
+                                <td colspan="10" class="px-4 py-10 text-center text-sm text-slate-500">No hay consultas registradas con los filtros seleccionados.</td>
                             </tr>
                         }
                         </tbody>
@@ -277,25 +341,25 @@
             </section>
         </div>
 
-        <div class="space-y-6">
+        <aside class="min-w-0 space-y-6">
             <section class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
                 <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Lectura rapida del negocio</p>
-                <div class="mt-5 space-y-4 text-sm text-slate-600">
-                    <div>
-                        <p class="font-semibold text-slate-500">Pais mas consultado</p>
-                        <p class="mt-1 text-lg font-black text-tinta">@Model.Resumen.PaisMasConsultado</p>
+                <div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+                    <div class="rounded-[1.35rem] border border-slate-100 bg-slate-50/70 p-4">
+                        <p class="text-sm font-semibold text-slate-500">Pais mas consultado</p>
+                        <p class="mt-2 text-xl font-black text-tinta break-words">@Model.Resumen.PaisMasConsultado</p>
                     </div>
-                    <div>
-                        <p class="font-semibold text-slate-500">Promedio que el cliente envia</p>
-                        <p class="mt-1 text-lg font-black text-tinta">USD @Model.Resumen.PromedioMontoConsultadoUsd.ToString("N2")</p>
+                    <div class="rounded-[1.35rem] border border-slate-100 bg-slate-50/70 p-4">
+                        <p class="text-sm font-semibold text-slate-500">Promedio que el cliente envia</p>
+                        <p class="mt-2 text-xl font-black text-tinta">USD @Model.Resumen.PromedioMontoConsultadoUsd.ToString("N2")</p>
                     </div>
-                    <div>
-                        <p class="font-semibold text-slate-500">Promedio que recibe</p>
-                        <p class="mt-1 text-lg font-black text-tinta">@Model.Resumen.PromedioResultadoObtenido.ToString("N2")</p>
+                    <div class="rounded-[1.35rem] border border-slate-100 bg-slate-50/70 p-4">
+                        <p class="text-sm font-semibold text-slate-500">Promedio que recibe</p>
+                        <p class="mt-2 text-xl font-black text-tinta">@Model.Resumen.PromedioResultadoObtenido.ToString("N2")</p>
                     </div>
-                    <div>
-                        <p class="font-semibold text-slate-500">Tasa promedio aplicada</p>
-                        <p class="mt-1 text-lg font-black text-tinta">@Model.Resumen.PromedioTasaAplicada.ToString("N4")</p>
+                    <div class="rounded-[1.35rem] border border-slate-100 bg-slate-50/70 p-4">
+                        <p class="text-sm font-semibold text-slate-500">Tasa promedio aplicada</p>
+                        <p class="mt-2 text-xl font-black text-tinta">@Model.Resumen.PromedioTasaAplicada.ToString("N4")</p>
                     </div>
                 </div>
             </section>
@@ -327,6 +391,6 @@
                     @await Html.PartialAsync("_ListaMetricasAnalitica", Model.Resumen.TopCombinaciones)
                 </div>
             </section>
-        </div>
+        </aside>
     </div>
 </section>
