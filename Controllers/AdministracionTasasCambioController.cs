@@ -4,6 +4,7 @@ using ElectronicaVallarta.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Globalization;
 
 namespace ElectronicaVallarta.Controllers;
 
@@ -13,9 +14,9 @@ public class AdministracionTasasCambioController(
     IServicioPais servicioPais,
     IServicioSucursal servicioSucursal) : Controller
 {
-    public async Task<IActionResult> Index(DateTime? fechaFiltro, bool mostrarTodos = false)
+    public async Task<IActionResult> Index(string? fechaFiltro, bool mostrarTodos = false)
     {
-        var fechaAplicada = mostrarTodos ? (DateTime?)null : (fechaFiltro ?? DateTime.Today).Date;
+        var fechaAplicada = mostrarTodos ? (DateTime?)null : ObtenerFechaFiltro(fechaFiltro);
         var modelo = new ListadoTasasCambioViewModel
         {
             FechaFiltro = fechaAplicada,
@@ -114,6 +115,17 @@ public class AdministracionTasasCambioController(
         modelo.Paises = paises.Select(x => new SelectListItem(x.Nombre, x.Id.ToString())).ToList();
         modelo.Sucursales = sucursales.Select(x => new OpcionSucursalViewModel { Id = x.Id, PaisId = x.PaisId, Nombre = x.Nombre }).ToList();
         return modelo;
+    }
+
+    private static DateTime ObtenerFechaFiltro(string? fechaFiltro)
+    {
+        if (!string.IsNullOrWhiteSpace(fechaFiltro) &&
+            DateTime.TryParseExact(fechaFiltro, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fechaParseada))
+        {
+            return fechaParseada.Date;
+        }
+
+        return DateTime.Today;
     }
 
     private static TasaCambioRango Mapear(FormularioTasaCambioViewModel modelo) =>

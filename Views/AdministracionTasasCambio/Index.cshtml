@@ -22,10 +22,9 @@
         <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div class="w-full flex-1 space-y-2">
                 <label for="fechaFiltro" class="text-sm font-semibold text-slate-700">Filtrar por fecha</label>
-                <input id="fechaFiltro" name="fechaFiltro" type="date" value="@(Model.FechaFiltro?.ToString("yyyy-MM-dd"))" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
+                <input id="fechaFiltro" name="fechaFiltro" type="date" value="@(Model.FechaFiltro?.ToString("yyyy-MM-dd"))" onchange="this.form.submit()" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
             </div>
             <div class="flex flex-row flex-nowrap items-end gap-3 lg:shrink-0">
-                <button type="submit" class="rounded-2xl bg-tinta px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:bg-mar">Aplicar filtro</button>
                 <a asp-action="Index" asp-route-mostrarTodos="true" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700 transition hover:bg-slate-50">Ver todos</a>
                 <a asp-action="Index" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700 transition hover:bg-slate-50">Hoy</a>
             </div>
