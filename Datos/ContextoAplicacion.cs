@@ -8,6 +8,7 @@ public class ContextoAplicacion(DbContextOptions<ContextoAplicacion> options) : 
     public DbSet<Pais> Paises => Set<Pais>();
     public DbSet<Sucursal> Sucursales => Set<Sucursal>();
     public DbSet<TasaCambioRango> TasasCambioRango => Set<TasaCambioRango>();
+    public DbSet<RegistroConsultaAnalitica> RegistrosConsultasAnalitica => Set<RegistroConsultaAnalitica>();
     public DbSet<UsuarioAdministrador> UsuariosAdministradores => Set<UsuarioAdministrador>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

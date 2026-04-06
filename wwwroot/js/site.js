@@ -248,7 +248,7 @@ function inicializarCalculadoraPublica() {
     }
 
     function programarCalculo(opciones = {}) {
-        const { desplazar = false } = opciones;
+        const { desplazar = false, demora = 280 } = opciones;
 
         if (temporizadorCalculo !== null) {
             window.clearTimeout(temporizadorCalculo);
@@ -257,7 +257,7 @@ function inicializarCalculadoraPublica() {
         debeDesplazarResultado = desplazar;
         temporizadorCalculo = window.setTimeout(() => {
             calcularCotizacion();
-        }, 280);
+        }, demora);
     }
 
     selectorPais.value = paisInicial;
@@ -268,27 +268,28 @@ function inicializarCalculadoraPublica() {
         cargarSucursales(false);
         rangoVisible = obtenerRangoSugerido();
         renderizarTasas();
-        programarCalculo();
+        programarCalculo({ demora: 180 });
     });
 
     selectorSucursal.addEventListener("change", () => {
         renderizarTasas();
-        programarCalculo();
+        programarCalculo({ demora: 180 });
     });
 
     campoMonto.addEventListener("input", () => {
         rangoVisible = obtenerRangoSugerido();
         renderizarTasas();
-        programarCalculo();
+        // Esperar un poco mas evita consultas intermedias mientras el usuario sigue escribiendo.
+        programarCalculo({ demora: 900 });
     });
 
-    campoMonto.addEventListener("blur", () => programarCalculo({ desplazar: true }));
+    campoMonto.addEventListener("blur", () => programarCalculo({ desplazar: true, demora: 0 }));
 
     botonEjemplo?.addEventListener("click", () => {
         campoMonto.value = "1250";
         rangoVisible = "mayor";
         renderizarTasas();
-        programarCalculo({ desplazar: true });
+        programarCalculo({ desplazar: true, demora: 0 });
     });
 
     pestanaRangoMenor?.addEventListener("click", () => {
@@ -308,7 +309,7 @@ function inicializarCalculadoraPublica() {
 
     renderizarTasas();
     if (campoMonto.value) {
-        programarCalculo();
+        programarCalculo({ demora: 180 });
     }
 }
 

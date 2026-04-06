@@ -29,9 +29,15 @@ public class ServicioCalculadora(
             {
                 EsExitoso = true,
                 Mensaje = "Calculo realizado correctamente.",
+                TasaCambioRangoId = datosCalculo.TasaCambioRangoId,
                 MontoUsd = solicitud.MontoUsd.Value,
                 MontoRecibe = Math.Round(solicitud.MontoUsd.Value * datosCalculo.TasaCambio, 2, MidpointRounding.AwayFromZero),
                 TasaCambioAplicada = datosCalculo.TasaCambio,
+                RangoMontoDesdeUsd = datosCalculo.MontoDesdeUsd,
+                RangoMontoHastaUsd = datosCalculo.MontoHastaUsd,
+                DescripcionRangoAplicado = datosCalculo.MontoDesdeUsd.HasValue
+                    ? $"{datosCalculo.MontoDesdeUsd.Value:N2} - {(datosCalculo.MontoHastaUsd.HasValue ? $"{datosCalculo.MontoHastaUsd.Value:N2}" : "En adelante")} USD"
+                    : null,
                 MonedaDestino = datosCalculo.CodigoMoneda,
                 SimboloMoneda = datosCalculo.SimboloMoneda,
                 NombrePais = datosCalculo.NombrePais,

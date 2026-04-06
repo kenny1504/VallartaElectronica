@@ -10,4 +10,5 @@ public class TasaCambioRango : EntidadBase
     public DateTime FechaTasa { get; set; }
     public Pais? Pais { get; set; }
     public Sucursal? Sucursal { get; set; }
+    public ICollection<RegistroConsultaAnalitica> RegistrosConsultasAnalitica { get; set; } = new List<RegistroConsultaAnalitica>();
 }

@@ -107,8 +107,11 @@ public class RepositorioTasaCambio(ContextoAplicacion contexto) : IRepositorioTa
             .OrderByDescending(x => x.MontoDesdeUsd)
             .Select(x => new DatosCalculoCotizacionDto
             {
+                TasaCambioRangoId = x.Id,
                 TasaCambio = x.TasaCambio,
                 FechaTasa = x.FechaTasa,
+                MontoDesdeUsd = x.MontoDesdeUsd,
+                MontoHastaUsd = x.MontoHastaUsd,
                 CodigoMoneda = x.Pais!.CodigoMoneda,
                 SimboloMoneda = x.Pais!.SimboloMoneda,
                 NombrePais = x.Pais!.Nombre,

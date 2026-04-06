@@ -6,4 +6,5 @@ public class Sucursal : EntidadBase
     public string Nombre { get; set; } = string.Empty;
     public Pais? Pais { get; set; }
     public ICollection<TasaCambioRango> TasasCambioRango { get; set; } = new List<TasaCambioRango>();
+    public ICollection<RegistroConsultaAnalitica> RegistrosConsultasAnalitica { get; set; } = new List<RegistroConsultaAnalitica>();
 }

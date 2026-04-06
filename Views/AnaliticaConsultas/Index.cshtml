@@ -1,0 +1,332 @@
+@model ElectronicaVallarta.ViewModels.PanelAnaliticaConsultasViewModel
+
+@{
+    ViewData["Title"] = "Analitica oculta";
+    var totalPaginas = Model.Listado.TamanoPagina == 0
+        ? 1
+        : (int)Math.Ceiling(Model.Listado.TotalRegistros / (decimal)Model.Listado.TamanoPagina);
+    totalPaginas = Math.Max(totalPaginas, 1);
+    var fechaDesde = Model.Filtro.FechaDesde?.ToString("yyyy-MM-dd");
+    var fechaHasta = Model.Filtro.FechaHasta?.ToString("yyyy-MM-dd");
+    var maximoSerie = Model.Resumen.SeriePorDia.Any() ? Model.Resumen.SeriePorDia.Max(x => x.Total) : 0;
+}
+
+<section class="space-y-6">
+    <partial name="~/Views/Shared/_Mensajes.cshtml" />
+    <partial name="~/Views/Shared/_BarraAdministracion.cshtml" />
+
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-mar">Panel oculto</p>
+            <h1 class="mt-2 text-3xl font-black text-tinta">Analitica de consultas</h1>
+            <p class="mt-2 max-w-3xl text-sm leading-7 text-slate-600">Monitorea el uso real del simulador publico, revisa tendencias, filtra resultados y exporta el historico sin exponer esta seccion en la navegacion general.</p>
+        </div>
+        <form asp-action="Exportar" method="get" class="flex">
+            <input type="hidden" name="fechaDesde" value="@fechaDesde" />
+            <input type="hidden" name="fechaHasta" value="@fechaHasta" />
+            <input type="hidden" name="paisId" value="@Model.Filtro.PaisId" />
+            <input type="hidden" name="region" value="@Model.Filtro.Region" />
+            <input type="hidden" name="sucursalId" value="@Model.Filtro.SucursalId" />
+            <input type="hidden" name="rango" value="@Model.Filtro.Rango" />
+            <input type="hidden" name="esExitosa" value="@Model.Filtro.EsExitosa" />
+            <input type="hidden" name="textoLibre" value="@Model.Filtro.TextoLibre" />
+            <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-tinta px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:bg-mar">
+                Exportar Excel
+            </button>
+        </form>
+    </div>
+
+    <form method="get" class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div class="space-y-2">
+                <label for="fechaDesde" class="text-sm font-semibold text-slate-700">Fecha desde</label>
+                <input id="fechaDesde" name="fechaDesde" type="date" value="@fechaDesde" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
+            </div>
+            <div class="space-y-2">
+                <label for="fechaHasta" class="text-sm font-semibold text-slate-700">Fecha hasta</label>
+                <input id="fechaHasta" name="fechaHasta" type="date" value="@fechaHasta" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
+            </div>
+            <div class="space-y-2">
+                <label for="paisId" class="text-sm font-semibold text-slate-700">Pais</label>
+                <select id="paisId" name="paisId" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10">
+                    <option value="">Todos</option>
+                    @foreach (var pais in Model.OpcionesFiltro.Paises)
+                    {
+                        <option value="@pais.Valor" selected="@(pais.Valor == Model.Filtro.PaisId?.ToString())">@pais.Etiqueta</option>
+                    }
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label for="region" class="text-sm font-semibold text-slate-700">Region</label>
+                <select id="region" name="region" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10">
+                    <option value="">Todas</option>
+                    @foreach (var region in Model.OpcionesFiltro.Regiones)
+                    {
+                        <option value="@region.Valor" selected="@(region.Valor == Model.Filtro.Region)">@region.Etiqueta</option>
+                    }
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label for="sucursalId" class="text-sm font-semibold text-slate-700">Sucursal</label>
+                <select id="sucursalId" name="sucursalId" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10">
+                    <option value="">Todas</option>
+                    @foreach (var sucursal in Model.OpcionesFiltro.Sucursales)
+                    {
+                        <option value="@sucursal.Valor" selected="@(sucursal.Valor == Model.Filtro.SucursalId?.ToString())">@sucursal.Etiqueta</option>
+                    }
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label for="rango" class="text-sm font-semibold text-slate-700">Rango</label>
+                <select id="rango" name="rango" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10">
+                    <option value="">Todos</option>
+                    @foreach (var rango in Model.OpcionesFiltro.Rangos)
+                    {
+                        <option value="@rango.Valor" selected="@(rango.Valor == Model.Filtro.Rango)">@rango.Etiqueta</option>
+                    }
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label for="esExitosa" class="text-sm font-semibold text-slate-700">Estado</label>
+                <select id="esExitosa" name="esExitosa" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10">
+                    <option value="">Todos</option>
+                    <option value="true" selected="@(Model.Filtro.EsExitosa == true)">Exitosas</option>
+                    <option value="false" selected="@(Model.Filtro.EsExitosa == false)">Fallidas</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label for="textoLibre" class="text-sm font-semibold text-slate-700">Texto libre</label>
+                <input id="textoLibre" name="textoLibre" type="search" value="@Model.Filtro.TextoLibre" placeholder="IP, error, sesion..." class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
+            </div>
+        </div>
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+            <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-tinta px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:bg-mar">
+                Actualizar panel
+            </button>
+            <a asp-action="Index" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700 transition hover:bg-slate-50">
+                Limpiar filtros
+            </a>
+        </div>
+    </form>
+
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <article class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Total consultas</p>
+            <p class="mt-3 text-3xl font-black text-tinta">@Model.Resumen.TotalConsultas</p>
+            <p class="mt-2 text-sm text-slate-500">Hoy: @Model.Resumen.TotalConsultasHoy · 7 dias: @Model.Resumen.TotalConsultasUltimosSieteDias</p>
+        </article>
+        <article class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Sesiones unicas</p>
+            <p class="mt-3 text-3xl font-black text-tinta">@Model.Resumen.TotalSesionesUnicas</p>
+            <p class="mt-2 text-sm text-slate-500">Usuarios anonimos distintos con los filtros actuales.</p>
+        </article>
+        <article class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Monto promedio consultado</p>
+            <p class="mt-3 text-3xl font-black text-tinta">USD @Model.Resumen.PromedioMontoConsultadoUsd.ToString("N2")</p>
+            <p class="mt-2 text-sm text-slate-500">Consultas mayores a 1000: @Model.Resumen.TotalConsultasMontoMayorMil</p>
+        </article>
+        <article class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Exito operativo</p>
+            <p class="mt-3 text-3xl font-black text-tinta">@Model.Resumen.PorcentajeExito.ToString("N2")%</p>
+            <p class="mt-2 text-sm text-slate-500">@Model.Resumen.TotalConsultasExitosas exitosas · @Model.Resumen.TotalConsultasFallidas fallidas</p>
+        </article>
+    </div>
+
+    <div class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <div class="space-y-6">
+            <section class="grid gap-4 lg:grid-cols-3">
+                <article class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+                    <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Pagador lider</p>
+                    <p class="mt-3 text-2xl font-black text-tinta">@Model.Resumen.SucursalMasConsultada</p>
+                    <p class="mt-2 text-sm text-slate-500">Pagador mas consultado en el simulador.</p>
+                </article>
+                <article class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+                    <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Rango dominante</p>
+                    <p class="mt-3 text-2xl font-black text-tinta">@Model.Resumen.RangoMasConsultado</p>
+                    <p class="mt-2 text-sm text-slate-500">Rango de monto con mayor interes.</p>
+                </article>
+                <article class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+                    <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Rendimiento medio</p>
+                    <p class="mt-3 text-2xl font-black text-tinta">@Model.Resumen.PromedioTiempoRespuestaMs.ToString("N0") ms</p>
+                    <p class="mt-2 text-sm text-slate-500">Tiempo promedio de respuesta del simulador.</p>
+                </article>
+            </section>
+
+            <section class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Tendencia diaria</p>
+                        <h2 class="mt-2 text-xl font-black text-tinta">Pulso de uso del simulador</h2>
+                    </div>
+                    <div class="text-sm text-slate-500">Consultas filtradas por dia</div>
+                </div>
+
+                @if (Model.Resumen.SeriePorDia.Any())
+                {
+                    <div class="mt-5 space-y-3">
+                        @foreach (var punto in Model.Resumen.SeriePorDia)
+                        {
+                            var ancho = maximoSerie == 0 ? 0 : Math.Max(12, (int)Math.Round((decimal)punto.Total * 100m / maximoSerie));
+                            <div class="grid grid-cols-[92px_1fr_44px] items-center gap-3">
+                                <span class="text-sm font-semibold text-slate-500">@punto.Fecha.ToString("MM/dd")</span>
+                                <div class="h-3 overflow-hidden rounded-full bg-slate-100">
+                                    <div class="h-full rounded-full bg-[linear-gradient(90deg,_#1d4ed8,_#60a5fa)]" style="width:@(ancho)%"></div>
+                                </div>
+                                <span class="text-right text-sm font-bold text-tinta">@punto.Total</span>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="mt-5 text-sm text-slate-500">Aun no hay consultas registradas con los filtros seleccionados.</p>
+                }
+            </section>
+
+            <section class="rounded-[2rem] border border-white/70 bg-white/90 shadow-panel">
+                <div class="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Listado detallado</p>
+                        <h2 class="mt-2 text-xl font-black text-tinta">Ultimas consultas relevantes</h2>
+                    </div>
+                    <p class="text-sm text-slate-500">Total filtrado: @Model.Listado.TotalRegistros</p>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-sm">
+                        <thead class="bg-slate-50/80">
+                            <tr class="text-left text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+                                <th class="px-4 py-4">Fecha</th>
+                                <th class="px-4 py-4">Pais</th>
+                                <th class="px-4 py-4">Pagador</th>
+                                <th class="px-4 py-4">Rango</th>
+                                <th class="px-4 py-4">Envia</th>
+                                <th class="px-4 py-4">Recibe</th>
+                                <th class="px-4 py-4">Tasa</th>
+                                <th class="px-4 py-4">Tiempo</th>
+                                <th class="px-4 py-4">Estado</th>
+                                <th class="px-4 py-4">Error</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                        @foreach (var registro in Model.Listado.Registros)
+                        {
+                            <tr class="align-top hover:bg-slate-50/70">
+                                <td class="px-4 py-4 whitespace-nowrap text-slate-600">@registro.FechaConsultaUtc.ToLocalTime().ToString("MM/dd/yyyy HH:mm")</td>
+                                <td class="px-4 py-4 text-slate-700">@(!string.IsNullOrWhiteSpace(registro.NombrePais) ? registro.NombrePais : "-")</td>
+                                <td class="px-4 py-4 font-semibold text-tinta">@(!string.IsNullOrWhiteSpace(registro.NombreSucursal) ? registro.NombreSucursal : "-")</td>
+                                <td class="px-4 py-4 text-slate-700">@(!string.IsNullOrWhiteSpace(registro.DescripcionRango) ? registro.DescripcionRango : "-")</td>
+                                <td class="px-4 py-4 text-slate-700">@(registro.MontoConsultadoUsd.HasValue ? $"USD {registro.MontoConsultadoUsd.Value:N2}" : "-")</td>
+                                <td class="px-4 py-4 text-slate-700">@(registro.ResultadoObtenido.HasValue ? registro.ResultadoObtenido.Value.ToString("N2") : "-")</td>
+                                <td class="px-4 py-4 text-slate-700">@(registro.TasaCambioAplicada.HasValue ? registro.TasaCambioAplicada.Value.ToString("N4") : "-")</td>
+                                <td class="px-4 py-4 text-slate-700">@registro.TiempoRespuestaMs ms</td>
+                                <td class="px-4 py-4">
+                                    <span class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.15em] @(registro.EsExitosa ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700")">
+                                        @(registro.EsExitosa ? "Exitosa" : "Fallida")
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 text-slate-600">@(!string.IsNullOrWhiteSpace(registro.MensajeError) ? registro.MensajeError : "-")</td>
+                            </tr>
+                        }
+                        @if (!Model.Listado.Registros.Any())
+                        {
+                            <tr>
+                                <td colspan="9" class="px-4 py-10 text-center text-sm text-slate-500">No hay consultas registradas con los filtros seleccionados.</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (Model.Listado.TotalRegistros > 0)
+                {
+                    <div class="flex flex-col gap-4 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="text-sm text-slate-500">Pagina @Model.Listado.PaginaActual de @totalPaginas</p>
+                        <div class="flex flex-wrap gap-2">
+                            <a asp-action="Index"
+                               asp-route-fechaDesde="@fechaDesde"
+                               asp-route-fechaHasta="@fechaHasta"
+                               asp-route-paisId="@Model.Filtro.PaisId"
+                               asp-route-region="@Model.Filtro.Region"
+                               asp-route-sucursalId="@Model.Filtro.SucursalId"
+                               asp-route-rango="@Model.Filtro.Rango"
+                               asp-route-esExitosa="@Model.Filtro.EsExitosa"
+                               asp-route-textoLibre="@Model.Filtro.TextoLibre"
+                               asp-route-tamanoPagina="@Model.Listado.TamanoPagina"
+                               asp-route-pagina="@(Math.Max(1, Model.Listado.PaginaActual - 1))"
+                               class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 @(Model.Listado.PaginaActual <= 1 ? "pointer-events-none opacity-50" : string.Empty)">
+                                Anterior
+                            </a>
+                            <a asp-action="Index"
+                               asp-route-fechaDesde="@fechaDesde"
+                               asp-route-fechaHasta="@fechaHasta"
+                               asp-route-paisId="@Model.Filtro.PaisId"
+                               asp-route-region="@Model.Filtro.Region"
+                               asp-route-sucursalId="@Model.Filtro.SucursalId"
+                               asp-route-rango="@Model.Filtro.Rango"
+                               asp-route-esExitosa="@Model.Filtro.EsExitosa"
+                               asp-route-textoLibre="@Model.Filtro.TextoLibre"
+                               asp-route-tamanoPagina="@Model.Listado.TamanoPagina"
+                               asp-route-pagina="@(Math.Min(totalPaginas, Model.Listado.PaginaActual + 1))"
+                               class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 @(Model.Listado.PaginaActual >= totalPaginas ? "pointer-events-none opacity-50" : string.Empty)">
+                                Siguiente
+                            </a>
+                        </div>
+                    </div>
+                }
+            </section>
+        </div>
+
+        <div class="space-y-6">
+            <section class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+                <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Lectura rapida del negocio</p>
+                <div class="mt-5 space-y-4 text-sm text-slate-600">
+                    <div>
+                        <p class="font-semibold text-slate-500">Pais mas consultado</p>
+                        <p class="mt-1 text-lg font-black text-tinta">@Model.Resumen.PaisMasConsultado</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-slate-500">Promedio que el cliente envia</p>
+                        <p class="mt-1 text-lg font-black text-tinta">USD @Model.Resumen.PromedioMontoConsultadoUsd.ToString("N2")</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-slate-500">Promedio que recibe</p>
+                        <p class="mt-1 text-lg font-black text-tinta">@Model.Resumen.PromedioResultadoObtenido.ToString("N2")</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-slate-500">Tasa promedio aplicada</p>
+                        <p class="mt-1 text-lg font-black text-tinta">@Model.Resumen.PromedioTasaAplicada.ToString("N4")</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+                <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Pagadores mas consultados</p>
+                <div class="mt-5 space-y-3">
+                    @await Html.PartialAsync("_ListaMetricasAnalitica", Model.Resumen.TopSucursales)
+                </div>
+            </section>
+
+            <section class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+                <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Rangos mas consultados</p>
+                <div class="mt-5 space-y-3">
+                    @await Html.PartialAsync("_ListaMetricasAnalitica", Model.Resumen.TopRangos)
+                </div>
+            </section>
+
+            <section class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+                <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Errores mas frecuentes</p>
+                <div class="mt-5 space-y-3">
+                    @await Html.PartialAsync("_ListaMetricasAnalitica", Model.Resumen.TopErrores)
+                </div>
+            </section>
+
+            <section class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+                <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Combinaciones mas usadas</p>
+                <div class="mt-5 space-y-3">
+                    @await Html.PartialAsync("_ListaMetricasAnalitica", Model.Resumen.TopCombinaciones)
+                </div>
+            </section>
+        </div>
+    </div>
+</section>

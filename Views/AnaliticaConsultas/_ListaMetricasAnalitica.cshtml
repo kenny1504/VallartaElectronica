@@ -1,0 +1,26 @@
+@model IReadOnlyCollection<ElectronicaVallarta.Modelos.Dto.ElementoMetricaAnaliticaDto>
+
+@{
+    var maximo = Model.Any() ? Model.Max(x => x.Total) : 0;
+}
+
+@if (Model.Any())
+{
+    foreach (var item in Model)
+    {
+        var ancho = maximo == 0 ? 0 : Math.Max(12, (int)Math.Round((decimal)item.Total * 100m / maximo));
+        <div class="space-y-2">
+            <div class="flex items-center justify-between gap-3">
+                <p class="min-w-0 truncate text-sm font-semibold text-tinta">@item.Etiqueta</p>
+                <span class="text-sm font-bold text-slate-500">@item.Total</span>
+            </div>
+            <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+                <div class="h-full rounded-full bg-[linear-gradient(90deg,_#f59e0b,_#ef4444)]" style="width:@(ancho)%"></div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <p class="text-sm text-slate-500">Sin datos para mostrar.</p>
+}
