@@ -26,7 +26,8 @@
             </div>
             <div class="flex flex-row flex-nowrap items-end gap-3 lg:shrink-0">
                 <button type="submit" class="rounded-2xl bg-tinta px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:bg-mar">Aplicar filtro</button>
-                <a asp-action="Index" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700 transition hover:bg-slate-50">Limpiar</a>
+                <a asp-action="Index" asp-route-mostrarTodos="true" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700 transition hover:bg-slate-50">Ver todos</a>
+                <a asp-action="Index" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700 transition hover:bg-slate-50">Hoy</a>
             </div>
         </div>
     </form>
@@ -69,7 +70,9 @@
                 {
                     <tr>
                         <td colspan="7" class="px-6 py-8 text-center text-sm text-slate-500">
-                            No se encontraron tasas para la fecha seleccionada.
+                            @(Model.MostrarTodos
+                                ? "No se encontraron tasas registradas."
+                                : "No se encontraron tasas para la fecha seleccionada.")
                         </td>
                     </tr>
                 }

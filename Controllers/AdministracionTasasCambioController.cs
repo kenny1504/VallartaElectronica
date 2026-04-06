@@ -13,12 +13,13 @@ public class AdministracionTasasCambioController(
     IServicioPais servicioPais,
     IServicioSucursal servicioSucursal) : Controller
 {
-    public async Task<IActionResult> Index(DateTime? fechaFiltro)
+    public async Task<IActionResult> Index(DateTime? fechaFiltro, bool mostrarTodos = false)
     {
-        var fechaAplicada = (fechaFiltro ?? DateTime.Today).Date;
+        var fechaAplicada = mostrarTodos ? (DateTime?)null : (fechaFiltro ?? DateTime.Today).Date;
         var modelo = new ListadoTasasCambioViewModel
         {
             FechaFiltro = fechaAplicada,
+            MostrarTodos = mostrarTodos,
             Tasas = await servicioTasaCambio.ObtenerTasasAsync(fechaAplicada)
         };
 
