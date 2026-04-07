@@ -23,7 +23,7 @@ public interface IServicioTasaCambio
     /// <returns>
     /// Una colección de objetos <see cref="RegistroTasaCambioListadoDto"/> que representa las tasas de cambio obtenidas.
     /// </returns>
-    Task<IReadOnlyCollection<RegistroTasaCambioListadoDto>> ObtenerListadoTasasAsync(DateTime? fechaFiltro = null);
+    Task<IReadOnlyCollection<RegistroTasaCambioListadoDto>> ObtenerListadoTasasAsync(DateTime? fechaFiltro = null, int? paisIdFiltro = null);
 
     /// Obtains the exchange rate range record corresponding to the specified identifier.
     /// <param name="id">

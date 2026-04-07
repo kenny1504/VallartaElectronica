@@ -11,7 +11,7 @@ public class ServicioTasaCambio(
     IRepositorioSucursal repositorioSucursal) : IServicioTasaCambio
 {
     public Task<IReadOnlyCollection<TasaCambioRango>> ObtenerTasasAsync(DateTime? fechaFiltro = null) => repositorioTasaCambio.ObtenerTodosAsync(fechaFiltro);
-    public Task<IReadOnlyCollection<RegistroTasaCambioListadoDto>> ObtenerListadoTasasAsync(DateTime? fechaFiltro = null) => repositorioTasaCambio.ObtenerListadoAsync(fechaFiltro);
+    public Task<IReadOnlyCollection<RegistroTasaCambioListadoDto>> ObtenerListadoTasasAsync(DateTime? fechaFiltro = null, int? paisIdFiltro = null) => repositorioTasaCambio.ObtenerListadoAsync(fechaFiltro, paisIdFiltro);
     public Task<TasaCambioRango?> ObtenerTasaPorIdAsync(int id, bool soloLectura = true) => repositorioTasaCambio.ObtenerPorIdAsync(id, soloLectura);
 
     public async Task CrearAsync(TasaCambioRango tasaCambioRango)

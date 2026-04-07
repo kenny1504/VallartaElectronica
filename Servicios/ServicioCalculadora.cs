@@ -48,17 +48,36 @@ public class ServicioCalculadora(
             };
         }
 
-        if (!await repositorioPais.ExisteActivoAsync(solicitud.PaisId.Value))
+        var pais = await repositorioPais.ObtenerPorIdAsync(solicitud.PaisId.Value);
+        if (pais is null || !pais.EstaActivo)
         {
-            return new ResultadoCalculoDto { EsExitoso = false, Mensaje = "El pais seleccionado no esta disponible." };
+            return new ResultadoCalculoDto
+            {
+                EsExitoso = false,
+                Mensaje = "El pais seleccionado no esta disponible.",
+                NombrePais = pais?.Nombre ?? string.Empty
+            };
         }
 
-        if (!await repositorioSucursal.ExisteActivaEnPaisAsync(solicitud.SucursalId.Value, solicitud.PaisId.Value))
+        var sucursal = await repositorioSucursal.ObtenerPorIdAsync(solicitud.SucursalId.Value);
+        if (sucursal is null || !sucursal.EstaActivo || sucursal.PaisId != solicitud.PaisId.Value)
         {
-            return new ResultadoCalculoDto { EsExitoso = false, Mensaje = "La sucursal o canal seleccionado no corresponde al pais indicado." };
+            return new ResultadoCalculoDto
+            {
+                EsExitoso = false,
+                Mensaje = "La sucursal o canal seleccionado no corresponde al pais indicado.",
+                NombrePais = pais.Nombre,
+                NombreSucursal = sucursal?.Nombre ?? string.Empty
+            };
         }
 
-        return new ResultadoCalculoDto { EsExitoso = false, Mensaje = "No encontramos una tasa configurada para la fecha local del cliente con ese monto. Intenta con otro pagador o consulta con administracion." };
+        return new ResultadoCalculoDto
+        {
+            EsExitoso = false,
+            Mensaje = "No encontramos una tasa configurada para la fecha local del cliente con ese monto. Intenta con otro pagador o consulta con administracion.",
+            NombrePais = pais.Nombre,
+            NombreSucursal = sucursal.Nombre
+        };
     }
 
     private static DateTime ObtenerFechaOperacion(string? fechaCliente)

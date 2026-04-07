@@ -24,9 +24,15 @@
                 <label for="fechaFiltro" class="text-sm font-semibold text-slate-700">Filtrar por fecha</label>
                 <input id="fechaFiltro" name="fechaFiltro" type="date" value="@(Model.FechaFiltro?.ToString("yyyy-MM-dd"))" onchange="this.form.submit()" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
             </div>
+            <div class="w-full flex-1 space-y-2">
+                <label for="paisIdFiltro" class="text-sm font-semibold text-slate-700">Filtrar por pais</label>
+                <select id="paisIdFiltro" name="paisIdFiltro" asp-items="Model.Paises" onchange="this.form.submit()" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10">
+                    <option value="">Todos los paises</option>
+                </select>
+            </div>
             <div class="flex flex-row flex-nowrap items-end gap-3 lg:shrink-0">
-                <a asp-action="Index" asp-route-mostrarTodos="true" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700 transition hover:bg-slate-50">Ver todos</a>
-                <a asp-action="Index" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700 transition hover:bg-slate-50">Hoy</a>
+                <a asp-action="Index" asp-route-mostrarTodos="true" asp-route-paisIdFiltro="@Model.PaisIdFiltro" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700 transition hover:bg-slate-50">Ver todos</a>
+                <a asp-action="Index" asp-route-paisIdFiltro="@Model.PaisIdFiltro" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700 transition hover:bg-slate-50">Hoy</a>
             </div>
         </div>
     </form>
@@ -70,8 +76,8 @@
                     <tr>
                         <td colspan="7" class="px-6 py-8 text-center text-sm text-slate-500">
                             @(Model.MostrarTodos
-                                ? "No se encontraron tasas registradas."
-                                : "No se encontraron tasas para la fecha seleccionada.")
+                                ? "No se encontraron tasas registradas para los filtros seleccionados."
+                                : "No se encontraron tasas para la fecha y pais seleccionados.")
                         </td>
                     </tr>
                 }

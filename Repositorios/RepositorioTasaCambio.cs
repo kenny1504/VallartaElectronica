@@ -29,7 +29,7 @@ public class RepositorioTasaCambio(ContextoAplicacion contexto) : IRepositorioTa
             .ToListAsync();
     }
 
-    public async Task<IReadOnlyCollection<RegistroTasaCambioListadoDto>> ObtenerListadoAsync(DateTime? fechaFiltro = null)
+    public async Task<IReadOnlyCollection<RegistroTasaCambioListadoDto>> ObtenerListadoAsync(DateTime? fechaFiltro = null, int? paisIdFiltro = null)
     {
         var consulta = contexto.TasasCambioRango.AsNoTracking().AsQueryable();
 
@@ -37,6 +37,11 @@ public class RepositorioTasaCambio(ContextoAplicacion contexto) : IRepositorioTa
         {
             var fecha = fechaFiltro.Value.Date;
             consulta = consulta.Where(x => x.FechaTasa == fecha);
+        }
+
+        if (paisIdFiltro.HasValue)
+        {
+            consulta = consulta.Where(x => x.PaisId == paisIdFiltro.Value);
         }
 
         // Proyecta solo columnas visibles en la tabla para evitar Includes y entidades completas.

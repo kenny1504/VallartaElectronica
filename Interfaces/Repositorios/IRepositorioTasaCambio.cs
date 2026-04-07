@@ -17,7 +17,7 @@ public interface IRepositorioTasaCambio
     /// El valor de la tarea contiene una colección inmutable de objetos TasaCambioRango.
     /// </return>
     Task<IReadOnlyCollection<TasaCambioRango>> ObtenerTodosAsync(DateTime? fechaFiltro = null);
-    Task<IReadOnlyCollection<RegistroTasaCambioListadoDto>> ObtenerListadoAsync(DateTime? fechaFiltro = null);
+    Task<IReadOnlyCollection<RegistroTasaCambioListadoDto>> ObtenerListadoAsync(DateTime? fechaFiltro = null, int? paisIdFiltro = null);
 
     /// <summary>
     /// Obtiene una entidad <see cref="TasaCambioRango"/> por su identificador único.

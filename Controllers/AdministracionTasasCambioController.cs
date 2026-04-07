@@ -14,14 +14,17 @@ public class AdministracionTasasCambioController(
     IServicioPais servicioPais,
     IServicioSucursal servicioSucursal) : Controller
 {
-    public async Task<IActionResult> Index(string? fechaFiltro, bool mostrarTodos = false)
+    public async Task<IActionResult> Index(string? fechaFiltro, int? paisIdFiltro, bool mostrarTodos = false)
     {
         var fechaAplicada = mostrarTodos ? (DateTime?)null : ObtenerFechaFiltro(fechaFiltro);
+        var paises = await servicioPais.ObtenerPaisesActivosAsync();
         var modelo = new ListadoTasasCambioViewModel
         {
             FechaFiltro = fechaAplicada,
+            PaisIdFiltro = paisIdFiltro,
             MostrarTodos = mostrarTodos,
-            Tasas = await servicioTasaCambio.ObtenerListadoTasasAsync(fechaAplicada)
+            Paises = paises.Select(x => new SelectListItem(x.Nombre, x.Id.ToString(), x.Id == paisIdFiltro)).ToList(),
+            Tasas = await servicioTasaCambio.ObtenerListadoTasasAsync(fechaAplicada, paisIdFiltro)
         };
 
         return View(modelo);
