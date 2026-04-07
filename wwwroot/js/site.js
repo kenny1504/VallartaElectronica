@@ -46,11 +46,13 @@ function inicializarCalculadoraPublica() {
     }
 
     const sucursales = obtenerJsonDesdeElemento("datos-sucursales-calculadora");
-    const tasas = obtenerJsonDesdeElemento("datos-tasas-calculadora");
+    let tasas = obtenerJsonDesdeElemento("datos-tasas-calculadora");
     const formulario = document.getElementById("formulario-calculadora");
     const selectorPais = document.getElementById("paisId");
     const selectorSucursal = document.getElementById("sucursalId");
     const campoMonto = document.getElementById("Solicitud_MontoUsd");
+    const campoFechaCliente = document.getElementById("fechaCliente");
+    const etiquetaFechaActualizacion = document.getElementById("fecha-actualizacion-cliente");
     const contenedorResultado = document.getElementById("contenedor-resultado");
     const contenedorListaTasas = document.getElementById("lista-tasas");
     const descripcionTasas = document.getElementById("descripcion-tasas");
@@ -59,12 +61,39 @@ function inicializarCalculadoraPublica() {
     const pestanaRangoMayor = document.getElementById("tab-rango-mayor");
     const botonEjemplo = document.getElementById("boton-ejemplo");
     const urlCalcular = modulo.dataset.urlCalcular;
+    const urlTasas = modulo.dataset.urlTasas;
     const paisInicial = modulo.dataset.paisInicial ?? "";
     const sucursalInicial = modulo.dataset.sucursalInicial ?? "";
     let temporizadorCalculo = null;
     let debeDesplazarResultado = false;
     let rangoVisible = "menor";
     let ultimaClaveCalculada = "";
+
+    function obtenerFechaLocalCliente() {
+        const fecha = new Date();
+        const anio = fecha.getFullYear();
+        const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+        const dia = String(fecha.getDate()).padStart(2, "0");
+        return `${anio}-${mes}-${dia}`;
+    }
+
+    function formatearFechaVisible(fechaIso) {
+        const [anio, mes, dia] = fechaIso.split("-");
+        return `${mes}/${dia}/${anio}`;
+    }
+
+    function establecerFechaCliente() {
+        const fechaCliente = obtenerFechaLocalCliente();
+        if (campoFechaCliente) {
+            campoFechaCliente.value = fechaCliente;
+        }
+
+        if (etiquetaFechaActualizacion) {
+            etiquetaFechaActualizacion.textContent = formatearFechaVisible(fechaCliente);
+        }
+
+        return fechaCliente;
+    }
 
     function desplazarResultadoEnMovil() {
         if (window.innerWidth >= 768) {
@@ -96,7 +125,8 @@ function inicializarCalculadoraPublica() {
         const paisId = obtenerPaisSeleccionado();
         const sucursalId = obtenerSucursalSeleccionada();
         const montoNormalizado = campoMonto.value.trim();
-        return `${paisId}|${sucursalId}|${montoNormalizado}`;
+        const fechaCliente = campoFechaCliente?.value ?? "";
+        return `${paisId}|${sucursalId}|${montoNormalizado}|${fechaCliente}`;
     }
 
     function obtenerTasasFiltradasPorPais() {
@@ -174,6 +204,29 @@ function inicializarCalculadoraPublica() {
                 tasa,
                 tasaAplicable != null && tasa.sucursalId === tasaAplicable.sucursalId && tasa.montoDesdeUsd === tasaAplicable.montoDesdeUsd)).join("")
             : "<p class='rounded-3xl border border-borde bg-white p-4 text-sm text-slate-500'>No hay tasas configuradas para este rango.</p>";
+    }
+
+    async function cargarTasasDelCliente() {
+        if (!urlTasas) {
+            renderizarTasas();
+            return;
+        }
+
+        const fechaCliente = establecerFechaCliente();
+        const parametros = new URLSearchParams({ fechaCliente });
+        try {
+            const respuesta = await fetch(`${urlTasas}?${parametros.toString()}`, {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+
+            if (respuesta.ok) {
+                tasas = await respuesta.json();
+            }
+        } catch {
+            tasas = [];
+        }
+
+        renderizarTasas();
     }
 
     function cargarSucursales(esCargaInicial) {
@@ -260,9 +313,11 @@ function inicializarCalculadoraPublica() {
         }, demora);
     }
 
+    establecerFechaCliente();
     selectorPais.value = paisInicial;
     rangoVisible = obtenerRangoSugerido();
     cargarSucursales(true);
+    cargarTasasDelCliente();
 
     selectorPais.addEventListener("change", () => {
         cargarSucursales(false);

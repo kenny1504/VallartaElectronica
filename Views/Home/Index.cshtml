@@ -12,6 +12,7 @@
 
 <section class="space-y-6 overflow-x-hidden sm:space-y-8" id="modulo-calculadora-publica"
          data-url-calcular="@Url.Action("Calcular", "Home")"
+         data-url-tasas="@Url.Action("ObtenerTasasDia", "Home")"
          data-pais-inicial="@Model.Solicitud.PaisId"
          data-sucursal-inicial="@Model.Solicitud.SucursalId">
     <div class="overflow-hidden rounded-4xl bg-[linear-gradient(135deg,_#ffffff_0%,_#dff2ff_40%,_#69b5f5_100%)] p-4 shadow-panel sm:p-8">
@@ -30,7 +31,7 @@
                 <div class="flex items-center justify-center gap-4">
                     <div class="text-center">
                         <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-azulMarca sm:text-sm">Actualizado</p>
-                        <p class="mt-1 text-xl font-black text-tinta sm:mt-2 sm:text-3xl">@DateTime.Today.ToString("MM/dd/yyyy")</p>
+                        <p id="fecha-actualizacion-cliente" class="mt-1 text-xl font-black text-tinta sm:mt-2 sm:text-3xl">--/--/----</p>
                     </div>
                     <p class="hidden max-w-[12rem] text-right text-sm leading-6 text-slate-600 sm:block">
                         Tasas visibles para consulta rapida y cotizacion inmediata.
@@ -50,6 +51,7 @@
             <div class="space-y-5 px-5 py-5 sm:px-7 sm:py-6">
                 <form id="formulario-calculadora" asp-action="Calcular" method="post" class="space-y-5">
                     @Html.AntiForgeryToken()
+                    <input asp-for="Solicitud.FechaCliente" type="hidden" id="fechaCliente" />
                     <div class="grid gap-5 md:grid-cols-2">
                         <div class="space-y-2">
                             <label asp-for="Solicitud.PaisId" class="text-sm font-semibold text-slate-700"></label>

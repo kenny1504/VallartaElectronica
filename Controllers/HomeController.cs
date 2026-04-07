@@ -6,6 +6,7 @@ using ElectronicaVallarta.Models;
 using ElectronicaVallarta.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Globalization;
 
 namespace ElectronicaVallarta.Controllers;
 
@@ -23,7 +24,6 @@ public class HomeController(
     {
         var paisesActivos = await servicioPais.ObtenerPaisesActivosAsync();
         var sucursales = await servicioSucursal.ObtenerSucursalesActivasAsync();
-        var tasas = await servicioTasaCambio.ObtenerTasasAsync(DateTime.Today);
         var paisMexico = paisesActivos.FirstOrDefault(x => x.Nombre.Equals("Mexico", StringComparison.OrdinalIgnoreCase));
         var paisPredeterminado = paisMexico ?? paisesActivos.FirstOrDefault();
         var sucursalPredeterminada = sucursales
@@ -44,25 +44,33 @@ public class HomeController(
             Sucursales = sucursales
                 .Select(x => new OpcionSucursalViewModel { Id = x.Id, PaisId = x.PaisId, Nombre = x.Nombre })
                 .ToList(),
-            TasasActivas = tasas
-                .Where(x => x.EstaActivo
-                            && x.Pais is not null
-                            && x.Sucursal is not null)
-                .Select(x => new TasaActivaViewModel
-                {
-                    PaisId = x.PaisId,
-                    SucursalId = x.SucursalId,
-                    NombreSucursal = x.Sucursal!.Nombre,
-                    NombrePais = x.Pais!.Nombre,
-                    MontoDesdeUsd = x.MontoDesdeUsd,
-                    MontoHastaUsd = x.MontoHastaUsd,
-                    TasaCambio = x.TasaCambio,
-                    CodigoMoneda = x.Pais!.CodigoMoneda
-                })
-                .ToList()
+            TasasActivas = []
         };
 
         return View(modelo);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ObtenerTasasDia(string? fechaCliente)
+    {
+        var fechaOperacion = ObtenerFechaOperacion(fechaCliente);
+        var tasas = await servicioTasaCambio.ObtenerTasasAsync(fechaOperacion);
+        return Json(tasas
+            .Where(x => x.EstaActivo
+                        && x.Pais is not null
+                        && x.Sucursal is not null)
+            .Select(x => new TasaActivaViewModel
+            {
+                PaisId = x.PaisId,
+                SucursalId = x.SucursalId,
+                FechaTasa = x.FechaTasa,
+                NombreSucursal = x.Sucursal!.Nombre,
+                NombrePais = x.Pais!.Nombre,
+                MontoDesdeUsd = x.MontoDesdeUsd,
+                MontoHastaUsd = x.MontoHastaUsd,
+                TasaCambio = x.TasaCambio,
+                CodigoMoneda = x.Pais!.CodigoMoneda
+            }));
     }
 
     [HttpPost]
@@ -181,5 +189,15 @@ public class HomeController(
         return montoConsultado < 1000
             ? "0.01 - 999.99 USD"
             : "1000.00 - En adelante USD";
+    }
+
+    private static DateTime ObtenerFechaOperacion(string? fechaCliente)
+    {
+        if (DateTime.TryParseExact(fechaCliente, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fecha))
+        {
+            return fecha.Date;
+        }
+
+        return DateTime.Today;
     }
 }

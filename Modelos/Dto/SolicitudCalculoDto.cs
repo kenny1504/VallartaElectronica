@@ -15,4 +15,6 @@ public class SolicitudCalculoDto
     [Display(Name = "Monto en USD")]
     [Range(typeof(decimal), "0.01", "999999999", ErrorMessage = "Ingresa un monto mayor a cero.")]
     public decimal? MontoUsd { get; set; }
+
+    public string? FechaCliente { get; set; }
 }

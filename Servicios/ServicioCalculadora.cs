@@ -1,6 +1,7 @@
 using ElectronicaVallarta.Interfaces.Repositorios;
 using ElectronicaVallarta.Interfaces.Servicios;
 using ElectronicaVallarta.Modelos.Dto;
+using System.Globalization;
 
 namespace ElectronicaVallarta.Servicios;
 
@@ -17,10 +18,11 @@ public class ServicioCalculadora(
         }
 
         // El caso exitoso se resuelve con una sola consulta proyectada desde tasas.
+        var fechaOperacion = ObtenerFechaOperacion(solicitud.FechaCliente);
         var datosCalculo = await repositorioTasaCambio.ObtenerDatosCalculoAsync(
             solicitud.PaisId.Value,
             solicitud.SucursalId.Value,
-            DateTime.Today,
+            fechaOperacion,
             solicitud.MontoUsd.Value);
 
         if (datosCalculo is not null)
@@ -56,6 +58,16 @@ public class ServicioCalculadora(
             return new ResultadoCalculoDto { EsExitoso = false, Mensaje = "La sucursal o canal seleccionado no corresponde al pais indicado." };
         }
 
-        return new ResultadoCalculoDto { EsExitoso = false, Mensaje = "No encontramos una tasa configurada para hoy con ese monto. Intenta con otro canal o consulta con administracion." };
+        return new ResultadoCalculoDto { EsExitoso = false, Mensaje = "No encontramos una tasa configurada para la fecha local del cliente con ese monto. Intenta con otro pagador o consulta con administracion." };
+    }
+
+    private static DateTime ObtenerFechaOperacion(string? fechaCliente)
+    {
+        if (DateTime.TryParseExact(fechaCliente, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fecha))
+        {
+            return fecha.Date;
+        }
+
+        return DateTime.Today;
     }
 }

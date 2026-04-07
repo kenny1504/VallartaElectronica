@@ -4,6 +4,7 @@ public class TasaActivaViewModel
 {
     public int PaisId { get; set; }
     public int SucursalId { get; set; }
+    public DateTime FechaTasa { get; set; }
     public string NombreSucursal { get; set; } = string.Empty;
     public string NombrePais { get; set; } = string.Empty;
     public decimal MontoDesdeUsd { get; set; }
