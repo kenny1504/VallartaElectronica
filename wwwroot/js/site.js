@@ -15,6 +15,10 @@ function formatearMontoUsd(monto) {
     return Number(monto).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function convertirValorEntradaANumero(valor) {
+    return Number(String(valor ?? "").replace(/,/g, "").trim());
+}
+
 function obtenerTextoRango(tasa) {
     const hasta = tasa.montoHastaUsd === null ? "En adelante" : formatearMontoUsd(tasa.montoHastaUsd);
     return `${formatearMontoUsd(tasa.montoDesdeUsd)} - ${hasta}`;
@@ -51,6 +55,9 @@ function inicializarCalculadoraPublica() {
     const selectorPais = document.getElementById("paisId");
     const selectorSucursal = document.getElementById("sucursalId");
     const campoMonto = document.getElementById("Solicitud_MontoUsd");
+    const campoMontoVisible = document.getElementById("montoVisible");
+    const botonMonedaEntrada = document.getElementById("boton-moneda-entrada");
+    const leyendaMonedaEntrada = document.getElementById("leyenda-moneda-entrada");
     const campoFechaCliente = document.getElementById("fechaCliente");
     const etiquetaFechaActualizacion = document.getElementById("fecha-actualizacion-cliente");
     const contenedorResultado = document.getElementById("contenedor-resultado");
@@ -68,6 +75,7 @@ function inicializarCalculadoraPublica() {
     let debeDesplazarResultado = false;
     let rangoVisible = "menor";
     let ultimaClaveCalculada = "";
+    let modoMonedaEntrada = "usd";
 
     function obtenerFechaLocalCliente() {
         const fecha = new Date();
@@ -121,6 +129,10 @@ function inicializarCalculadoraPublica() {
         return Number(campoMonto.value || 0);
     }
 
+    function obtenerMontoVisibleActual() {
+        return convertirValorEntradaANumero(campoMontoVisible?.value || 0);
+    }
+
     function obtenerClaveSolicitudActual() {
         const paisId = obtenerPaisSeleccionado();
         const sucursalId = obtenerSucursalSeleccionada();
@@ -132,6 +144,16 @@ function inicializarCalculadoraPublica() {
     function obtenerTasasFiltradasPorPais() {
         const paisId = obtenerPaisSeleccionado();
         return tasas.filter(tasa => tasa.paisId === paisId);
+    }
+
+    function obtenerMonedaDestinoActual() {
+        const resultadoActual = contenedorResultado.querySelector("[data-resultado-exitoso='true']");
+        if (resultadoActual?.dataset.resultadoMoneda) {
+            return resultadoActual.dataset.resultadoMoneda;
+        }
+
+        const primeraTasa = obtenerTasasFiltradasPorPais()[0];
+        return primeraTasa?.codigoMoneda || "USD";
     }
 
     function obtenerRangoSugerido() {
@@ -150,6 +172,90 @@ function inicializarCalculadoraPublica() {
             tasa.sucursalId === sucursalId &&
             monto >= Number(tasa.montoDesdeUsd) &&
             (tasa.montoHastaUsd === null || monto <= Number(tasa.montoHastaUsd)));
+    }
+
+    function obtenerTasaReferenciaPorPagador() {
+        const sucursalId = obtenerSucursalSeleccionada();
+        if (!sucursalId) {
+            return null;
+        }
+
+        const tasasDelPagador = obtenerTasasFiltradasPorPais()
+            .filter(tasa => tasa.sucursalId === sucursalId)
+            .sort((a, b) => Number(a.montoDesdeUsd) - Number(b.montoDesdeUsd));
+
+        if (tasasDelPagador.length === 0) {
+            return null;
+        }
+
+        const tasasDelRangoVisible = tasasDelPagador.filter(tasa =>
+            rangoVisible === "mayor"
+                ? Number(tasa.montoDesdeUsd) >= 1000 || tasa.montoHastaUsd === null
+                : Number(tasa.montoDesdeUsd) < 1000);
+
+        return tasasDelRangoVisible[0] || tasasDelPagador[0];
+    }
+
+    function obtenerTasaParaEntradaDestino() {
+        const resultadoActual = contenedorResultado.querySelector("[data-resultado-exitoso='true']");
+        const tasaResultado = Number(resultadoActual?.dataset.resultadoTasa || 0);
+        if (Number.isFinite(tasaResultado) && tasaResultado > 0) {
+            return {
+                tasaCambio: tasaResultado,
+                codigoMoneda: resultadoActual.dataset.resultadoMoneda || obtenerMonedaDestinoActual(),
+                montoRecibe: Number(resultadoActual.dataset.resultadoMontoRecibe || 0)
+            };
+        }
+
+        const tasaPantalla = obtenerTasaAplicableEnPantalla();
+        if (tasaPantalla) {
+            return {
+                tasaCambio: Number(tasaPantalla.tasaCambio),
+                codigoMoneda: tasaPantalla.codigoMoneda,
+                montoRecibe: obtenerMontoActual() * Number(tasaPantalla.tasaCambio)
+            };
+        }
+
+        const tasaReferencia = obtenerTasaReferenciaPorPagador();
+        return tasaReferencia
+            ? {
+                tasaCambio: Number(tasaReferencia.tasaCambio),
+                codigoMoneda: tasaReferencia.codigoMoneda,
+                montoRecibe: 0
+            }
+            : null;
+    }
+
+    function sincronizarCampoEntrada() {
+        if (!campoMontoVisible || !botonMonedaEntrada) {
+            return;
+        }
+
+        if (modoMonedaEntrada === "destino") {
+            const tasaDestino = obtenerTasaParaEntradaDestino();
+            const monedaDestino = tasaDestino?.codigoMoneda || obtenerMonedaDestinoActual();
+            botonMonedaEntrada.textContent = monedaDestino;
+            if (leyendaMonedaEntrada) {
+                leyendaMonedaEntrada.textContent = `Toca la moneda para volver a USD o escribe directamente en ${monedaDestino}.`;
+            }
+
+            if (tasaDestino && Number.isFinite(tasaDestino.tasaCambio) && tasaDestino.tasaCambio > 0) {
+                const montoDestino = Number.isFinite(tasaDestino.montoRecibe) && tasaDestino.montoRecibe > 0
+                    ? tasaDestino.montoRecibe
+                    : obtenerMontoActual() * tasaDestino.tasaCambio;
+                campoMontoVisible.value = montoDestino > 0 ? montoDestino.toFixed(2) : "";
+            } else {
+                campoMontoVisible.value = "";
+            }
+
+            return;
+        }
+
+        botonMonedaEntrada.textContent = "USD";
+        if (leyendaMonedaEntrada) {
+            leyendaMonedaEntrada.textContent = "Toca la moneda para alternar entre USD y la moneda del pais destino.";
+        }
+        campoMontoVisible.value = campoMonto.value || "";
     }
 
     function actualizarEstadoPestanas() {
@@ -227,6 +333,7 @@ function inicializarCalculadoraPublica() {
         }
 
         renderizarTasas();
+        sincronizarCampoEntrada();
     }
 
     function cargarSucursales(esCargaInicial) {
@@ -258,6 +365,7 @@ function inicializarCalculadoraPublica() {
         }
 
         renderizarTasas();
+        sincronizarCampoEntrada();
     }
 
     async function calcularCotizacion() {
@@ -293,6 +401,7 @@ function inicializarCalculadoraPublica() {
 
         contenedorResultado.innerHTML = await respuesta.text();
         ultimaClaveCalculada = claveActual;
+        sincronizarCampoEntrada();
         if (debeDesplazarResultado) {
             desplazarResultadoEnMovil();
         }
@@ -318,32 +427,67 @@ function inicializarCalculadoraPublica() {
     rangoVisible = obtenerRangoSugerido();
     cargarSucursales(true);
     cargarTasasDelCliente();
+    sincronizarCampoEntrada();
 
     selectorPais.addEventListener("change", () => {
         cargarSucursales(false);
         rangoVisible = obtenerRangoSugerido();
         renderizarTasas();
+        sincronizarCampoEntrada();
         programarCalculo({ demora: 180 });
     });
 
     selectorSucursal.addEventListener("change", () => {
         renderizarTasas();
+        sincronizarCampoEntrada();
         programarCalculo({ demora: 180 });
     });
 
-    campoMonto.addEventListener("input", () => {
+    campoMontoVisible.addEventListener("input", () => {
+        if (modoMonedaEntrada === "destino") {
+            const tasaDestino = obtenerTasaParaEntradaDestino();
+            const montoDestino = obtenerMontoVisibleActual();
+            if (tasaDestino && Number.isFinite(montoDestino) && montoDestino > 0) {
+                // Conserva mayor precision en USD para evitar que al recalcular se degrade
+                // el monto destino visible por redondeos intermedios.
+                campoMonto.value = (montoDestino / tasaDestino.tasaCambio).toFixed(6);
+            } else {
+                campoMonto.value = "";
+            }
+        } else {
+            campoMonto.value = campoMontoVisible.value;
+        }
+
         rangoVisible = obtenerRangoSugerido();
         renderizarTasas();
         // Esperar un poco mas evita consultas intermedias mientras el usuario sigue escribiendo.
         programarCalculo({ demora: 900 });
     });
 
-    campoMonto.addEventListener("blur", () => programarCalculo({ desplazar: true, demora: 0 }));
+    campoMontoVisible.addEventListener("blur", () => {
+        if (modoMonedaEntrada === "usd" && campoMonto.value) {
+            campoMontoVisible.value = Number(campoMonto.value).toFixed(2);
+        }
+
+        programarCalculo({ desplazar: true, demora: 0 });
+    });
+
+    botonMonedaEntrada?.addEventListener("click", () => {
+        if (modoMonedaEntrada === "usd" && obtenerMonedaDestinoActual() === "USD") {
+            return;
+        }
+
+        modoMonedaEntrada = modoMonedaEntrada === "usd" ? "destino" : "usd";
+        sincronizarCampoEntrada();
+        campoMontoVisible?.focus();
+        campoMontoVisible?.select();
+    });
 
     botonEjemplo?.addEventListener("click", () => {
         campoMonto.value = "1250";
         rangoVisible = "mayor";
         renderizarTasas();
+        sincronizarCampoEntrada();
         programarCalculo({ desplazar: true, demora: 0 });
     });
 
@@ -364,6 +508,7 @@ function inicializarCalculadoraPublica() {
 
     renderizarTasas();
     if (campoMonto.value) {
+        sincronizarCampoEntrada();
         programarCalculo({ demora: 180 });
     }
 }

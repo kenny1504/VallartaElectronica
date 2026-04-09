@@ -73,9 +73,11 @@
                     <div class="space-y-2">
                         <label asp-for="Solicitud.MontoUsd" class="text-sm font-semibold text-slate-700">Ingresa el monto</label>
                         <div class="flex overflow-hidden rounded-2xl border border-borde bg-white focus-within:border-azulMarca focus-within:ring-4 focus-within:ring-azulMarca/10">
-                            <span class="inline-flex items-center bg-azulClaroMarca px-4 text-sm font-bold text-azulMarca">USD</span>
-                            <input asp-for="Solicitud.MontoUsd" type="number" step="0.01" min="0.01" placeholder="0.00" class="w-full px-4 py-3 outline-none" />
+                            <button type="button" id="boton-moneda-entrada" class="inline-flex items-center bg-azulClaroMarca px-4 text-sm font-bold text-azulMarca transition hover:bg-sky-100">USD</button>
+                            <input asp-for="Solicitud.MontoUsd" type="hidden" />
+                            <input id="montoVisible" type="number" step="0.01" min="0.01" placeholder="0.00" class="w-full px-4 py-3 outline-none" />
                         </div>
+                        <p id="leyenda-moneda-entrada" class="text-xs leading-5 text-slate-500">Toca la moneda para alternar entre USD y la moneda del pais destino.</p>
                         <span asp-validation-for="Solicitud.MontoUsd" class="text-sm text-rojoMarca"></span>
                     </div>
                     
