@@ -1221,14 +1221,6 @@ video {
   line-height: 2.5rem;
 }
 
-.text-\[0\.96rem\] {
-  font-size: 0.96rem;
-}
-
-.text-\[0\.98rem\] {
-  font-size: 0.98rem;
-}
-
 .text-\[10px\] {
   font-size: 10px;
 }
@@ -1657,13 +1649,14 @@ video {
     line-height: 1;
   }
 
-  .sm\:text-\[1\.12rem\] {
-    font-size: 1.12rem;
-  }
-
   .sm\:text-base {
     font-size: 1rem;
     line-height: 1.5rem;
+  }
+
+  .sm\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
   }
 
   .sm\:text-sm {
@@ -1681,17 +1674,8 @@ video {
     line-height: 1rem;
   }
 
-  .sm\:text-lg {
-    font-size: 1.125rem;
-    line-height: 1.75rem;
-  }
-
   .sm\:leading-7 {
     line-height: 1.75rem;
-  }
-
-  .sm\:leading-9 {
-    line-height: 2.25rem;
   }
 
   .sm\:leading-8 {
@@ -1765,6 +1749,10 @@ video {
 }
 
 @media (min-width: 1280px) {
+  .xl\:col-span-2 {
+    grid-column: span 2 / span 2;
+  }
+
   .xl\:grid-cols-1 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
   }
@@ -1783,6 +1771,10 @@ video {
 
   .xl\:grid-cols-\[minmax\(0\2c 1\.55fr\)_minmax\(22rem\2c 0\.95fr\)\] {
     grid-template-columns: minmax(0,1.55fr) minmax(22rem,0.95fr);
+  }
+
+  .xl\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .xl\:flex-row {

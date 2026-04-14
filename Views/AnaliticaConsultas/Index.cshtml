@@ -166,8 +166,8 @@
         </article>
     </div>
 
-    <div class="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(22rem,0.95fr)]">
-        <div class="min-w-0 space-y-6">
+    <div class="space-y-6">
+        <div class="space-y-6">
             <div class="grid gap-4 lg:grid-cols-3">
                 <article class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
                     <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Pagador lider</p>
@@ -245,105 +245,12 @@
                     <p class="mt-5 text-sm text-slate-500">Aun no hay consultas registradas con los filtros seleccionados.</p>
                 }
             </section>
-
-            <section class="rounded-[2rem] border border-white/70 bg-white/90 shadow-panel">
-                <div class="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 lg:flex-row lg:items-end lg:justify-between">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Listado detallado</p>
-                        <h2 class="mt-2 text-xl font-black text-tinta">Ultimas consultas relevantes</h2>
-                    </div>
-                    <p class="text-sm text-slate-500">Total filtrado: @Model.Listado.TotalRegistros</p>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-200 text-sm">
-                        <thead class="bg-slate-50/80">
-                            <tr class="text-left text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
-                                <th class="px-4 py-4">Fecha</th>
-                                <th class="px-4 py-4">Pais</th>
-                                <th class="px-4 py-4">Pagador</th>
-                                <th class="px-4 py-4">Rango</th>
-                                <th class="px-4 py-4">Envia</th>
-                                <th class="px-4 py-4">Recibe</th>
-                                <th class="px-4 py-4">Tasa</th>
-                                <th class="px-4 py-4">Tiempo</th>
-                                <th class="px-4 py-4">Estado</th>
-                                <th class="px-4 py-4">Error</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                        @foreach (var registro in Model.Listado.Registros)
-                        {
-                            <tr class="align-top hover:bg-slate-50/70">
-                                <td class="px-4 py-4 whitespace-nowrap text-slate-600">@registro.FechaConsultaUtc.ToLocalTime().ToString("MM/dd/yyyy HH:mm")</td>
-                                <td class="px-4 py-4 text-slate-700">@(!string.IsNullOrWhiteSpace(registro.NombrePais) ? registro.NombrePais : "-")</td>
-                                <td class="px-4 py-4 font-semibold text-tinta">@(!string.IsNullOrWhiteSpace(registro.NombreSucursal) ? registro.NombreSucursal : "-")</td>
-                                <td class="px-4 py-4 text-slate-700">@(!string.IsNullOrWhiteSpace(registro.DescripcionRango) ? registro.DescripcionRango : "-")</td>
-                                <td class="px-4 py-4 text-slate-700">@(registro.MontoConsultadoUsd.HasValue ? $"USD {registro.MontoConsultadoUsd.Value:N2}" : "-")</td>
-                                <td class="px-4 py-4 text-slate-700">@(registro.ResultadoObtenido.HasValue ? registro.ResultadoObtenido.Value.ToString("N2") : "-")</td>
-                                <td class="px-4 py-4 text-slate-700">@(registro.TasaCambioAplicada.HasValue ? registro.TasaCambioAplicada.Value.ToString("N4") : "-")</td>
-                                <td class="px-4 py-4 text-slate-700">@registro.TiempoRespuestaMs ms</td>
-                                <td class="px-4 py-4">
-                                    <span class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.15em] @(registro.EsExitosa ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700")">
-                                        @(registro.EsExitosa ? "Exitosa" : "Fallida")
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 text-slate-600">@(!string.IsNullOrWhiteSpace(registro.MensajeError) ? registro.MensajeError : "-")</td>
-                            </tr>
-                        }
-                        @if (!Model.Listado.Registros.Any())
-                        {
-                            <tr>
-                                <td colspan="10" class="px-4 py-10 text-center text-sm text-slate-500">No hay consultas registradas con los filtros seleccionados.</td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                </div>
-
-                @if (Model.Listado.TotalRegistros > 0)
-                {
-                    <div class="flex flex-col gap-4 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                        <p class="text-sm text-slate-500">Pagina @Model.Listado.PaginaActual de @totalPaginas</p>
-                        <div class="flex flex-wrap gap-2">
-                            <a asp-action="Index"
-                               asp-route-fechaDesde="@fechaDesde"
-                               asp-route-fechaHasta="@fechaHasta"
-                               asp-route-paisId="@Model.Filtro.PaisId"
-                               asp-route-region="@Model.Filtro.Region"
-                               asp-route-sucursalId="@Model.Filtro.SucursalId"
-                               asp-route-rango="@Model.Filtro.Rango"
-                               asp-route-esExitosa="@Model.Filtro.EsExitosa"
-                               asp-route-textoLibre="@Model.Filtro.TextoLibre"
-                               asp-route-tamanoPagina="@Model.Listado.TamanoPagina"
-                               asp-route-pagina="@(Math.Max(1, Model.Listado.PaginaActual - 1))"
-                               class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 @(Model.Listado.PaginaActual <= 1 ? "pointer-events-none opacity-50" : string.Empty)">
-                                Anterior
-                            </a>
-                            <a asp-action="Index"
-                               asp-route-fechaDesde="@fechaDesde"
-                               asp-route-fechaHasta="@fechaHasta"
-                               asp-route-paisId="@Model.Filtro.PaisId"
-                               asp-route-region="@Model.Filtro.Region"
-                               asp-route-sucursalId="@Model.Filtro.SucursalId"
-                               asp-route-rango="@Model.Filtro.Rango"
-                               asp-route-esExitosa="@Model.Filtro.EsExitosa"
-                               asp-route-textoLibre="@Model.Filtro.TextoLibre"
-                               asp-route-tamanoPagina="@Model.Listado.TamanoPagina"
-                               asp-route-pagina="@(Math.Min(totalPaginas, Model.Listado.PaginaActual + 1))"
-                               class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 @(Model.Listado.PaginaActual >= totalPaginas ? "pointer-events-none opacity-50" : string.Empty)">
-                                Siguiente
-                            </a>
-                        </div>
-                    </div>
-                }
-            </section>
         </div>
 
-        <aside class="min-w-0 space-y-6">
+        <div class="grid gap-6 xl:grid-cols-2">
             <section class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
                 <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Lectura rapida del negocio</p>
-                <div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+                <div class="mt-5 grid gap-4 sm:grid-cols-2">
                     <div class="rounded-[1.35rem] border border-slate-100 bg-slate-50/70 p-4">
                         <p class="text-sm font-semibold text-slate-500">Pais mas consultado</p>
                         <p class="mt-2 text-xl font-black text-tinta break-words">@Model.Resumen.PaisMasConsultado</p>
@@ -384,12 +291,105 @@
                 </div>
             </section>
 
-            <section class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+            <section class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel xl:col-span-2">
                 <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Combinaciones mas usadas</p>
                 <div class="mt-5 space-y-3">
                     @await Html.PartialAsync("_ListaMetricasAnalitica", Model.Resumen.TopCombinaciones)
                 </div>
             </section>
-        </aside>
+        </div>
     </div>
+
+    <section class="rounded-[2rem] border border-white/70 bg-white/90 shadow-panel">
+        <div class="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Listado detallado</p>
+                <h2 class="mt-2 text-xl font-black text-tinta">Ultimas consultas relevantes</h2>
+            </div>
+            <p class="text-sm text-slate-500">Total filtrado: @Model.Listado.TotalRegistros</p>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead class="bg-slate-50/80">
+                    <tr class="text-left text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+                        <th class="px-4 py-4">Fecha</th>
+                        <th class="px-4 py-4">Pais</th>
+                        <th class="px-4 py-4">Pagador</th>
+                        <th class="px-4 py-4">Rango</th>
+                        <th class="px-4 py-4">Envia</th>
+                        <th class="px-4 py-4">Recibe</th>
+                        <th class="px-4 py-4">Tasa</th>
+                        <th class="px-4 py-4">Tiempo</th>
+                        <th class="px-4 py-4">Estado</th>
+                        <th class="px-4 py-4">Error</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                @foreach (var registro in Model.Listado.Registros)
+                {
+                    <tr class="align-top hover:bg-slate-50/70">
+                        <td class="px-4 py-4 whitespace-nowrap text-slate-600">@registro.FechaConsultaUtc.ToLocalTime().ToString("MM/dd/yyyy HH:mm")</td>
+                        <td class="px-4 py-4 text-slate-700">@(!string.IsNullOrWhiteSpace(registro.NombrePais) ? registro.NombrePais : "-")</td>
+                        <td class="px-4 py-4 font-semibold text-tinta">@(!string.IsNullOrWhiteSpace(registro.NombreSucursal) ? registro.NombreSucursal : "-")</td>
+                        <td class="px-4 py-4 text-slate-700">@(!string.IsNullOrWhiteSpace(registro.DescripcionRango) ? registro.DescripcionRango : "-")</td>
+                        <td class="px-4 py-4 text-slate-700">@(registro.MontoConsultadoUsd.HasValue ? $"USD {registro.MontoConsultadoUsd.Value:N2}" : "-")</td>
+                        <td class="px-4 py-4 text-slate-700">@(registro.ResultadoObtenido.HasValue ? registro.ResultadoObtenido.Value.ToString("N2") : "-")</td>
+                        <td class="px-4 py-4 text-slate-700">@(registro.TasaCambioAplicada.HasValue ? registro.TasaCambioAplicada.Value.ToString("N4") : "-")</td>
+                        <td class="px-4 py-4 text-slate-700">@registro.TiempoRespuestaMs ms</td>
+                        <td class="px-4 py-4">
+                            <span class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.15em] @(registro.EsExitosa ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700")">
+                                @(registro.EsExitosa ? "Exitosa" : "Fallida")
+                            </span>
+                        </td>
+                        <td class="px-4 py-4 text-slate-600">@(!string.IsNullOrWhiteSpace(registro.MensajeError) ? registro.MensajeError : "-")</td>
+                    </tr>
+                }
+                @if (!Model.Listado.Registros.Any())
+                {
+                    <tr>
+                        <td colspan="10" class="px-4 py-10 text-center text-sm text-slate-500">No hay consultas registradas con los filtros seleccionados.</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.Listado.TotalRegistros > 0)
+        {
+            <div class="flex flex-col gap-4 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-sm text-slate-500">Pagina @Model.Listado.PaginaActual de @totalPaginas</p>
+                <div class="flex flex-wrap gap-2">
+                    <a asp-action="Index"
+                       asp-route-fechaDesde="@fechaDesde"
+                       asp-route-fechaHasta="@fechaHasta"
+                       asp-route-paisId="@Model.Filtro.PaisId"
+                       asp-route-region="@Model.Filtro.Region"
+                       asp-route-sucursalId="@Model.Filtro.SucursalId"
+                       asp-route-rango="@Model.Filtro.Rango"
+                       asp-route-esExitosa="@Model.Filtro.EsExitosa"
+                       asp-route-textoLibre="@Model.Filtro.TextoLibre"
+                       asp-route-tamanoPagina="@Model.Listado.TamanoPagina"
+                       asp-route-pagina="@(Math.Max(1, Model.Listado.PaginaActual - 1))"
+                       class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 @(Model.Listado.PaginaActual <= 1 ? "pointer-events-none opacity-50" : string.Empty)">
+                        Anterior
+                    </a>
+                    <a asp-action="Index"
+                       asp-route-fechaDesde="@fechaDesde"
+                       asp-route-fechaHasta="@fechaHasta"
+                       asp-route-paisId="@Model.Filtro.PaisId"
+                       asp-route-region="@Model.Filtro.Region"
+                       asp-route-sucursalId="@Model.Filtro.SucursalId"
+                       asp-route-rango="@Model.Filtro.Rango"
+                       asp-route-esExitosa="@Model.Filtro.EsExitosa"
+                       asp-route-textoLibre="@Model.Filtro.TextoLibre"
+                       asp-route-tamanoPagina="@Model.Listado.TamanoPagina"
+                       asp-route-pagina="@(Math.Min(totalPaginas, Model.Listado.PaginaActual + 1))"
+                       class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 @(Model.Listado.PaginaActual >= totalPaginas ? "pointer-events-none opacity-50" : string.Empty)">
+                        Siguiente
+                    </a>
+                </div>
+            </div>
+        }
+    </section>
 </section>
