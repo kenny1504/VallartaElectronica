@@ -2,9 +2,11 @@ using ElectronicaVallarta.Datos;
 using ElectronicaVallarta.Datos.Inicializacion;
 using ElectronicaVallarta.Extensiones;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+const long TamanoMaximoCargaBytes = 100 * 1024 * 1024;
 
 var mvcBuilder = builder.Services.AddControllersWithViews();
 
@@ -21,6 +23,20 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.Name = "ElectronicaVallarta.Admin";
         options.SlidingExpiration = true;
     });
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = TamanoMaximoCargaBytes;
+});
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = TamanoMaximoCargaBytes;
+});
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = TamanoMaximoCargaBytes;
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartHeadersLengthLimit = 64 * 1024;
+});
 builder.Services.AddDbContext<ContextoAplicacion>(options =>
     options
         .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
@@ -45,6 +61,7 @@ using (var alcance = app.Services.CreateScope())
 
 app.UseRouting();
 app.UseStatusCodePagesWithReExecute("/error/{0}");
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapStaticAssets();

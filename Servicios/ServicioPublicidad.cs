@@ -18,6 +18,11 @@ public class ServicioPublicidad(IRepositorioPublicidad repositorioPublicidad, IW
         ".mp4", ".webm", ".mov", ".m4v", ".avi", ".mpeg", ".mpg"
     };
 
+    private static readonly HashSet<string> TiposContenidoSvg = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "image/svg+xml", "application/svg+xml", "application/xml", "text/xml", "text/plain", "application/octet-stream"
+    };
+
     private const long TamanoMaximoArchivoBytes = 100 * 1024 * 1024;
     private const string RutaPublicaBase = "/uploads/publicidad";
 
@@ -136,7 +141,7 @@ public class ServicioPublicidad(IRepositorioPublicidad repositorioPublicidad, IW
             throw new InvalidOperationException("El archivo no puede superar 100 MB.");
         }
 
-        if (!EsContenidoEsperado(archivo, tipoRecurso))
+        if (!EsContenidoEsperado(archivo, tipoRecurso, extension))
         {
             throw new InvalidOperationException("El contenido del archivo no coincide con el tipo de recurso seleccionado.");
         }
@@ -157,11 +162,16 @@ public class ServicioPublicidad(IRepositorioPublicidad repositorioPublicidad, IW
             ? ExtensionesImagen.Contains(extension)
             : ExtensionesVideo.Contains(extension);
 
-    private static bool EsContenidoEsperado(IFormFile archivo, TipoRecursoPublicidad tipoRecurso)
+    private static bool EsContenidoEsperado(IFormFile archivo, TipoRecursoPublicidad tipoRecurso, string extension)
     {
         if (string.IsNullOrWhiteSpace(archivo.ContentType))
         {
             return true;
+        }
+
+        if (tipoRecurso == TipoRecursoPublicidad.Imagen && extension.Equals(".svg", StringComparison.OrdinalIgnoreCase))
+        {
+            return TiposContenidoSvg.Contains(archivo.ContentType);
         }
 
         return tipoRecurso == TipoRecursoPublicidad.Imagen
