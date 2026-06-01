@@ -1,12 +1,14 @@
+using ElectronicaVallarta.Interfaces.Servicios;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElectronicaVallarta.Controllers;
 
-public class PublicidadController : Controller
+public class PublicidadController(IServicioPublicidad servicioPublicidad) : Controller
 {
     [HttpGet("/publicidad")]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        var publicidades = await servicioPublicidad.ObtenerPublicidadesActivasAsync(DateTime.Now);
+        return View(publicidades);
     }
 }

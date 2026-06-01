@@ -29,7 +29,7 @@ function solicitarJson(url) {
         solicitud.open("GET", url, true);
         solicitud.setRequestHeader("X-Requested-With", "XMLHttpRequest");
         solicitud.onreadystatechange = () => {
-            if (solicitud.readyState !== XMLHttpRequest.DONE) {
+            if (solicitud.readyState !== 4) {
                 return;
             }
 
@@ -865,10 +865,14 @@ function inicializarPublicidadPublica() {
     }
 
     async function cargarPublicidad() {
-        try {
-            publicidades = await solicitarJson(urlPublicidad);
-        } catch {
-            publicidades = [];
+        publicidades = obtenerJsonDesdeElemento("datos-publicidad-inicial");
+
+        if (publicidades.length === 0 && urlPublicidad) {
+            try {
+                publicidades = await solicitarJson(urlPublicidad);
+            } catch {
+                publicidades = [];
+            }
         }
 
         if (publicidades.length === 0) {
