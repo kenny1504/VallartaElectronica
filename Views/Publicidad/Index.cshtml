@@ -2,6 +2,7 @@
 @{
     Layout = null;
     ViewData["Title"] = "Publicidad";
+    var primeraPublicidad = Model.FirstOrDefault();
     var publicidadesIniciales = System.Text.Json.JsonSerializer.Serialize(
         Model,
         new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
@@ -134,7 +135,28 @@
         <section id="publicidad-visor"
                  class="pantalla-publicitaria__visor"
                  aria-label="Pantalla publicitaria"
-                 aria-live="off"></section>
+                 aria-live="off">
+            @if (primeraPublicidad is not null)
+            {
+                if (primeraPublicidad.TipoRecurso.Equals("Video", StringComparison.OrdinalIgnoreCase))
+                {
+                    <video class="publicidad-media publicidad-media--visible"
+                           src="@primeraPublicidad.UrlRecurso"
+                           muted
+                           autoplay
+                           playsinline
+                           preload="auto"></video>
+                }
+                else
+                {
+                    <img class="publicidad-media publicidad-media--visible"
+                         src="@primeraPublicidad.UrlRecurso"
+                         alt="@primeraPublicidad.Titulo"
+                         loading="eager"
+                         decoding="async" />
+                }
+            }
+        </section>
         <button id="botonPantallaCompletaPublicidad"
                 class="boton-pantalla-completa"
                 type="button"
@@ -153,7 +175,7 @@
             var indiceActual = 0;
             var temporizador = null;
             var relojRevision = null;
-            var recursoActual = null;
+            var recursoActual = visor ? visor.querySelector(".publicidad-media--visible") : null;
             var inicioRecursoActual = 0;
             var duracionRecursoActualMs = 0;
             var cargandoRecurso = false;
@@ -212,10 +234,9 @@
                 visor.appendChild(recursoNuevo);
 
                 var activar = function () {
-                    recursoNuevo.classList.add("publicidad-media--visible");
+                    recursoNuevo.className = "publicidad-media publicidad-media--visible";
                     if (recursoAnterior) {
-                        recursoAnterior.classList.remove("publicidad-media--visible");
-                        recursoAnterior.classList.add("publicidad-media--saliente");
+                        recursoAnterior.className = "publicidad-media publicidad-media--saliente";
                     }
                 };
 
@@ -384,7 +405,24 @@
 
             if (publicidades.length > 0) {
                 iniciarRelojRevision();
-                mostrarPublicidadActual();
+                if (recursoActual) {
+                    if (recursoActual.tagName === "VIDEO") {
+                        recursoActual.muted = true;
+                        recursoActual.autoplay = true;
+                        recursoActual.playsInline = true;
+                        if (typeof recursoActual.play === "function") {
+                            try {
+                                recursoActual.play();
+                            } catch (error) {
+                            }
+                        }
+                    }
+
+                    programarAvance(publicidades[0].duracionSegundos);
+                    precargarSiguiente();
+                } else {
+                    mostrarPublicidadActual();
+                }
             }
 
             document.addEventListener("visibilitychange", function () {
