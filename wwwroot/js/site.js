@@ -11,6 +11,44 @@ function obtenerJsonDesdeElemento(idElemento) {
     }
 }
 
+function solicitarJson(url) {
+    if (typeof fetch === "function") {
+        return fetch(url, {
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        }).then(respuesta => {
+            if (!respuesta.ok) {
+                throw new Error("Respuesta no valida");
+            }
+
+            return respuesta.json();
+        });
+    }
+
+    return new Promise((resolve, reject) => {
+        const solicitud = new XMLHttpRequest();
+        solicitud.open("GET", url, true);
+        solicitud.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+        solicitud.onreadystatechange = () => {
+            if (solicitud.readyState !== XMLHttpRequest.DONE) {
+                return;
+            }
+
+            if (solicitud.status < 200 || solicitud.status >= 300) {
+                reject(new Error("Respuesta no valida"));
+                return;
+            }
+
+            try {
+                resolve(JSON.parse(solicitud.responseText || "[]"));
+            } catch {
+                reject(new Error("Respuesta JSON no valida"));
+            }
+        };
+        solicitud.onerror = () => reject(new Error("No se pudo completar la solicitud"));
+        solicitud.send();
+    });
+}
+
 function formatearMontoUsd(monto) {
     return Number(monto).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -583,8 +621,284 @@ function inicializarToasts() {
     });
 }
 
+function inicializarFormularioPublicidad() {
+    const contenedorPreview = document.getElementById("previewPublicidad");
+    const campoArchivo = document.getElementById("archivoPublicidad");
+    const selectorTipo = document.getElementById("tipoRecursoPublicidad");
+    if (!contenedorPreview || !campoArchivo) {
+        return;
+    }
+
+    let urlObjetoActual = null;
+
+    function limpiarUrlObjeto() {
+        if (urlObjetoActual) {
+            URL.revokeObjectURL(urlObjetoActual);
+            urlObjetoActual = null;
+        }
+    }
+
+    function mostrarVacio() {
+        contenedorPreview.innerHTML = "<p class='px-5 text-center text-sm leading-6 text-slate-500'>Selecciona un archivo para previsualizarlo.</p>";
+    }
+
+    function mostrarRecurso(url, tipo) {
+        const esVideo = String(tipo || "").toLowerCase().includes("video") || /\.(mp4|webm|mov|m4v|avi|mpeg|mpg)$/i.test(url);
+        contenedorPreview.innerHTML = esVideo
+            ? `<video src="${url}" class="max-h-80 w-full bg-black object-contain" controls muted preload="metadata"></video>`
+            : `<img src="${url}" alt="Previsualizacion de publicidad" class="max-h-80 w-full object-contain" loading="lazy" />`;
+    }
+
+    const urlActual = contenedorPreview.dataset.urlActual;
+    if (urlActual) {
+        mostrarRecurso(urlActual, contenedorPreview.dataset.tipoActual);
+    } else {
+        mostrarVacio();
+    }
+
+    campoArchivo.addEventListener("change", () => {
+        const archivo = campoArchivo.files?.[0];
+        if (!archivo) {
+            limpiarUrlObjeto();
+            if (urlActual) {
+                mostrarRecurso(urlActual, contenedorPreview.dataset.tipoActual);
+            } else {
+                mostrarVacio();
+            }
+            return;
+        }
+
+        limpiarUrlObjeto();
+        urlObjetoActual = URL.createObjectURL(archivo);
+        const tipo = archivo.type.startsWith("video/") ? "Video" : selectorTipo?.options[selectorTipo.selectedIndex]?.text || "Imagen";
+        mostrarRecurso(urlObjetoActual, tipo);
+    });
+}
+
+function inicializarPublicidadPublica() {
+    const modulo = document.getElementById("modulo-publicidad");
+    if (!modulo) {
+        return;
+    }
+
+    const visor = document.getElementById("publicidad-visor");
+    const estado = document.getElementById("publicidad-estado");
+    const titulo = document.getElementById("publicidad-titulo");
+    const descripcion = document.getElementById("publicidad-descripcion");
+    const contador = document.getElementById("publicidad-contador");
+    const botonPantallaCompleta = document.getElementById("botonPantallaCompletaPublicidad");
+    const urlPublicidad = modulo.dataset.urlPublicidad;
+    const esModoPantalla = modulo.dataset.modoPantalla === "true";
+    const repetirVideos = modulo.dataset.loopVideos === "true";
+    let publicidades = [];
+    let indiceActual = 0;
+    let temporizador = null;
+    let recursoActual = null;
+    let recursoPrecargado = null;
+
+    function limpiarTemporizador() {
+        if (temporizador !== null) {
+            window.clearTimeout(temporizador);
+            temporizador = null;
+        }
+    }
+
+    function mostrarEstado(mensaje) {
+        if (esModoPantalla || !estado) {
+            return;
+        }
+
+        estado.textContent = mensaje;
+        estado.classList.remove("hidden");
+    }
+
+    function ocultarEstado() {
+        estado?.classList.add("hidden");
+    }
+
+    function avanzar() {
+        limpiarTemporizador();
+        if (publicidades.length === 0) {
+            mostrarEstado("No hay publicidad activa por el momento.");
+            return;
+        }
+
+        indiceActual = (indiceActual + 1) % publicidades.length;
+        mostrarPublicidadActual();
+    }
+
+    function precargarSiguiente() {
+        if (publicidades.length < 2) {
+            return;
+        }
+
+        const siguiente = publicidades[(indiceActual + 1) % publicidades.length];
+        if (String(siguiente.tipoRecurso).toLowerCase() === "imagen") {
+            const imagen = new Image();
+            imagen.loading = "lazy";
+            imagen.src = siguiente.urlRecurso;
+            recursoPrecargado = imagen;
+            return;
+        }
+
+        const video = document.createElement("video");
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        video.src = siguiente.urlRecurso;
+        recursoPrecargado = video;
+    }
+
+    function programarAvance(segundos) {
+        limpiarTemporizador();
+        const duracionMs = Math.max(Number(segundos || 1), 1) * 1000;
+        temporizador = window.setTimeout(avanzar, duracionMs);
+    }
+
+    function configurarTexto(publicidad) {
+        if (titulo) {
+            titulo.textContent = publicidad.titulo || "Publicidad";
+        }
+
+        if (descripcion) {
+            descripcion.textContent = publicidad.descripcion || "";
+        }
+
+        if (contador) {
+            contador.textContent = `${indiceActual + 1} / ${publicidades.length}`;
+        }
+    }
+
+    function manejarErrorCarga() {
+        mostrarEstado("No se pudo cargar este recurso. Mostrando el siguiente...");
+        programarAvance(1);
+    }
+
+    function reemplazarRecurso(recursoNuevo) {
+        const recursoAnterior = recursoActual;
+        recursoActual = recursoNuevo;
+        visor.appendChild(recursoNuevo);
+
+        window.requestAnimationFrame(() => {
+            recursoNuevo.classList.add("publicidad-media--visible");
+            if (recursoAnterior) {
+                recursoAnterior.classList.remove("publicidad-media--visible");
+                recursoAnterior.classList.add("publicidad-media--saliente");
+            }
+        });
+
+        if (recursoAnterior) {
+            window.setTimeout(() => {
+                if (recursoAnterior.tagName === "VIDEO") {
+                    recursoAnterior.pause();
+                    recursoAnterior.removeAttribute("src");
+                    recursoAnterior.load();
+                }
+
+                recursoAnterior.remove();
+            }, 760);
+        }
+    }
+
+    function mostrarImagen(publicidad) {
+        const imagen = document.createElement("img");
+        imagen.alt = publicidad.titulo || "Publicidad";
+        imagen.loading = "lazy";
+        imagen.decoding = "async";
+        imagen.className = "publicidad-media";
+        imagen.addEventListener("load", () => {
+            ocultarEstado();
+            reemplazarRecurso(imagen);
+            programarAvance(publicidad.duracionSegundos);
+            precargarSiguiente();
+        }, { once: true });
+        imagen.addEventListener("error", manejarErrorCarga, { once: true });
+        imagen.src = publicidad.urlRecurso;
+    }
+
+    function mostrarVideo(publicidad) {
+        const video = document.createElement("video");
+        video.className = "publicidad-media";
+        video.muted = true;
+        video.autoplay = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        video.loop = repetirVideos && publicidades.length === 1;
+        video.addEventListener("loadeddata", () => {
+            ocultarEstado();
+            reemplazarRecurso(video);
+            const reproduccion = video.play();
+            if (reproduccion?.catch) {
+                reproduccion.catch(() => programarAvance(publicidad.duracionSegundos));
+            }
+
+            if (!video.loop) {
+                programarAvance(publicidad.duracionSegundos);
+            }
+
+            precargarSiguiente();
+        }, { once: true });
+        if (!video.loop) {
+            video.addEventListener("ended", avanzar, { once: true });
+        }
+
+        video.addEventListener("error", manejarErrorCarga, { once: true });
+        video.src = publicidad.urlRecurso;
+    }
+
+    function mostrarPublicidadActual() {
+        const publicidad = publicidades[indiceActual];
+        if (!publicidad) {
+            mostrarEstado("No hay publicidad activa por el momento.");
+            return;
+        }
+
+        mostrarEstado("Cargando publicidad...");
+        configurarTexto(publicidad);
+
+        if (String(publicidad.tipoRecurso).toLowerCase() === "video") {
+            mostrarVideo(publicidad);
+            return;
+        }
+
+        mostrarImagen(publicidad);
+    }
+
+    async function cargarPublicidad() {
+        try {
+            publicidades = await solicitarJson(urlPublicidad);
+        } catch {
+            publicidades = [];
+        }
+
+        if (publicidades.length === 0) {
+            mostrarEstado("No hay publicidad activa por el momento.");
+            return;
+        }
+
+        mostrarPublicidadActual();
+    }
+
+    botonPantallaCompleta?.addEventListener("click", async () => {
+        try {
+            if (document.fullscreenElement) {
+                await document.exitFullscreen();
+                return;
+            }
+
+            await modulo.requestFullscreen();
+        } catch {
+            botonPantallaCompleta.style.display = "none";
+        }
+    });
+
+    cargarPublicidad();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     inicializarCalculadoraPublica();
     inicializarFormularioTasaCambio();
+    inicializarFormularioPublicidad();
+    inicializarPublicidadPublica();
     inicializarToasts();
 });

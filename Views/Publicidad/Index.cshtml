@@ -1,0 +1,142 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Publicidad";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Electronica Vallarta</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: #020617;
+        }
+
+        body {
+            overscroll-behavior: none;
+        }
+
+        .pantalla-publicitaria {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            height: 100vh;
+            background:
+                radial-gradient(circle at 50% 50%, rgba(58, 160, 243, 0.16), transparent 46%),
+                #020617;
+        }
+
+        .pantalla-publicitaria__visor {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: calc(100vh * 16 / 9);
+            max-height: calc(100vw * 9 / 16);
+            background: #000;
+            overflow: hidden;
+        }
+
+        .pantalla-publicitaria__visor--lleno {
+            max-width: none;
+            max-height: none;
+        }
+
+        .publicidad-media {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0;
+            transform: scale(1.005);
+            transition: opacity 700ms ease, transform 900ms ease;
+            background: #000;
+        }
+
+        .publicidad-media--visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .publicidad-media--saliente {
+            opacity: 0;
+        }
+
+        .boton-pantalla-completa {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 20;
+            width: 3rem;
+            height: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.28);
+            opacity: 0.14;
+            cursor: pointer;
+            transition: opacity 180ms ease, background 180ms ease, transform 180ms ease;
+        }
+
+        .boton-pantalla-completa::before,
+        .boton-pantalla-completa::after {
+            position: absolute;
+            inset: 0.78rem;
+            content: "";
+            border-color: rgba(255, 255, 255, 0.92);
+            border-style: solid;
+        }
+
+        .boton-pantalla-completa::before {
+            border-width: 2px 0 0 2px;
+        }
+
+        .boton-pantalla-completa::after {
+            border-width: 0 2px 2px 0;
+        }
+
+        .boton-pantalla-completa:hover,
+        .boton-pantalla-completa:focus-visible {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.55);
+            transform: scale(1.04);
+            outline: none;
+        }
+
+        @@media (max-aspect-ratio: 4 / 3) {
+            .pantalla-publicitaria__visor {
+                max-width: 100vw;
+                max-height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main id="modulo-publicidad"
+          class="pantalla-publicitaria"
+          data-url-publicidad="/api/publicidad/activa"
+          data-modo-pantalla="true"
+          data-loop-videos="false">
+        <section id="publicidad-visor"
+                 class="pantalla-publicitaria__visor"
+                 aria-label="Pantalla publicitaria"
+                 aria-live="off"></section>
+        <button id="botonPantallaCompletaPublicidad"
+                class="boton-pantalla-completa"
+                type="button"
+                aria-label="Activar pantalla completa"></button>
+    </main>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+</body>
+</html>

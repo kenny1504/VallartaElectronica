@@ -1,0 +1,83 @@
+@model IEnumerable<ElectronicaVallarta.Dominio.Entidades.Publicidad>
+
+@{
+    ViewData["Title"] = "Publicidad";
+}
+
+<partial name="~/Views/Shared/_Mensajes.cshtml" />
+
+<section class="space-y-6">
+    <partial name="~/Views/Shared/_BarraAdministracion.cshtml" />
+
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-mar">Multimedia</p>
+            <h1 class="mt-2 text-3xl font-black text-tinta">Publicidad</h1>
+            <p class="mt-2 text-sm leading-7 text-slate-600">Administra anuncios rotativos de imagen y video para la vista publica.</p>
+        </div>
+        <a asp-action="Crear" class="inline-flex items-center justify-center rounded-2xl bg-tinta px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:bg-mar">Nueva publicidad</a>
+    </div>
+
+    <div class="overflow-hidden rounded-[2rem] border border-white/70 bg-white/90 shadow-panel">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead class="bg-slate-50/80">
+                    <tr class="text-left text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+                        <th class="px-6 py-4">Recurso</th>
+                        <th class="px-6 py-4">Tipo</th>
+                        <th class="px-6 py-4">Duracion</th>
+                        <th class="px-6 py-4">Orden</th>
+                        <th class="px-6 py-4">Vigencia</th>
+                        <th class="px-6 py-4">Estado</th>
+                        <th class="px-6 py-4 text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                @foreach (var publicidad in Model)
+                {
+                    <tr class="hover:bg-slate-50/70">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="h-14 w-20 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                                    @if (publicidad.TipoRecurso == ElectronicaVallarta.Dominio.Enumeraciones.TipoRecursoPublicidad.Imagen)
+                                    {
+                                        <img src="@publicidad.UrlRecurso" alt="@publicidad.Titulo" class="h-full w-full object-cover" loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <video src="@publicidad.UrlRecurso" class="h-full w-full object-cover" muted preload="metadata"></video>
+                                    }
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="font-semibold text-tinta">@publicidad.Titulo</p>
+                                    <p class="mt-1 max-w-xs truncate text-xs text-slate-500">@publicidad.Descripcion</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-slate-600">@publicidad.TipoRecurso</td>
+                        <td class="px-6 py-4 text-slate-600">@publicidad.DuracionSegundos s</td>
+                        <td class="px-6 py-4 text-slate-600">@publicidad.Orden</td>
+                        <td class="px-6 py-4 text-xs leading-6 text-slate-600">
+                            <div>Inicio: @(publicidad.FechaInicio?.ToString("yyyy-MM-dd HH:mm") ?? "Sin limite")</div>
+                            <div>Fin: @(publicidad.FechaFin?.ToString("yyyy-MM-dd HH:mm") ?? "Sin limite")</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.15em] @(publicidad.EstaActivo ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-600")">@(publicidad.EstaActivo ? "Activo" : "Inactivo")</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex justify-end gap-2">
+                                <form asp-action="CambiarEstado" asp-route-id="@publicidad.Id" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 transition hover:border-mar hover:text-mar">@(publicidad.EstaActivo ? "Desactivar" : "Activar")</button>
+                                </form>
+                                <a asp-action="Editar" asp-route-id="@publicidad.Id" class="rounded-xl border border-slate-200 px-4 py-2 font-semibold text-slate-700 transition hover:border-mar hover:text-mar">Editar</a>
+                                <a asp-action="Eliminar" asp-route-id="@publicidad.Id" class="rounded-xl border border-rose-200 px-4 py-2 font-semibold text-rose-700 transition hover:bg-rose-50">Eliminar</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

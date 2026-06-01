@@ -21,12 +21,14 @@ public static class RegistroDependenciasExtensions
         services.AddScoped<IRepositorioTasaCambio, RepositorioTasaCambio>();
         services.AddScoped<IRepositorioConsultaAnalitica, RepositorioConsultaAnalitica>();
         services.AddScoped<IRepositorioUsuarioAdministrador, RepositorioUsuarioAdministrador>();
+        services.AddScoped<IRepositorioPublicidad, RepositorioPublicidad>();
         services.AddScoped<IServicioPais, ServicioPais>();
         services.AddScoped<IServicioSucursal, ServicioSucursal>();
         services.AddScoped<IServicioTasaCambio, ServicioTasaCambio>();
         services.AddScoped<IServicioCalculadora, ServicioCalculadora>();
         services.AddScoped<IServicioAnaliticaConsultas, ServicioAnaliticaConsultas>();
         services.AddScoped<IServicioAutenticacionAdministrador, ServicioAutenticacionAdministrador>();
+        services.AddScoped<IServicioPublicidad, ServicioPublicidad>();
         services.AddScoped<InicializadorDatos>();
 
         return services;

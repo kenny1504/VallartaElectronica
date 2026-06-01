@@ -1,0 +1,85 @@
+@model ElectronicaVallarta.ViewModels.FormularioPublicidadViewModel
+
+<form method="post" enctype="multipart/form-data" class="mx-auto max-w-5xl rounded-[2rem] border border-white/70 bg-white/90 p-8 shadow-panel">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="UrlRecursoActual" />
+
+    <div asp-validation-summary="ModelOnly" class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"></div>
+
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div class="space-y-5">
+            <div class="grid gap-5 md:grid-cols-2">
+                <div class="space-y-2">
+                    <label asp-for="Titulo" class="text-sm font-semibold text-slate-700"></label>
+                    <input asp-for="Titulo" class="campo-base" />
+                    <span asp-validation-for="Titulo" class="text-sm text-rose-600"></span>
+                </div>
+                <div class="space-y-2">
+                    <label asp-for="TipoRecurso" class="text-sm font-semibold text-slate-700"></label>
+                    <select asp-for="TipoRecurso" asp-items="Model.TiposRecurso" id="tipoRecursoPublicidad" class="campo-base">
+                        <option value="">Selecciona un tipo</option>
+                    </select>
+                    <span asp-validation-for="TipoRecurso" class="text-sm text-rose-600"></span>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label asp-for="Descripcion" class="text-sm font-semibold text-slate-700"></label>
+                <textarea asp-for="Descripcion" rows="3" class="campo-base"></textarea>
+                <span asp-validation-for="Descripcion" class="text-sm text-rose-600"></span>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-3">
+                <div class="space-y-2">
+                    <label asp-for="DuracionSegundos" class="text-sm font-semibold text-slate-700"></label>
+                    <input asp-for="DuracionSegundos" type="number" min="1" max="3600" class="campo-base" />
+                    <span asp-validation-for="DuracionSegundos" class="text-sm text-rose-600"></span>
+                </div>
+                <div class="space-y-2">
+                    <label asp-for="Orden" class="text-sm font-semibold text-slate-700"></label>
+                    <input asp-for="Orden" type="number" min="0" max="9999" class="campo-base" />
+                    <span asp-validation-for="Orden" class="text-sm text-rose-600"></span>
+                </div>
+                <label class="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-4">
+                    <input asp-for="EstaActivo" class="h-5 w-5 rounded border-slate-300 text-mar focus:ring-mar" />
+                    <span class="text-sm font-semibold text-slate-700">Mantener activa</span>
+                </label>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2">
+                <div class="space-y-2">
+                    <label asp-for="FechaInicio" class="text-sm font-semibold text-slate-700"></label>
+                    <input asp-for="FechaInicio" type="datetime-local" class="campo-base" />
+                    <span asp-validation-for="FechaInicio" class="text-sm text-rose-600"></span>
+                </div>
+                <div class="space-y-2">
+                    <label asp-for="FechaFin" class="text-sm font-semibold text-slate-700"></label>
+                    <input asp-for="FechaFin" type="datetime-local" class="campo-base" />
+                    <span asp-validation-for="FechaFin" class="text-sm text-rose-600"></span>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label asp-for="Archivo" class="text-sm font-semibold text-slate-700"></label>
+                <input asp-for="Archivo" id="archivoPublicidad" type="file" accept=".jpg,.jpeg,.png,.webp,.svg,.mp4,.webm,.mov,.m4v,.avi,.mpeg,.mpg,image/*,video/*" class="w-full rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-sm text-slate-700 outline-none transition file:mr-4 file:rounded-xl file:border-0 file:bg-tinta file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:border-mar" />
+                <span asp-validation-for="Archivo" class="text-sm text-rose-600"></span>
+                <p class="text-xs leading-5 text-slate-500">Imagenes jpg, jpeg, png, webp, svg. Videos mp4, webm, mov, m4v, avi, mpeg o mpg. Se recomienda usar WebP para imagenes.</p>
+            </div>
+        </div>
+
+        <aside class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Previsualizacion</p>
+            <div id="previewPublicidad" class="mt-4 flex min-h-64 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white"
+                 data-url-actual="@Model.UrlRecursoActual"
+                 data-tipo-actual="@Model.TipoRecurso">
+                <p class="px-5 text-center text-sm leading-6 text-slate-500">Selecciona un archivo para previsualizarlo.</p>
+            </div>
+        </aside>
+    </div>
+
+    <div class="mt-8 flex flex-wrap gap-3">
+        <button type="submit" class="boton-exito">Guardar</button>
+        <a asp-action="Index" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700">Volver</a>
+    </div>
+</form>
