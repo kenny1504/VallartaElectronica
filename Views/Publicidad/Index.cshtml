@@ -143,20 +143,24 @@
 
     <script id="datos-publicidad-inicial" type="application/json">@Html.Raw(publicidadesIniciales)</script>
     <script>
-        (() => {
-            const modulo = document.getElementById("modulo-publicidad");
-            const visor = document.getElementById("publicidad-visor");
-            const botonPantallaCompleta = document.getElementById("botonPantallaCompletaPublicidad");
-            const datosIniciales = document.getElementById("datos-publicidad-inicial");
-            const repetirVideos = modulo.dataset.loopVideos === "true";
-            let publicidades = [];
-            let indiceActual = 0;
-            let temporizador = null;
-            let recursoActual = null;
+        (function () {
+            var modulo = document.getElementById("modulo-publicidad");
+            var visor = document.getElementById("publicidad-visor");
+            var botonPantallaCompleta = document.getElementById("botonPantallaCompletaPublicidad");
+            var datosIniciales = document.getElementById("datos-publicidad-inicial");
+            var repetirVideos = modulo.getAttribute("data-loop-videos") === "true";
+            var publicidades = [];
+            var indiceActual = 0;
+            var temporizador = null;
+            var relojRevision = null;
+            var recursoActual = null;
+            var inicioRecursoActual = 0;
+            var duracionRecursoActualMs = 0;
+            var cargandoRecurso = false;
 
             try {
                 publicidades = JSON.parse(datosIniciales.textContent || "[]");
-            } catch {
+            } catch (error) {
                 publicidades = [];
             }
 
@@ -169,11 +173,13 @@
 
             function programarAvance(segundos) {
                 limpiarTemporizador();
-                temporizador = window.setTimeout(avanzar, Math.max(Number(segundos || 1), 1) * 1000);
+                inicioRecursoActual = Date.now();
+                duracionRecursoActualMs = Math.max(Number(segundos || 1), 1) * 1000;
+                temporizador = window.setTimeout(avanzar, duracionRecursoActualMs);
             }
 
             function avanzar() {
-                if (publicidades.length === 0) {
+                if (publicidades.length === 0 || cargandoRecurso) {
                     return;
                 }
 
@@ -186,15 +192,14 @@
                     return;
                 }
 
-                const siguiente = publicidades[(indiceActual + 1) % publicidades.length];
+                var siguiente = publicidades[(indiceActual + 1) % publicidades.length];
                 if (String(siguiente.tipoRecurso).toLowerCase() === "imagen") {
-                    const imagen = new Image();
-                    imagen.loading = "lazy";
+                    var imagen = new Image();
                     imagen.src = siguiente.urlRecurso;
                     return;
                 }
 
-                const video = document.createElement("video");
+                var video = document.createElement("video");
                 video.muted = true;
                 video.playsInline = true;
                 video.preload = "metadata";
@@ -202,20 +207,26 @@
             }
 
             function reemplazarRecurso(recursoNuevo) {
-                const recursoAnterior = recursoActual;
+                var recursoAnterior = recursoActual;
                 recursoActual = recursoNuevo;
                 visor.appendChild(recursoNuevo);
 
-                window.requestAnimationFrame(() => {
+                var activar = function () {
                     recursoNuevo.classList.add("publicidad-media--visible");
                     if (recursoAnterior) {
                         recursoAnterior.classList.remove("publicidad-media--visible");
                         recursoAnterior.classList.add("publicidad-media--saliente");
                     }
-                });
+                };
+
+                if (window.requestAnimationFrame) {
+                    window.requestAnimationFrame(activar);
+                } else {
+                    window.setTimeout(activar, 16);
+                }
 
                 if (recursoAnterior) {
-                    window.setTimeout(() => {
+                    window.setTimeout(function () {
                         if (recursoAnterior.tagName === "VIDEO") {
                             recursoAnterior.pause();
                             recursoAnterior.removeAttribute("src");
@@ -228,37 +239,64 @@
             }
 
             function manejarErrorCarga() {
-                programarAvance(1);
+                cargandoRecurso = false;
+                window.setTimeout(avanzar, 1000);
             }
 
             function mostrarImagen(publicidad) {
-                const imagen = document.createElement("img");
+                cargandoRecurso = true;
+                var imagen = document.createElement("img");
+                var cargada = false;
                 imagen.alt = publicidad.titulo || "Publicidad";
                 imagen.decoding = "async";
                 imagen.loading = "eager";
                 imagen.className = "publicidad-media";
-                imagen.addEventListener("load", () => {
+
+                function completarCarga() {
+                    if (cargada) {
+                        return;
+                    }
+
+                    cargada = true;
+                    cargandoRecurso = false;
                     reemplazarRecurso(imagen);
                     programarAvance(publicidad.duracionSegundos);
                     precargarSiguiente();
-                }, { once: true });
-                imagen.addEventListener("error", manejarErrorCarga, { once: true });
+                }
+
+                imagen.onload = completarCarga;
+                imagen.onerror = manejarErrorCarga;
                 imagen.src = publicidad.urlRecurso;
+
+                if (imagen.complete && imagen.naturalWidth > 0) {
+                    window.setTimeout(completarCarga, 0);
+                }
             }
 
             function mostrarVideo(publicidad) {
-                const video = document.createElement("video");
+                cargandoRecurso = true;
+                var video = document.createElement("video");
+                var cargado = false;
                 video.className = "publicidad-media";
                 video.muted = true;
                 video.autoplay = true;
                 video.playsInline = true;
                 video.preload = "auto";
                 video.loop = repetirVideos && publicidades.length === 1;
-                video.addEventListener("loadeddata", () => {
+
+                function completarCargaVideo() {
+                    if (cargado) {
+                        return;
+                    }
+
+                    cargado = true;
+                    cargandoRecurso = false;
                     reemplazarRecurso(video);
-                    const reproduccion = video.play();
-                    if (reproduccion?.catch) {
-                        reproduccion.catch(() => programarAvance(publicidad.duracionSegundos));
+                    var reproduccion = video.play();
+                    if (reproduccion && typeof reproduccion.catch === "function") {
+                        reproduccion.catch(function () {
+                            programarAvance(publicidad.duracionSegundos);
+                        });
                     }
 
                     if (!video.loop) {
@@ -266,16 +304,25 @@
                     }
 
                     precargarSiguiente();
-                }, { once: true });
-                if (!video.loop) {
-                    video.addEventListener("ended", avanzar, { once: true });
                 }
-                video.addEventListener("error", manejarErrorCarga, { once: true });
+
+                video.onloadeddata = completarCargaVideo;
+                video.oncanplay = completarCargaVideo;
+                if (!video.loop) {
+                    video.onended = avanzar;
+                }
+                video.onerror = manejarErrorCarga;
                 video.src = publicidad.urlRecurso;
+
+                window.setTimeout(function () {
+                    if (video.readyState >= 2) {
+                        completarCargaVideo();
+                    }
+                }, 1500);
             }
 
             function mostrarPublicidadActual() {
-                const publicidad = publicidades[indiceActual];
+                var publicidad = publicidades[indiceActual];
                 if (!publicidad) {
                     return;
                 }
@@ -288,20 +335,63 @@
                 mostrarImagen(publicidad);
             }
 
-            botonPantallaCompleta?.addEventListener("click", async () => {
-                try {
-                    if (document.fullscreenElement) {
-                        await document.exitFullscreen();
+            function iniciarRelojRevision() {
+                if (relojRevision !== null) {
+                    return;
+                }
+
+                relojRevision = window.setInterval(function () {
+                    if (publicidades.length < 2 || cargandoRecurso || duracionRecursoActualMs <= 0) {
                         return;
                     }
 
-                    await modulo.requestFullscreen();
-                } catch {
-                    botonPantallaCompleta.style.display = "none";
+                    if (Date.now() - inicioRecursoActual >= duracionRecursoActualMs + 750) {
+                        avanzar();
+                    }
+                }, 1000);
+            }
+
+            if (botonPantallaCompleta) {
+                botonPantallaCompleta.addEventListener("click", function () {
+                    try {
+                        var elementoPantallaCompleta = document.fullscreenElement
+                            || document.webkitFullscreenElement
+                            || document.msFullscreenElement;
+
+                        if (elementoPantallaCompleta) {
+                            if (document.exitFullscreen) {
+                                document.exitFullscreen();
+                            } else if (document.webkitExitFullscreen) {
+                                document.webkitExitFullscreen();
+                            } else if (document.msExitFullscreen) {
+                                document.msExitFullscreen();
+                            }
+                            return;
+                        }
+
+                        if (modulo.requestFullscreen) {
+                            modulo.requestFullscreen();
+                        } else if (modulo.webkitRequestFullscreen) {
+                            modulo.webkitRequestFullscreen();
+                        } else if (modulo.msRequestFullscreen) {
+                            modulo.msRequestFullscreen();
+                        }
+                    } catch (error) {
+                        botonPantallaCompleta.style.display = "none";
+                    }
+                });
+            }
+
+            if (publicidades.length > 0) {
+                iniciarRelojRevision();
+                mostrarPublicidadActual();
+            }
+
+            document.addEventListener("visibilitychange", function () {
+                if (!document.hidden && publicidades.length > 1 && duracionRecursoActualMs > 0) {
+                    programarAvance(Math.max(1, Math.ceil((duracionRecursoActualMs - (Date.now() - inicioRecursoActual)) / 1000)));
                 }
             });
-
-            mostrarPublicidadActual();
         })();
     </script>
 </body>
