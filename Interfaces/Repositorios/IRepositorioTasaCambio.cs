@@ -44,6 +44,7 @@ public interface IRepositorioTasaCambio
     /// basada en los parámetros proporcionados, o <see langword="null"/> si no existe una tasa aplicable.
     /// </returns>
     Task<TasaCambioRango?> ObtenerTasaAplicableAsync(int paisId, int sucursalId, DateTime fechaTasa, decimal montoUsd);
+    Task<TasaCambioRango?> ObtenerTasaVigentePorRangoAsync(int paisId, int sucursalId, decimal montoDesdeUsd, decimal? montoHastaUsd);
     Task<DatosCalculoCotizacionDto?> ObtenerDatosCalculoAsync(int paisId, int sucursalId, DateTime fechaTasa, decimal montoUsd);
 
     /// <summary>

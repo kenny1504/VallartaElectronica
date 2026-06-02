@@ -593,6 +593,174 @@ function inicializarFormularioTasaCambio() {
     cargarSucursalesPorPais();
 }
 
+function inicializarActualizacionPublicidadSvg() {
+    const boton = document.getElementById("btnActualizarPublicidadSvg");
+    if (!boton) {
+        return;
+    }
+
+    const texto = boton.querySelector("[data-texto]");
+    const loader = boton.querySelector("[data-loader]");
+    const url = boton.dataset.url;
+    const urlPublicidadSvg = "/uploads/publicidad/tasas.svg";
+
+    function obtenerTokenAntifalsificacion() {
+        return document.querySelector("input[name='__RequestVerificationToken']")?.value || "";
+    }
+
+    function establecerCargando(estaCargando) {
+        boton.disabled = estaCargando;
+        loader?.classList.toggle("hidden", !estaCargando);
+        if (texto) {
+            texto.textContent = estaCargando ? "Actualizando..." : "Actualizar Publicidad SVG";
+        }
+    }
+
+    function obtenerClasesBotonPrincipal() {
+        return "inline-flex items-center justify-center rounded-xl bg-tinta px-5 py-3 text-sm font-bold text-white transition hover:bg-azulMarca";
+    }
+
+    function obtenerClasesBotonSecundario() {
+        return "inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50";
+    }
+
+    async function mostrarAlerta(opciones) {
+        if (window.Swal?.fire) {
+            return window.Swal.fire(opciones);
+        }
+
+        if (opciones.showCancelButton) {
+            return { isConfirmed: window.confirm(opciones.text || opciones.title || "Confirmar accion") };
+        }
+
+        window.alert(opciones.text || opciones.title || "");
+        return { isConfirmed: true };
+    }
+
+    async function mostrarVistaPreviaPublicidadSvg() {
+        const urlVistaPrevia = `${urlPublicidadSvg}?v=${new Date().getTime()}`;
+
+        if (!window.Swal?.fire) {
+            window.open(urlVistaPrevia, "_blank");
+            return;
+        }
+
+        const resultadoVistaPrevia = await window.Swal.fire({
+            title: "Vista previa",
+            width: "90%",
+            html: `
+                <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50" style="height:min(700px, 75vh);">
+                    <div id="loaderVistaPreviaPublicidadSvg" class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white text-sm font-semibold text-slate-600">
+                        <span class="h-8 w-8 animate-spin rounded-full border-4 border-azulMarca/20 border-t-azulMarca"></span>
+                        <span>Cargando vista previa...</span>
+                    </div>
+                    <img
+                        id="imagenVistaPreviaPublicidadSvg"
+                        src="${urlVistaPrevia}"
+                        alt="Vista previa de publicidad SVG"
+                        class="h-full w-full object-contain opacity-0 transition"
+                        loading="eager" />
+                </div>
+            `,
+            showCloseButton: true,
+            showDenyButton: true,
+            confirmButtonText: "Cerrar",
+            denyButtonText: "Abrir en nueva pestaña",
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: obtenerClasesBotonPrincipal(),
+                denyButton: "inline-flex items-center justify-center rounded-xl bg-azulMarca px-5 py-3 text-sm font-bold text-white transition hover:bg-tinta"
+            },
+            didOpen: () => {
+                const imagen = document.getElementById("imagenVistaPreviaPublicidadSvg");
+                const loaderPreview = document.getElementById("loaderVistaPreviaPublicidadSvg");
+                imagen?.addEventListener("load", () => {
+                    loaderPreview?.classList.add("hidden");
+                    imagen.classList.remove("opacity-0");
+                }, { once: true });
+                imagen?.addEventListener("error", () => {
+                    if (loaderPreview) {
+                        loaderPreview.innerHTML = "<span>No se pudo cargar la vista previa. Usa Abrir en nueva pestana.</span>";
+                    }
+                }, { once: true });
+            }
+        });
+
+        if (resultadoVistaPrevia.isDenied) {
+            window.open(`${urlPublicidadSvg}?v=${new Date().getTime()}`, "_blank");
+        }
+    }
+
+    boton.addEventListener("click", async () => {
+        const confirmacion = await mostrarAlerta({
+            title: "Actualizar publicidad",
+            text: "Se reemplazaran las tasas del SVG con las tasas vigentes mas recientes.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Actualizar",
+            cancelButtonText: "Cancelar",
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: obtenerClasesBotonPrincipal(),
+                cancelButton: obtenerClasesBotonSecundario()
+            }
+        });
+
+        if (!confirmacion.isConfirmed || !url) {
+            return;
+        }
+
+        establecerCargando(true);
+        if (window.Swal?.fire) {
+            window.Swal.fire({
+                title: "Actualizando publicidad",
+                text: "Estamos regenerando el SVG con las tasas vigentes.",
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => window.Swal.showLoading()
+            });
+        }
+
+        try {
+            const respuesta = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "RequestVerificationToken": obtenerTokenAntifalsificacion()
+                }
+            });
+
+            const resultado = await respuesta.json();
+            await mostrarAlerta({
+                title: resultado.success ? "Listo" : "No se pudo actualizar",
+                text: resultado.message || "No se pudo completar el proceso.",
+                icon: resultado.success ? "success" : "error",
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: obtenerClasesBotonPrincipal()
+                }
+            });
+
+            if (resultado.success) {
+                await mostrarVistaPreviaPublicidadSvg();
+            }
+        } catch {
+            await mostrarAlerta({
+                title: "No se pudo actualizar",
+                text: "Ocurrio un error al comunicarse con el servidor.",
+                icon: "error",
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: obtenerClasesBotonPrincipal()
+                }
+            });
+        } finally {
+            establecerCargando(false);
+        }
+    });
+}
+
 function inicializarToasts() {
     const toasts = document.querySelectorAll("[data-toast]");
     if (toasts.length === 0) {
@@ -902,6 +1070,7 @@ function inicializarPublicidadPublica() {
 document.addEventListener("DOMContentLoaded", () => {
     inicializarCalculadoraPublica();
     inicializarFormularioTasaCambio();
+    inicializarActualizacionPublicidadSvg();
     inicializarFormularioPublicidad();
     inicializarPublicidadPublica();
     inicializarToasts();

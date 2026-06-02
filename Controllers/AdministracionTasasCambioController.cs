@@ -12,7 +12,8 @@ namespace ElectronicaVallarta.Controllers;
 public class AdministracionTasasCambioController(
     IServicioTasaCambio servicioTasaCambio,
     IServicioPais servicioPais,
-    IServicioSucursal servicioSucursal) : Controller
+    IServicioSucursal servicioSucursal,
+    IServicioActualizadorPublicidadSvg servicioActualizadorPublicidadSvg) : Controller
 {
     public async Task<IActionResult> Index(string? fechaFiltro, int? paisIdFiltro, bool mostrarTodos = false)
     {
@@ -109,6 +110,14 @@ public class AdministracionTasasCambioController(
         }
 
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ActualizarPublicidadSvg()
+    {
+        var resultado = await servicioActualizadorPublicidadSvg.ActualizarAsync();
+        return Json(new { success = resultado.Success, message = resultado.Message });
     }
 
     private async Task<FormularioTasaCambioViewModel> ConstruirFormularioAsync(FormularioTasaCambioViewModel modelo)

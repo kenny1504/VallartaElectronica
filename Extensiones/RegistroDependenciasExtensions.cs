@@ -25,6 +25,7 @@ public static class RegistroDependenciasExtensions
         services.AddScoped<IServicioPais, ServicioPais>();
         services.AddScoped<IServicioSucursal, ServicioSucursal>();
         services.AddScoped<IServicioTasaCambio, ServicioTasaCambio>();
+        services.AddScoped<IServicioActualizadorPublicidadSvg, ServicioActualizadorPublicidadSvg>();
         services.AddScoped<IServicioCalculadora, ServicioCalculadora>();
         services.AddScoped<IServicioAnaliticaConsultas, ServicioAnaliticaConsultas>();
         services.AddScoped<IServicioAutenticacionAdministrador, ServicioAutenticacionAdministrador>();
