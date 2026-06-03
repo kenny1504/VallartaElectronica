@@ -22,9 +22,10 @@ public class ServicioActualizadorPublicidadSvg(
         new("rate_mas1000_deposito", 1, 3, 1001, 2999)
     ];
 
-    public async Task<ResultadoActualizacionPublicidadSvg> ActualizarAsync()
+    public async Task<ResultadoActualizacionPublicidadSvg> ActualizarAsync(DateTime fechaTasa)
     {
         var rutaSvg = Path.Combine(entorno.WebRootPath, RutaRelativaSvg);
+        var fecha = fechaTasa.Date;
 
         try
         {
@@ -42,14 +43,16 @@ public class ServicioActualizadorPublicidadSvg(
                 var tasa = await repositorioTasaCambio.ObtenerTasaVigentePorRangoAsync(
                     configuracion.PaisId,
                     configuracion.SucursalId,
+                    fecha,
                     configuracion.MontoDesdeUsd,
                     configuracion.MontoHastaUsd);
 
                 if (tasa is null)
                 {
                     logger.LogWarning(
-                        "No se encontro tasa vigente para el nodo SVG {NodoId}. PaisId: {PaisId}, SucursalId: {SucursalId}, MontoDesdeUsd: {MontoDesdeUsd}, MontoHastaUsd: {MontoHastaUsd}.",
+                        "No se encontro tasa vigente para el nodo SVG {NodoId}. FechaTasa: {FechaTasa}, PaisId: {PaisId}, SucursalId: {SucursalId}, MontoDesdeUsd: {MontoDesdeUsd}, MontoHastaUsd: {MontoHastaUsd}.",
                         configuracion.NodoId,
+                        fecha,
                         configuracion.PaisId,
                         configuracion.SucursalId,
                         configuracion.MontoDesdeUsd,
@@ -70,11 +73,11 @@ public class ServicioActualizadorPublicidadSvg(
 
             if (tasasActualizadas == 0)
             {
-                return new ResultadoActualizacionPublicidadSvg(false, "No se encontro ninguna tasa vigente para actualizar la publicidad.");
+                return new ResultadoActualizacionPublicidadSvg(false, $"No se encontro ninguna tasa vigente para actualizar la publicidad del {fecha:MM/dd/yyyy}.");
             }
 
             documento.Save(rutaSvg, SaveOptions.DisableFormatting);
-            logger.LogInformation("Publicidad SVG actualizada correctamente. Tasas actualizadas: {TasasActualizadas}.", tasasActualizadas);
+            logger.LogInformation("Publicidad SVG actualizada correctamente. FechaTasa: {FechaTasa}. Tasas actualizadas: {TasasActualizadas}.", fecha, tasasActualizadas);
 
             return new ResultadoActualizacionPublicidadSvg(true, "Publicidad actualizada correctamente.");
         }

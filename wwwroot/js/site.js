@@ -608,6 +608,10 @@ function inicializarActualizacionPublicidadSvg() {
         return document.querySelector("input[name='__RequestVerificationToken']")?.value || "";
     }
 
+    function obtenerFechaTasaSeleccionada() {
+        return document.getElementById("fechaFiltro")?.value || boton.dataset.fechaTasa || "";
+    }
+
     function establecerCargando(estaCargando) {
         boton.disabled = estaCargando;
         loader?.classList.toggle("hidden", !estaCargando);
@@ -710,11 +714,25 @@ function inicializarActualizacionPublicidadSvg() {
             return;
         }
 
+        const fechaTasa = obtenerFechaTasaSeleccionada();
+        if (!fechaTasa) {
+            await mostrarAlerta({
+                title: "Fecha requerida",
+                text: "Selecciona una fecha para actualizar la publicidad SVG.",
+                icon: "warning",
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: obtenerClasesBotonPrincipal()
+                }
+            });
+            return;
+        }
+
         establecerCargando(true);
         if (window.Swal?.fire) {
             window.Swal.fire({
                 title: "Actualizando publicidad",
-                text: "Estamos regenerando el SVG con las tasas vigentes.",
+                text: `Estamos regenerando el SVG con las tasas del ${fechaTasa}.`,
                 allowOutsideClick: false,
                 allowEscapeKey: false,
                 showConfirmButton: false,
@@ -725,9 +743,11 @@ function inicializarActualizacionPublicidadSvg() {
         try {
             const respuesta = await fetch(url, {
                 method: "POST",
+                body: new URLSearchParams({ fechaTasa }),
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
-                    "RequestVerificationToken": obtenerTokenAntifalsificacion()
+                    "RequestVerificationToken": obtenerTokenAntifalsificacion(),
+                    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
                 }
             });
 

@@ -93,16 +93,17 @@ public class RepositorioTasaCambio(ContextoAplicacion contexto) : IRepositorioTa
             .FirstOrDefaultAsync();
     }
 
-    public Task<TasaCambioRango?> ObtenerTasaVigentePorRangoAsync(int paisId, int sucursalId, decimal montoDesdeUsd, decimal? montoHastaUsd)
+    public Task<TasaCambioRango?> ObtenerTasaVigentePorRangoAsync(int paisId, int sucursalId, DateTime fechaTasa, decimal montoDesdeUsd, decimal? montoHastaUsd)
     {
+        var fecha = fechaTasa.Date;
         return contexto.TasasCambioRango.AsNoTracking()
             .Where(x => x.EstaActivo &&
                         x.PaisId == paisId &&
                         x.SucursalId == sucursalId &&
+                        x.FechaTasa == fecha &&
                         x.MontoDesdeUsd == montoDesdeUsd &&
                         x.MontoHastaUsd == montoHastaUsd)
-            .OrderByDescending(x => x.FechaTasa)
-            .ThenByDescending(x => x.Id)
+            .OrderByDescending(x => x.Id)
             .FirstOrDefaultAsync();
     }
 

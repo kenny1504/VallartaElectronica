@@ -20,6 +20,7 @@
             <button id="btnActualizarPublicidadSvg"
                     type="button"
                     data-url="@Url.Action("ActualizarPublicidadSvg", "AdministracionTasasCambio")"
+                    data-fecha-tasa="@(Model.FechaFiltro?.ToString("yyyy-MM-dd"))"
                     class="inline-flex items-center justify-center gap-2 rounded-2xl bg-azulMarca px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white shadow-panel transition hover:-translate-y-1 hover:bg-tinta focus:ring-4 focus:ring-azulMarca/20 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-70">
                 <span data-texto>Actualizar Publicidad SVG</span>
                 <span data-loader class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/50 border-t-white"></span>

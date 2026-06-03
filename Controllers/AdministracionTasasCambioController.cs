@@ -114,9 +114,14 @@ public class AdministracionTasasCambioController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ActualizarPublicidadSvg()
+    public async Task<IActionResult> ActualizarPublicidadSvg(string fechaTasa)
     {
-        var resultado = await servicioActualizadorPublicidadSvg.ActualizarAsync();
+        if (!DateTime.TryParseExact(fechaTasa, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fechaParseada))
+        {
+            return Json(new { success = false, message = "La fecha seleccionada no es valida." });
+        }
+
+        var resultado = await servicioActualizadorPublicidadSvg.ActualizarAsync(fechaParseada.Date);
         return Json(new { success = resultado.Success, message = resultado.Message });
     }
 
