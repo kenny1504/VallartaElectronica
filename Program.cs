@@ -61,7 +61,20 @@ using (var alcance = app.Services.CreateScope())
 
 app.UseRouting();
 app.UseStatusCodePagesWithReExecute("/error/{0}");
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = contexto =>
+    {
+        if (!contexto.Context.Request.Path.StartsWithSegments("/uploads/publicidad"))
+        {
+            return;
+        }
+
+        contexto.Context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+        contexto.Context.Response.Headers.Pragma = "no-cache";
+        contexto.Context.Response.Headers.Expires = "0";
+    }
+});
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapStaticAssets();

@@ -9,6 +9,7 @@ public class ApiPublicidadController(IServicioPublicidad servicioPublicidad) : C
 {
     [HttpGet("activa")]
     [HttpGet("activam")]
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public async Task<IActionResult> ObtenerActiva()
     {
         var publicidades = await servicioPublicidad.ObtenerPublicidadesActivasAsync(DateTime.Now);
