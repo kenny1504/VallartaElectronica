@@ -102,7 +102,6 @@ public class RepositorioTasaCambio(ContextoAplicacion contexto) : IRepositorioTa
                         x.MontoDesdeUsd == montoDesdeUsd &&
                         x.MontoHastaUsd == montoHastaUsd)
             .OrderByDescending(x => x.FechaTasa)
-            .ThenByDescending(x => x.FechaActualizacion ?? x.FechaCreacion)
             .ThenByDescending(x => x.Id)
             .FirstOrDefaultAsync();
     }
