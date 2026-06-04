@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using System.Xml.Linq;
 using ElectronicaVallarta.Interfaces.Repositorios;
 using ElectronicaVallarta.Interfaces.Servicios;
@@ -14,12 +15,12 @@ public class ServicioActualizadorPublicidadSvg(
 
     private static readonly IReadOnlyCollection<ConfiguracionTasaSvg> Configuraciones =
     [
-        new("rate_menos1000_elektra", 1, 2, 1, 1000),
-        new("rate_mas1000_elektra", 1, 2, 1001, 2999),
-        new("rate_menos1000_bancoppel", 1, 1, 1, 1000),
-        new("rate_mas1000_bancoppel", 1, 1, 1001, 2999),
-        new("rate_menos1000_deposito", 1, 3, 1, 1000),
-        new("rate_mas1000_deposito", 1, 3, 1001, 2999)
+        new("rate_menos1000_elektra", "Mexico", ["Elektra", "Banco Azteca"], 1, 1000),
+        new("rate_mas1000_elektra", "Mexico", ["Elektra", "Banco Azteca"], 1001, 2999),
+        new("rate_menos1000_bancoppel", "Mexico", ["BanCoppel"], 1, 1000),
+        new("rate_mas1000_bancoppel", "Mexico", ["BanCoppel"], 1001, 2999),
+        new("rate_menos1000_deposito", "Mexico", ["Deposito a cuenta", "Depósito a cuenta"], 1, 1000),
+        new("rate_mas1000_deposito", "Mexico", ["Deposito a cuenta", "Depósito a cuenta"], 1001, 2999)
     ];
 
     public async Task<ResultadoActualizacionPublicidadSvg> ActualizarAsync(DateTime fechaTasa)
@@ -48,26 +49,23 @@ public class ServicioActualizadorPublicidadSvg(
             var documento = XDocument.Load(rutaSvg, LoadOptions.PreserveWhitespace);
             var tasasActualizadas = 0;
             var valoresEsperados = new Dictionary<string, string>();
+            var tasasFecha = await repositorioTasaCambio.ObtenerTodosAsync(fecha);
 
             foreach (var configuracion in Configuraciones)
             {
-                var tasa = await repositorioTasaCambio.ObtenerTasaVigentePorRangoAsync(
-                    configuracion.PaisId,
-                    configuracion.SucursalId,
-                    fecha,
-                    configuracion.MontoDesdeUsd,
-                    configuracion.MontoHastaUsd);
+                var tasa = ObtenerTasaConfigurada(tasasFecha, configuracion);
 
                 if (tasa is null)
                 {
                     logger.LogWarning(
-                        "No se encontro tasa vigente para el nodo SVG {NodoId}. FechaTasa: {FechaTasa}, PaisId: {PaisId}, SucursalId: {SucursalId}, MontoDesdeUsd: {MontoDesdeUsd}, MontoHastaUsd: {MontoHastaUsd}.",
+                        "No se encontro tasa vigente para el nodo SVG {NodoId}. FechaTasa: {FechaTasa}, Pais: {Pais}, SucursalesEsperadas: {SucursalesEsperadas}, MontoDesdeUsd: {MontoDesdeUsd}, MontoHastaUsd: {MontoHastaUsd}. TasasDisponibles: {TasasDisponibles}.",
                         configuracion.NodoId,
                         fecha,
-                        configuracion.PaisId,
-                        configuracion.SucursalId,
+                        configuracion.PaisNombre,
+                        string.Join(", ", configuracion.SucursalesEsperadas),
                         configuracion.MontoDesdeUsd,
-                        configuracion.MontoHastaUsd);
+                        configuracion.MontoHastaUsd,
+                        ConstruirResumenTasas(tasasFecha));
                     continue;
                 }
 
@@ -82,6 +80,18 @@ public class ServicioActualizadorPublicidadSvg(
                 nodo.Value = valorTasa;
                 valoresEsperados[configuracion.NodoId] = valorTasa;
                 tasasActualizadas++;
+
+                logger.LogInformation(
+                    "Nodo SVG {NodoId} actualizado con TasaCambioRangoId {TasaCambioRangoId}. PaisId: {PaisId}. Pais: {Pais}. SucursalId: {SucursalId}. Sucursal: {Sucursal}. Rango: {MontoDesdeUsd}-{MontoHastaUsd}. Valor: {Valor}.",
+                    configuracion.NodoId,
+                    tasa.Id,
+                    tasa.PaisId,
+                    tasa.Pais?.Nombre,
+                    tasa.SucursalId,
+                    tasa.Sucursal?.Nombre,
+                    tasa.MontoDesdeUsd,
+                    tasa.MontoHastaUsd,
+                    valorTasa);
             }
 
             if (tasasActualizadas == 0)
@@ -115,6 +125,56 @@ public class ServicioActualizadorPublicidadSvg(
             logger.LogError(ex, "No se pudo actualizar la publicidad SVG en {RutaSvg}.", rutaSvg);
             return new ResultadoActualizacionPublicidadSvg(false, "No se pudo actualizar la publicidad SVG. Intentalo nuevamente.");
         }
+    }
+
+    private static ElectronicaVallarta.Dominio.Entidades.TasaCambioRango? ObtenerTasaConfigurada(
+        IEnumerable<ElectronicaVallarta.Dominio.Entidades.TasaCambioRango> tasas,
+        ConfiguracionTasaSvg configuracion)
+    {
+        var paisEsperado = NormalizarTexto(configuracion.PaisNombre);
+        var sucursalesEsperadas = configuracion.SucursalesEsperadas.Select(NormalizarTexto).ToList();
+
+        return tasas
+            .Where(x => x.EstaActivo &&
+                        string.Equals(NormalizarTexto(x.Pais?.Nombre), paisEsperado, StringComparison.Ordinal) &&
+                        x.MontoDesdeUsd == configuracion.MontoDesdeUsd &&
+                        x.MontoHastaUsd == configuracion.MontoHastaUsd &&
+                        SucursalCoincide(NormalizarTexto(x.Sucursal?.Nombre), sucursalesEsperadas))
+            .OrderByDescending(x => x.Id)
+            .FirstOrDefault();
+    }
+
+    private static bool SucursalCoincide(string nombreSucursal, IReadOnlyCollection<string> sucursalesEsperadas)
+    {
+        return sucursalesEsperadas.Any(sucursalEsperada =>
+            string.Equals(nombreSucursal, sucursalEsperada, StringComparison.Ordinal) ||
+            nombreSucursal.Contains(sucursalEsperada, StringComparison.Ordinal));
+    }
+
+    private static string NormalizarTexto(string? valor)
+    {
+        if (string.IsNullOrWhiteSpace(valor))
+        {
+            return string.Empty;
+        }
+
+        var textoNormalizado = valor.Trim().Normalize(NormalizationForm.FormD);
+        var constructor = new StringBuilder(textoNormalizado.Length);
+        foreach (var caracter in textoNormalizado)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(caracter) != UnicodeCategory.NonSpacingMark)
+            {
+                constructor.Append(char.ToUpperInvariant(caracter));
+            }
+        }
+
+        return constructor.ToString().Normalize(NormalizationForm.FormC);
+    }
+
+    private static string ConstruirResumenTasas(IEnumerable<ElectronicaVallarta.Dominio.Entidades.TasaCambioRango> tasas)
+    {
+        return string.Join(" | ", tasas.Select(x =>
+            $"Id={x.Id}; Pais={x.Pais?.Nombre}; Sucursal={x.Sucursal?.Nombre}; Rango={x.MontoDesdeUsd}-{x.MontoHastaUsd}; Tasa={x.TasaCambio.ToString("0.00", CultureInfo.InvariantCulture)}"));
     }
 
     private static void GuardarSvg(string rutaSvg, XDocument documento)
@@ -152,6 +212,6 @@ public class ServicioActualizadorPublicidadSvg(
         return new ResultadoVerificacionSvg(true, "OK");
     }
 
-    private sealed record ConfiguracionTasaSvg(string NodoId, int PaisId, int SucursalId, decimal MontoDesdeUsd, decimal? MontoHastaUsd);
+    private sealed record ConfiguracionTasaSvg(string NodoId, string PaisNombre, IReadOnlyCollection<string> SucursalesEsperadas, decimal MontoDesdeUsd, decimal? MontoHastaUsd);
     private sealed record ResultadoVerificacionSvg(bool EsValida, string Detalle);
 }

@@ -1,4 +1,6 @@
 using System;
+using ElectronicaVallarta.Datos;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,6 +8,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ElectronicaVallarta.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(ContextoAplicacion))]
+    [Migration("20260604153000_AgregarLogsAplicacionEnBaseDatos")]
     public partial class AgregarLogsAplicacionEnBaseDatos : Migration
     {
         /// <inheritdoc />
