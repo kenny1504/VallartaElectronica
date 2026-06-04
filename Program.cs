@@ -5,6 +5,7 @@ using ElectronicaVallarta.Infraestructura.Logging;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 const long TamanoMaximoCargaBytes = 100 * 1024 * 1024;
@@ -63,6 +64,46 @@ using (var alcance = app.Services.CreateScope())
 
 app.UseRouting();
 app.UseStatusCodePagesWithReExecute("/error/{0}");
+app.Use(async (contexto, siguiente) =>
+{
+    if (!contexto.Request.Path.Equals("/uploads/publicidad/tasas.svg", StringComparison.OrdinalIgnoreCase))
+    {
+        await siguiente();
+        return;
+    }
+
+    var ambiente = contexto.RequestServices.GetRequiredService<IWebHostEnvironment>();
+    var logger = contexto.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("PublicidadSvgEndpoint");
+    var rutaSvg = Path.Combine(ambiente.WebRootPath, "uploads", "publicidad", "tasas.svg");
+
+    contexto.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate, max-age=0";
+    contexto.Response.Headers.Pragma = "no-cache";
+    contexto.Response.Headers.Expires = "0";
+    contexto.Response.Headers.ETag = $"\"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}\"";
+    contexto.Response.Headers["X-Tasas-Svg-Source"] = rutaSvg;
+
+    if (!File.Exists(rutaSvg))
+    {
+        logger.LogError("Solicitud publica de tasas.svg fallida. No se encontro el archivo en {RutaSvg}.", rutaSvg);
+        contexto.Response.StatusCode = StatusCodes.Status404NotFound;
+        await contexto.Response.WriteAsync("No se encontro el archivo tasas.svg.");
+        return;
+    }
+
+    var informacionArchivo = new FileInfo(rutaSvg);
+    contexto.Response.Headers["X-Tasas-Svg-LastWriteUtc"] = informacionArchivo.LastWriteTimeUtc.ToString("O");
+    contexto.Response.Headers["X-Tasas-Svg-Length"] = informacionArchivo.Length.ToString(CultureInfo.InvariantCulture);
+    contexto.Response.ContentType = "image/svg+xml";
+    contexto.Response.ContentLength = informacionArchivo.Length;
+
+    logger.LogInformation(
+        "Sirviendo tasas.svg desde endpoint dinamico. RutaSvg: {RutaSvg}. UltimaEscrituraUtc: {UltimaEscrituraUtc}. TamanoBytes: {TamanoBytes}.",
+        rutaSvg,
+        informacionArchivo.LastWriteTimeUtc,
+        informacionArchivo.Length);
+
+    await contexto.Response.SendFileAsync(rutaSvg);
+});
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = contexto =>
