@@ -13,6 +13,8 @@ services:
       - "8080:8080"
     volumes:
       - dataprotection_keys:/root/.aspnet/DataProtection-Keys
+      - publicidad_uploads:/app/wwwroot/uploads
     restart: unless-stopped
 volumes:
   dataprotection_keys:
+  publicidad_uploads:

@@ -29,6 +29,16 @@ public class ServicioActualizadorPublicidadSvg(
 
         try
         {
+            logger.LogInformation(
+                "Iniciando actualizacion de publicidad SVG. WebRootPath: {WebRootPath}. RutaSvg: {RutaSvg}. DirectorioExiste: {DirectorioExiste}. ArchivoExiste: {ArchivoExiste}. AtributosArchivo: {AtributosArchivo}. TamanoBytes: {TamanoBytes}. UsuarioProceso: {UsuarioProceso}.",
+                entorno.WebRootPath,
+                rutaSvg,
+                Directory.Exists(Path.GetDirectoryName(rutaSvg)),
+                File.Exists(rutaSvg),
+                File.Exists(rutaSvg) ? File.GetAttributes(rutaSvg).ToString() : "No existe",
+                File.Exists(rutaSvg) ? new FileInfo(rutaSvg).Length : 0,
+                Environment.UserName);
+
             if (!File.Exists(rutaSvg))
             {
                 logger.LogError("No se encontro el archivo SVG de publicidad en {RutaSvg}.", rutaSvg);
@@ -37,6 +47,7 @@ public class ServicioActualizadorPublicidadSvg(
 
             var documento = XDocument.Load(rutaSvg, LoadOptions.PreserveWhitespace);
             var tasasActualizadas = 0;
+            var valoresEsperados = new Dictionary<string, string>();
 
             foreach (var configuracion in Configuraciones)
             {
@@ -67,7 +78,9 @@ public class ServicioActualizadorPublicidadSvg(
                     continue;
                 }
 
-                nodo.Value = tasa.TasaCambio.ToString("0.00", CultureInfo.InvariantCulture);
+                var valorTasa = tasa.TasaCambio.ToString("0.00", CultureInfo.InvariantCulture);
+                nodo.Value = valorTasa;
+                valoresEsperados[configuracion.NodoId] = valorTasa;
                 tasasActualizadas++;
             }
 
@@ -76,8 +89,24 @@ public class ServicioActualizadorPublicidadSvg(
                 return new ResultadoActualizacionPublicidadSvg(false, $"No se encontro ninguna tasa vigente para actualizar la publicidad del {fecha:MM/dd/yyyy}.");
             }
 
-            documento.Save(rutaSvg, SaveOptions.DisableFormatting);
-            logger.LogInformation("Publicidad SVG actualizada correctamente. FechaTasa: {FechaTasa}. Tasas actualizadas: {TasasActualizadas}.", fecha, tasasActualizadas);
+            GuardarSvg(rutaSvg, documento);
+            var verificacion = VerificarSvgGuardado(rutaSvg, valoresEsperados);
+            if (!verificacion.EsValida)
+            {
+                logger.LogError(
+                    "El SVG fue procesado pero no se pudo confirmar la escritura en disco. RutaSvg: {RutaSvg}. Detalle: {Detalle}.",
+                    rutaSvg,
+                    verificacion.Detalle);
+                return new ResultadoActualizacionPublicidadSvg(false, "El servidor no pudo confirmar que el archivo SVG quedara actualizado. Revisa permisos de escritura sobre wwwroot/uploads/publicidad/tasas.svg.");
+            }
+
+            var fechaActualizacion = File.GetLastWriteTimeUtc(rutaSvg);
+            logger.LogInformation(
+                "Publicidad SVG actualizada y verificada correctamente. RutaSvg: {RutaSvg}. FechaTasa: {FechaTasa}. Tasas actualizadas: {TasasActualizadas}. UltimaEscrituraUtc: {UltimaEscrituraUtc}.",
+                rutaSvg,
+                fecha,
+                tasasActualizadas,
+                fechaActualizacion);
 
             return new ResultadoActualizacionPublicidadSvg(true, "Publicidad actualizada correctamente.");
         }
@@ -88,5 +117,41 @@ public class ServicioActualizadorPublicidadSvg(
         }
     }
 
+    private static void GuardarSvg(string rutaSvg, XDocument documento)
+    {
+        var atributos = File.GetAttributes(rutaSvg);
+        if (atributos.HasFlag(FileAttributes.ReadOnly))
+        {
+            File.SetAttributes(rutaSvg, atributos & ~FileAttributes.ReadOnly);
+        }
+
+        using var flujo = new FileStream(rutaSvg, FileMode.Create, FileAccess.Write, FileShare.None, 64 * 1024);
+        documento.Save(flujo, SaveOptions.DisableFormatting);
+        flujo.Flush(true);
+    }
+
+    private static ResultadoVerificacionSvg VerificarSvgGuardado(string rutaSvg, IReadOnlyDictionary<string, string> valoresEsperados)
+    {
+        using var flujo = new FileStream(rutaSvg, FileMode.Open, FileAccess.Read, FileShare.Read);
+        var documento = XDocument.Load(flujo, LoadOptions.PreserveWhitespace);
+
+        foreach (var valorEsperado in valoresEsperados)
+        {
+            var nodo = documento.Descendants().FirstOrDefault(x => string.Equals((string?)x.Attribute("id"), valorEsperado.Key, StringComparison.Ordinal));
+            if (nodo is null)
+            {
+                return new ResultadoVerificacionSvg(false, $"No se encontro el nodo {valorEsperado.Key} despues de guardar.");
+            }
+
+            if (!string.Equals(nodo.Value, valorEsperado.Value, StringComparison.Ordinal))
+            {
+                return new ResultadoVerificacionSvg(false, $"El nodo {valorEsperado.Key} quedo con valor {nodo.Value} y se esperaba {valorEsperado.Value}.");
+            }
+        }
+
+        return new ResultadoVerificacionSvg(true, "OK");
+    }
+
     private sealed record ConfiguracionTasaSvg(string NodoId, int PaisId, int SucursalId, decimal MontoDesdeUsd, decimal? MontoHastaUsd);
+    private sealed record ResultadoVerificacionSvg(bool EsValida, string Detalle);
 }

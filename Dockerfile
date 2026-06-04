@@ -38,5 +38,13 @@ ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 EXPOSE 8080
 
 COPY --from=compilacion /app/publicado ./
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 
-ENTRYPOINT ["dotnet", "ElectronicaVallarta.dll"]
+RUN mkdir -p /app/wwwroot/uploads/publicidad \
+    && mkdir -p /app/seed/uploads/publicidad \
+    && if [ -f /app/wwwroot/uploads/publicidad/tasas.svg ]; then cp /app/wwwroot/uploads/publicidad/tasas.svg /app/seed/uploads/publicidad/tasas.svg; fi \
+    && sed -i 's/\r$//' /app/docker-entrypoint.sh \
+    && chmod -R 775 /app/wwwroot/uploads \
+    && chmod +x /app/docker-entrypoint.sh
+
+ENTRYPOINT ["/app/docker-entrypoint.sh"]

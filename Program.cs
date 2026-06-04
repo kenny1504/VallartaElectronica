@@ -1,6 +1,7 @@
 using ElectronicaVallarta.Datos;
 using ElectronicaVallarta.Datos.Inicializacion;
 using ElectronicaVallarta.Extensiones;
+using ElectronicaVallarta.Infraestructura.Logging;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +45,7 @@ builder.Services.AddDbContext<ContextoAplicacion>(options =>
             builder.Configuration.GetConnectionString("ConexionSqlServer"),
             sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
 builder.Services.AgregarDependenciasAplicacion();
+builder.Services.AgregarLoggingBaseDatos();
 
 var app = builder.Build();
 

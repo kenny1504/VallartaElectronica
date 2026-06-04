@@ -120,6 +120,71 @@ namespace ElectronicaVallarta.Migrations
                     b.ToTable("Publicidades", (string)null);
                 });
 
+            modelBuilder.Entity("ElectronicaVallarta.Dominio.Entidades.RegistroLogAplicacion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Ambiente")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("Categoria")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("DetalleExcepcion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("FechaUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Mensaje")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("MetodoHttp")
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<string>("Nivel")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Propiedades")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Ruta")
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("TraceIdentifier")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Usuario")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Categoria");
+
+                    b.HasIndex("FechaUtc");
+
+                    b.HasIndex("TraceIdentifier");
+
+                    b.HasIndex("Nivel", "FechaUtc");
+
+                    b.ToTable("RegistrosLogsAplicacion", "Auditoria");
+                });
+
             modelBuilder.Entity("ElectronicaVallarta.Dominio.Entidades.RegistroConsultaAnalitica", b =>
                 {
                     b.Property<int>("Id")
