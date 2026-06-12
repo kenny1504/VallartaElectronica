@@ -12,27 +12,35 @@ public class ServicioActualizadorPublicidadSvg(
     IWebHostEnvironment entorno,
     ILogger<ServicioActualizadorPublicidadSvg> logger) : IServicioActualizadorPublicidadSvg
 {
-    private static readonly IReadOnlyCollection<string> RutasRelativasSvg =
+    private static readonly IReadOnlyCollection<ConfiguracionTasaSvg> ConfiguracionesMexico =
     [
-        "uploads/publicidad/tasas.svg",
-        "uploads/publicidad/tasas-post.svg"
+        new("rate_menos1000_elektra", 1, "Mexico", 2, ["Elektra", "Banco Azteca"], 1, 1000),
+        new("rate_mas1000_elektra", 1, "Mexico", 2, ["Elektra", "Banco Azteca"], 1001, 2999),
+        new("rate_menos1000_bancoppel", 1, "Mexico", 1, ["BanCoppel"], 1, 1000),
+        new("rate_mas1000_bancoppel", 1, "Mexico", 1, ["BanCoppel"], 1001, 2999),
+        new("rate_menos1000_deposito", 1, "Mexico", 3, ["Deposito a cuenta", "Deposito"], 1, 1000),
+        new("rate_mas1000_deposito", 1, "Mexico", 3, ["Deposito a cuenta", "Deposito"], 1001, 2999)
     ];
 
-    private static readonly IReadOnlyCollection<ConfiguracionTasaSvg> Configuraciones =
+    private static readonly IReadOnlyCollection<ConfiguracionTasaSvg> ConfiguracionesGuatemala =
     [
-        new("rate_menos1000_elektra", "Mexico", ["Elektra", "Banco Azteca"], 1, 1000),
-        new("rate_mas1000_elektra", "Mexico", ["Elektra", "Banco Azteca"], 1001, 2999),
-        new("rate_menos1000_bancoppel", "Mexico", ["BanCoppel"], 1, 1000),
-        new("rate_mas1000_bancoppel", "Mexico", ["BanCoppel"], 1001, 2999),
-        new("rate_menos1000_deposito", "Mexico", ["Deposito a cuenta", "Deposito"], 1, 1000),
-        new("rate_mas1000_deposito", "Mexico", ["Deposito a cuenta", "Deposito"], 1001, 2999)
+        new("rate_guatemala_industrial", 2, "Guatemala", 4, ["Industrial"], null, null),
+        new("rate_guatemala_banrural", 2, "Guatemala", 8, ["Banrural"], null, null),
+        new("rate_guatemala_gyt", 2, "Guatemala", 10, ["G y T", "GyT", "G&T"], null, null)
+    ];
+
+    private static readonly IReadOnlyCollection<ArchivoSvgPublicidad> ArchivosSvg =
+    [
+        new("uploads/publicidad/tasas.svg", ConfiguracionesMexico),
+        new("uploads/publicidad/tasas-post.svg", ConfiguracionesMexico),
+        new("uploads/publicidad/tasa-guate.svg", ConfiguracionesGuatemala)
     ];
 
     public async Task<ResultadoActualizacionPublicidadSvg> ActualizarAsync(DateTime fechaTasa)
     {
         var fecha = fechaTasa.Date;
-        var archivos = RutasRelativasSvg
-            .Select(rutaRelativa => new ArchivoSvgPublicidad(rutaRelativa, Path.Combine(entorno.WebRootPath, rutaRelativa)))
+        var archivos = ArchivosSvg
+            .Select(archivo => archivo with { RutaFisica = Path.Combine(entorno.WebRootPath, archivo.RutaRelativa) })
             .ToList();
 
         try
@@ -49,28 +57,32 @@ public class ServicioActualizadorPublicidadSvg(
             }
 
             var tasasFecha = await repositorioTasaCambio.ObtenerTodosAsync(fecha);
-            var valoresEsperados = ObtenerValoresEsperados(tasasFecha, fecha);
-            if (valoresEsperados.Count == 0)
-            {
-                return new ResultadoActualizacionPublicidadSvg(false, $"No se encontro ninguna tasa vigente para actualizar la publicidad del {fecha:MM/dd/yyyy}.");
-            }
+            var totalTasasActualizadas = 0;
 
             foreach (var archivo in archivos)
             {
+                var valoresEsperados = ObtenerValoresEsperados(tasasFecha, archivo.Configuraciones, fecha, archivo.RutaRelativa);
+                if (valoresEsperados.Count == 0)
+                {
+                    return new ResultadoActualizacionPublicidadSvg(false, $"No se encontro ninguna tasa vigente para actualizar {archivo.RutaRelativa} del {fecha:MM/dd/yyyy}.");
+                }
+
                 var resultadoArchivo = ActualizarArchivoSvg(archivo, valoresEsperados);
                 if (!resultadoArchivo.EsValido)
                 {
                     return new ResultadoActualizacionPublicidadSvg(false, resultadoArchivo.Mensaje);
                 }
+
+                totalTasasActualizadas += valoresEsperados.Count;
             }
 
             logger.LogInformation(
-                "Archivos SVG de publicidad actualizados y verificados correctamente. FechaTasa: {FechaTasa}. Archivos: {Archivos}. TasasActualizadasPorArchivo: {TasasActualizadas}.",
+                "Archivos SVG de publicidad actualizados y verificados correctamente. FechaTasa: {FechaTasa}. Archivos: {Archivos}. TotalTasasActualizadas: {TotalTasasActualizadas}.",
                 fecha,
                 string.Join(", ", archivos.Select(x => x.RutaFisica)),
-                valoresEsperados.Count);
+                totalTasasActualizadas);
 
-            return new ResultadoActualizacionPublicidadSvg(true, "Publicidad e historia actualizadas correctamente.");
+            return new ResultadoActualizacionPublicidadSvg(true, "Publicidad, historia y Guatemala actualizadas correctamente.");
         }
         catch (Exception ex)
         {
@@ -99,22 +111,29 @@ public class ServicioActualizadorPublicidadSvg(
         }
     }
 
-    private Dictionary<string, string> ObtenerValoresEsperados(IEnumerable<TasaCambioRango> tasasFecha, DateTime fecha)
+    private Dictionary<string, string> ObtenerValoresEsperados(
+        IEnumerable<TasaCambioRango> tasasFecha,
+        IEnumerable<ConfiguracionTasaSvg> configuraciones,
+        DateTime fecha,
+        string rutaRelativa)
     {
         var tasas = tasasFecha.ToList();
         var valoresEsperados = new Dictionary<string, string>();
 
-        foreach (var configuracion in Configuraciones)
+        foreach (var configuracion in configuraciones)
         {
             var tasa = ObtenerTasaConfigurada(tasas, configuracion);
 
             if (tasa is null)
             {
                 logger.LogWarning(
-                    "No se encontro tasa vigente para el nodo SVG {NodoId}. FechaTasa: {FechaTasa}, Pais: {Pais}, SucursalesEsperadas: {SucursalesEsperadas}, MontoDesdeUsd: {MontoDesdeUsd}, MontoHastaUsd: {MontoHastaUsd}. TasasDisponibles: {TasasDisponibles}.",
+                    "No se encontro tasa vigente para el nodo SVG {NodoId}. Archivo: {Archivo}. FechaTasa: {FechaTasa}, PaisId: {PaisId}, Pais: {Pais}, SucursalId: {SucursalId}, SucursalesEsperadas: {SucursalesEsperadas}, MontoDesdeUsd: {MontoDesdeUsd}, MontoHastaUsd: {MontoHastaUsd}. TasasDisponibles: {TasasDisponibles}.",
                     configuracion.NodoId,
+                    rutaRelativa,
                     fecha,
+                    configuracion.PaisId,
                     configuracion.PaisNombre,
+                    configuracion.SucursalId,
                     string.Join(", ", configuracion.SucursalesEsperadas),
                     configuracion.MontoDesdeUsd,
                     configuracion.MontoHastaUsd,
@@ -126,9 +145,10 @@ public class ServicioActualizadorPublicidadSvg(
             valoresEsperados[configuracion.NodoId] = valorTasa;
 
             logger.LogInformation(
-                "Nodo SVG {NodoId} usara TasaCambioRangoId {TasaCambioRangoId}. PaisId: {PaisId}. Pais: {Pais}. SucursalId: {SucursalId}. Sucursal: {Sucursal}. Rango: {MontoDesdeUsd}-{MontoHastaUsd}. Valor: {Valor}.",
+                "Nodo SVG {NodoId} usara TasaCambioRangoId {TasaCambioRangoId}. Archivo: {Archivo}. PaisId: {PaisId}. Pais: {Pais}. SucursalId: {SucursalId}. Sucursal: {Sucursal}. Rango: {MontoDesdeUsd}-{MontoHastaUsd}. Valor: {Valor}.",
                 configuracion.NodoId,
                 tasa.Id,
+                rutaRelativa,
                 tasa.PaisId,
                 tasa.Pais?.Nombre,
                 tasa.SucursalId,
@@ -197,19 +217,48 @@ public class ServicioActualizadorPublicidadSvg(
 
         return tasas
             .Where(x => x.EstaActivo &&
-                        string.Equals(NormalizarTexto(x.Pais?.Nombre), paisEsperado, StringComparison.Ordinal) &&
-                        x.MontoDesdeUsd == configuracion.MontoDesdeUsd &&
-                        x.MontoHastaUsd == configuracion.MontoHastaUsd &&
-                        SucursalCoincide(NormalizarTexto(x.Sucursal?.Nombre), sucursalesEsperadas))
+                        PaisCoincide(x, configuracion, paisEsperado) &&
+                        SucursalCoincide(x, configuracion, sucursalesEsperadas) &&
+                        RangoCoincide(x, configuracion))
             .OrderByDescending(x => x.Id)
             .FirstOrDefault();
     }
 
-    private static bool SucursalCoincide(string nombreSucursal, IReadOnlyCollection<string> sucursalesEsperadas)
+    private static bool PaisCoincide(TasaCambioRango tasa, ConfiguracionTasaSvg configuracion, string paisEsperado)
     {
+        if (configuracion.PaisId.HasValue)
+        {
+            return tasa.PaisId == configuracion.PaisId.Value;
+        }
+
+        return string.Equals(NormalizarTexto(tasa.Pais?.Nombre), paisEsperado, StringComparison.Ordinal);
+    }
+
+    private static bool SucursalCoincide(
+        TasaCambioRango tasa,
+        ConfiguracionTasaSvg configuracion,
+        IReadOnlyCollection<string> sucursalesEsperadas)
+    {
+        if (configuracion.SucursalId.HasValue)
+        {
+            return tasa.SucursalId == configuracion.SucursalId.Value;
+        }
+
+        var nombreSucursal = NormalizarTexto(tasa.Sucursal?.Nombre);
         return sucursalesEsperadas.Any(sucursalEsperada =>
             string.Equals(nombreSucursal, sucursalEsperada, StringComparison.Ordinal) ||
             nombreSucursal.Contains(sucursalEsperada, StringComparison.Ordinal));
+    }
+
+    private static bool RangoCoincide(TasaCambioRango tasa, ConfiguracionTasaSvg configuracion)
+    {
+        if (!configuracion.MontoDesdeUsd.HasValue && !configuracion.MontoHastaUsd.HasValue)
+        {
+            return true;
+        }
+
+        return tasa.MontoDesdeUsd == configuracion.MontoDesdeUsd &&
+            tasa.MontoHastaUsd == configuracion.MontoHastaUsd;
     }
 
     private static string NormalizarTexto(string? valor)
@@ -273,8 +322,19 @@ public class ServicioActualizadorPublicidadSvg(
         return new ResultadoVerificacionSvg(true, "OK");
     }
 
-    private sealed record ConfiguracionTasaSvg(string NodoId, string PaisNombre, IReadOnlyCollection<string> SucursalesEsperadas, decimal MontoDesdeUsd, decimal? MontoHastaUsd);
-    private sealed record ArchivoSvgPublicidad(string RutaRelativa, string RutaFisica);
+    private sealed record ConfiguracionTasaSvg(
+        string NodoId,
+        int? PaisId,
+        string PaisNombre,
+        int? SucursalId,
+        IReadOnlyCollection<string> SucursalesEsperadas,
+        decimal? MontoDesdeUsd,
+        decimal? MontoHastaUsd);
+
+    private sealed record ArchivoSvgPublicidad(
+        string RutaRelativa,
+        IReadOnlyCollection<ConfiguracionTasaSvg> Configuraciones,
+        string RutaFisica = "");
     private sealed record ResultadoActualizacionArchivoSvg(bool EsValido, string Mensaje);
     private sealed record ResultadoVerificacionSvg(bool EsValida, string Detalle);
 }

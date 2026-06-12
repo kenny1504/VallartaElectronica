@@ -603,8 +603,9 @@ function inicializarActualizacionPublicidadSvg() {
     const loader = boton.querySelector("[data-loader]");
     const url = boton.dataset.url;
     const archivosPublicidadSvg = [
-        { titulo: "Publicidad", url: "/uploads/publicidad/tasas.svg" },
-        { titulo: "Historia", url: "/uploads/publicidad/tasas-post.svg", permiteAbrir: false, permiteDescargaPng: true, nombreDescarga: "tasas-post.png" }
+        { titulo: "Publicidad Mexico", url: "/uploads/publicidad/tasas.svg" },
+        { titulo: "Historia", url: "/uploads/publicidad/tasas-post.svg", permiteAbrir: false, permiteDescargaPng: true, nombreDescarga: "tasas-post.png" },
+        { titulo: "Publicidad Guatemala", url: "/uploads/publicidad/tasa-guate.svg" }
     ];
 
     function obtenerTokenAntifalsificacion() {
@@ -699,7 +700,7 @@ function inicializarActualizacionPublicidadSvg() {
             title: "Vista previa",
             width: "90%",
             html: `
-                <div class="grid gap-4 md:grid-cols-2">
+                <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                     ${vistasPrevias.map((archivo, indice) => `
                         <section class="min-w-0">
                             <h3 class="mb-2 text-center text-sm font-black uppercase tracking-[0.18em] text-slate-600">${archivo.titulo}</h3>
