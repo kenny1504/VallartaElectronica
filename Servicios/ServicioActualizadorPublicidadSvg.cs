@@ -29,10 +29,21 @@ public class ServicioActualizadorPublicidadSvg(
         new("rate_guatemala_gyt", 2, "Guatemala", 10, ["G y T", "GyT", "G&T"], null, null)
     ];
 
+    private static readonly IReadOnlyDictionary<string, AtributosTextoSvg> AtributosTextoHistoria =
+        new Dictionary<string, AtributosTextoSvg>(StringComparer.Ordinal)
+        {
+            ["rate_menos1000_elektra"] = new("626", "56"),
+            ["rate_mas1000_elektra"] = new("626", "56"),
+            ["rate_menos1000_bancoppel"] = new("765", "56"),
+            ["rate_mas1000_bancoppel"] = new("765", "56"),
+            ["rate_menos1000_deposito"] = new("905", "56"),
+            ["rate_mas1000_deposito"] = new("905", "56")
+        };
+
     private static readonly IReadOnlyCollection<ArchivoSvgPublicidad> ArchivosSvg =
     [
         new("uploads/publicidad/tasas.svg", ConfiguracionesMexico),
-        new("uploads/publicidad/tasas-post.svg", ConfiguracionesMexico),
+        new("uploads/publicidad/tasas-post.svg", ConfiguracionesMexico, AtributosTextoHistoria),
         new("uploads/publicidad/tasa-guate.svg", ConfiguracionesGuatemala)
     ];
 
@@ -178,6 +189,7 @@ public class ServicioActualizadorPublicidadSvg(
                 continue;
             }
 
+            AplicarAtributosTexto(archivo, valorEsperado.Key, nodo);
             nodo.Value = valorEsperado.Value;
             tasasActualizadas++;
         }
@@ -206,6 +218,23 @@ public class ServicioActualizadorPublicidadSvg(
             fechaActualizacion);
 
         return new ResultadoActualizacionArchivoSvg(true, "OK");
+    }
+
+    private static void AplicarAtributosTexto(ArchivoSvgPublicidad archivo, string nodoId, XElement nodo)
+    {
+        if (archivo.AtributosTextoPorNodo is null ||
+            !archivo.AtributosTextoPorNodo.TryGetValue(nodoId, out var atributos))
+        {
+            return;
+        }
+
+        nodo.SetAttributeValue("y", atributos.Y);
+        nodo.SetAttributeValue("font-family", "Arial, Helvetica, sans-serif");
+        nodo.SetAttributeValue("font-size", atributos.FontSize);
+        nodo.SetAttributeValue("font-weight", "900");
+        nodo.SetAttributeValue("fill", "#33475b");
+        nodo.SetAttributeValue("text-anchor", "middle");
+        nodo.SetAttributeValue("dominant-baseline", "middle");
     }
 
     private static TasaCambioRango? ObtenerTasaConfigurada(
@@ -334,7 +363,10 @@ public class ServicioActualizadorPublicidadSvg(
     private sealed record ArchivoSvgPublicidad(
         string RutaRelativa,
         IReadOnlyCollection<ConfiguracionTasaSvg> Configuraciones,
+        IReadOnlyDictionary<string, AtributosTextoSvg>? AtributosTextoPorNodo = null,
         string RutaFisica = "");
+
+    private sealed record AtributosTextoSvg(string Y, string FontSize);
     private sealed record ResultadoActualizacionArchivoSvg(bool EsValido, string Mensaje);
     private sealed record ResultadoVerificacionSvg(bool EsValida, string Detalle);
 }
