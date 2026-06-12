@@ -48,11 +48,35 @@
         </div>
     </form>
 
+    <form id="formCopiarTasasCambio" asp-action="Copiar" method="post" class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="FechaOrigen" value="@(Model.FechaFiltro?.ToString("yyyy-MM-dd"))" />
+        <input type="hidden" name="PaisIdFiltro" value="@Model.PaisIdFiltro" />
+        <input id="copiarTodasTasasCambio" type="hidden" name="CopiarTodas" value="false" />
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div class="space-y-1">
+                <p class="text-xs font-bold uppercase tracking-[0.25em] text-mar">Copiar tasas</p>
+                <p class="text-sm leading-6 text-slate-600">Copia las tasas seleccionadas a una nueva fecha.</p>
+            </div>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                <div class="space-y-2">
+                    <label for="fechaDestinoCopiarTasas" class="text-sm font-semibold text-slate-700">Fecha destino</label>
+                    <input id="fechaDestinoCopiarTasas" name="FechaDestino" type="date" required class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-mar focus:ring-4 focus:ring-mar/10" />
+                </div>
+                <button type="submit" data-modo-copia="seleccionadas" class="rounded-2xl border border-azulMarca/20 bg-azulClaroMarca px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-azulMarca transition hover:bg-azulMarca hover:text-white">Copiar seleccionadas</button>
+                <button type="submit" data-modo-copia="todas" class="rounded-2xl bg-tinta px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:bg-azulMarca">Copiar todas</button>
+            </div>
+        </div>
+    </form>
+
     <div class="overflow-hidden rounded-[2rem] border border-white/70 bg-white/90 shadow-panel">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-50/80">
                     <tr class="text-left text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+                        <th class="px-6 py-4">
+                            <input id="seleccionarTodasTasasCambio" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-azulMarca focus:ring-azulMarca" aria-label="Seleccionar todas las tasas" />
+                        </th>
                         <th class="px-6 py-4">Fecha</th>
                         <th class="px-6 py-4">Pais</th>
                         <th class="px-6 py-4">Sucursal</th>
@@ -66,6 +90,9 @@
                 @foreach (var tasa in Model.Tasas)
                 {
                     <tr class="hover:bg-slate-50/70">
+                        <td class="px-6 py-4">
+                            <input form="formCopiarTasasCambio" type="checkbox" name="TasasSeleccionadas" value="@tasa.Id" class="seleccion-tasa-cambio h-4 w-4 rounded border-slate-300 text-azulMarca focus:ring-azulMarca" aria-label="Seleccionar tasa @tasa.Id" />
+                        </td>
                         <td class="px-6 py-4 text-slate-600">@tasa.FechaTasa.ToString("MM/dd/yyyy")</td>
                         <td class="px-6 py-4 text-slate-700">@tasa.NombrePais</td>
                         <td class="px-6 py-4 font-semibold text-tinta">@tasa.NombreSucursal</td>
@@ -85,7 +112,7 @@
                 @if (!Model.Tasas.Any())
                 {
                     <tr>
-                        <td colspan="7" class="px-6 py-8 text-center text-sm text-slate-500">
+                        <td colspan="8" class="px-6 py-8 text-center text-sm text-slate-500">
                             @(Model.MostrarTodos
                                 ? "No se encontraron tasas registradas para los filtros seleccionados."
                                 : "No se encontraron tasas para la fecha y pais seleccionados.")

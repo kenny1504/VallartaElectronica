@@ -21,6 +21,40 @@ public class ServicioTasaCambio(
         await repositorioTasaCambio.AgregarAsync(tasaCambioRango);
     }
 
+    public async Task<int> CopiarAsync(DateTime? fechaOrigen, DateTime fechaDestino, bool copiarTodas, IReadOnlyCollection<int> tasasSeleccionadas, int? paisIdFiltro = null)
+    {
+        var tasasOrigen = await ObtenerTasasOrigenAsync(fechaOrigen, copiarTodas, tasasSeleccionadas, paisIdFiltro);
+        if (tasasOrigen.Count == 0)
+        {
+            throw new InvalidOperationException("No se encontraron tasas para copiar.");
+        }
+
+        var fechaDestinoNormalizada = fechaDestino.Date;
+        var fechaCreacion = DateTime.UtcNow;
+        var tasasCopiadas = tasasOrigen.Select(x => new TasaCambioRango
+        {
+            PaisId = x.PaisId,
+            SucursalId = x.SucursalId,
+            MontoDesdeUsd = x.MontoDesdeUsd,
+            MontoHastaUsd = x.MontoHastaUsd,
+            TasaCambio = x.TasaCambio,
+            FechaTasa = fechaDestinoNormalizada,
+            EstaActivo = x.EstaActivo,
+            FechaCreacion = fechaCreacion
+        }).ToList();
+
+        ValidarTraslapesEnLote(tasasCopiadas);
+
+        foreach (var tasa in tasasCopiadas)
+        {
+            var tasaExistente = await repositorioTasaCambio.ObtenerPorRangoAsync(tasa.PaisId, tasa.SucursalId, tasa.FechaTasa, tasa.MontoDesdeUsd, tasa.MontoHastaUsd);
+            await ValidarModeloAsync(tasa, tasaExistente?.Id);
+        }
+
+        await repositorioTasaCambio.GuardarCopiaAsync(tasasCopiadas);
+        return tasasCopiadas.Count;
+    }
+
     public async Task ActualizarAsync(TasaCambioRango tasaCambioRango)
     {
         var tasaActual = await repositorioTasaCambio.ObtenerPorIdAsync(tasaCambioRango.Id, false)
@@ -45,6 +79,47 @@ public class ServicioTasaCambio(
                    ?? throw new InvalidOperationException("La tasa solicitada no existe.");
 
         await repositorioTasaCambio.EliminarAsync(tasa);
+    }
+
+    private async Task<IReadOnlyCollection<TasaCambioRango>> ObtenerTasasOrigenAsync(DateTime? fechaOrigen, bool copiarTodas, IReadOnlyCollection<int> tasasSeleccionadas, int? paisIdFiltro)
+    {
+        if (copiarTodas)
+        {
+            if (!fechaOrigen.HasValue)
+            {
+                throw new InvalidOperationException("Selecciona una fecha origen para copiar todas las tasas.");
+            }
+
+            var tasasPorFecha = await repositorioTasaCambio.ObtenerTodosAsync(fechaOrigen.Value.Date);
+            return paisIdFiltro.HasValue
+                ? tasasPorFecha.Where(x => x.PaisId == paisIdFiltro.Value).ToList()
+                : tasasPorFecha;
+        }
+
+        var ids = tasasSeleccionadas.Where(x => x > 0).Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            throw new InvalidOperationException("Selecciona al menos una tasa para copiar.");
+        }
+
+        return await repositorioTasaCambio.ObtenerPorIdsAsync(ids);
+    }
+
+    private static void ValidarTraslapesEnLote(IReadOnlyCollection<TasaCambioRango> tasasCambioRango)
+    {
+        foreach (var grupo in tasasCambioRango.GroupBy(x => new { x.PaisId, x.SucursalId, FechaTasa = x.FechaTasa.Date }))
+        {
+            var tasas = grupo.OrderBy(x => x.MontoDesdeUsd).ToList();
+            for (var indice = 1; indice < tasas.Count; indice++)
+            {
+                var tasaAnterior = tasas[indice - 1];
+                var tasaActual = tasas[indice];
+                if (tasaActual.MontoDesdeUsd <= (tasaAnterior.MontoHastaUsd ?? decimal.MaxValue))
+                {
+                    throw new InvalidOperationException("La seleccion contiene rangos traslapados para el mismo pais, sucursal y fecha destino.");
+                }
+            }
+        }
     }
 
     private async Task ValidarModeloAsync(TasaCambioRango tasaCambioRango, int? idExcluir = null)

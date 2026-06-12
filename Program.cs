@@ -66,7 +66,17 @@ app.UseRouting();
 app.UseStatusCodePagesWithReExecute("/error/{0}");
 app.Use(async (contexto, siguiente) =>
 {
-    if (!contexto.Request.Path.Equals("/uploads/publicidad/tasas.svg", StringComparison.OrdinalIgnoreCase))
+    var archivosSvgTasas = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "tasas.svg",
+        "tasas-post.svg"
+    };
+    var nombreArchivoSvg = Path.GetFileName(contexto.Request.Path.Value) ?? string.Empty;
+    var esSvgTasas = contexto.Request.Path.StartsWithSegments("/uploads/publicidad") &&
+        !string.IsNullOrWhiteSpace(nombreArchivoSvg) &&
+        archivosSvgTasas.Contains(nombreArchivoSvg);
+
+    if (!esSvgTasas)
     {
         await siguiente();
         return;
@@ -74,19 +84,20 @@ app.Use(async (contexto, siguiente) =>
 
     var ambiente = contexto.RequestServices.GetRequiredService<IWebHostEnvironment>();
     var logger = contexto.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("PublicidadSvgEndpoint");
-    var rutaSvg = Path.Combine(ambiente.WebRootPath, "uploads", "publicidad", "tasas.svg");
+    var rutaSvg = Path.Combine(ambiente.WebRootPath, "uploads", "publicidad", nombreArchivoSvg);
 
     contexto.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate, max-age=0";
     contexto.Response.Headers.Pragma = "no-cache";
     contexto.Response.Headers.Expires = "0";
     contexto.Response.Headers.ETag = $"\"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}\"";
+    contexto.Response.Headers["X-Tasas-Svg-File"] = nombreArchivoSvg;
     contexto.Response.Headers["X-Tasas-Svg-Source"] = rutaSvg;
 
     if (!File.Exists(rutaSvg))
     {
-        logger.LogError("Solicitud publica de tasas.svg fallida. No se encontro el archivo en {RutaSvg}.", rutaSvg);
+        logger.LogError("Solicitud publica de {NombreArchivoSvg} fallida. No se encontro el archivo en {RutaSvg}.", nombreArchivoSvg, rutaSvg);
         contexto.Response.StatusCode = StatusCodes.Status404NotFound;
-        await contexto.Response.WriteAsync("No se encontro el archivo tasas.svg.");
+        await contexto.Response.WriteAsync($"No se encontro el archivo {nombreArchivoSvg}.");
         return;
     }
 
@@ -97,7 +108,8 @@ app.Use(async (contexto, siguiente) =>
     contexto.Response.ContentLength = informacionArchivo.Length;
 
     logger.LogInformation(
-        "Sirviendo tasas.svg desde endpoint dinamico. RutaSvg: {RutaSvg}. UltimaEscrituraUtc: {UltimaEscrituraUtc}. TamanoBytes: {TamanoBytes}.",
+        "Sirviendo {NombreArchivoSvg} desde endpoint dinamico. RutaSvg: {RutaSvg}. UltimaEscrituraUtc: {UltimaEscrituraUtc}. TamanoBytes: {TamanoBytes}.",
+        nombreArchivoSvg,
         rutaSvg,
         informacionArchivo.LastWriteTimeUtc,
         informacionArchivo.Length);

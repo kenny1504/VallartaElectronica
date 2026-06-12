@@ -79,6 +79,17 @@ public class RepositorioTasaCambio(ContextoAplicacion contexto) : IRepositorioTa
         return await consulta.FirstOrDefaultAsync(x => x.Id == id);
     }
 
+    public async Task<IReadOnlyCollection<TasaCambioRango>> ObtenerPorIdsAsync(IReadOnlyCollection<int> ids)
+    {
+        return await contexto.TasasCambioRango.AsNoTracking()
+            .Where(x => ids.Contains(x.Id))
+            .OrderBy(x => x.FechaTasa)
+            .ThenBy(x => x.Pais!.Nombre)
+            .ThenBy(x => x.Sucursal!.Nombre)
+            .ThenBy(x => x.MontoDesdeUsd)
+            .ToListAsync();
+    }
+
     public async Task<TasaCambioRango?> ObtenerTasaAplicableAsync(int paisId, int sucursalId, DateTime fechaTasa, decimal montoUsd)
     {
         var fecha = fechaTasa.Date;
@@ -90,6 +101,19 @@ public class RepositorioTasaCambio(ContextoAplicacion contexto) : IRepositorioTa
                         montoUsd >= x.MontoDesdeUsd &&
                         (!x.MontoHastaUsd.HasValue || montoUsd <= x.MontoHastaUsd.Value))
             .OrderByDescending(x => x.MontoDesdeUsd)
+            .FirstOrDefaultAsync();
+    }
+
+    public Task<TasaCambioRango?> ObtenerPorRangoAsync(int paisId, int sucursalId, DateTime fechaTasa, decimal montoDesdeUsd, decimal? montoHastaUsd)
+    {
+        var fecha = fechaTasa.Date;
+        return contexto.TasasCambioRango.AsNoTracking()
+            .Where(x => x.PaisId == paisId &&
+                        x.SucursalId == sucursalId &&
+                        x.FechaTasa == fecha &&
+                        x.MontoDesdeUsd == montoDesdeUsd &&
+                        x.MontoHastaUsd == montoHastaUsd)
+            .OrderByDescending(x => x.Id)
             .FirstOrDefaultAsync();
     }
 
@@ -156,6 +180,45 @@ public class RepositorioTasaCambio(ContextoAplicacion contexto) : IRepositorioTa
     public async Task AgregarAsync(TasaCambioRango tasaCambioRango)
     {
         await contexto.TasasCambioRango.AddAsync(tasaCambioRango);
+        await contexto.SaveChangesAsync();
+    }
+
+    public async Task AgregarRangoAsync(IReadOnlyCollection<TasaCambioRango> tasasCambioRango)
+    {
+        await contexto.TasasCambioRango.AddRangeAsync(tasasCambioRango);
+        await contexto.SaveChangesAsync();
+    }
+
+    public async Task GuardarCopiaAsync(IReadOnlyCollection<TasaCambioRango> tasasCambioRango)
+    {
+        var fechaActualizacion = DateTime.UtcNow;
+        var fechasDestino = tasasCambioRango.Select(x => x.FechaTasa.Date).Distinct().ToList();
+        var tasasDestino = await contexto.TasasCambioRango
+            .Where(x => fechasDestino.Contains(x.FechaTasa))
+            .ToListAsync();
+
+        var tasasNuevas = new List<TasaCambioRango>();
+        foreach (var tasaCopiada in tasasCambioRango)
+        {
+            var tasaExistente = tasasDestino.FirstOrDefault(x =>
+                x.PaisId == tasaCopiada.PaisId &&
+                x.SucursalId == tasaCopiada.SucursalId &&
+                x.FechaTasa == tasaCopiada.FechaTasa.Date &&
+                x.MontoDesdeUsd == tasaCopiada.MontoDesdeUsd &&
+                x.MontoHastaUsd == tasaCopiada.MontoHastaUsd);
+
+            if (tasaExistente is null)
+            {
+                tasasNuevas.Add(tasaCopiada);
+                continue;
+            }
+
+            tasaExistente.TasaCambio = tasaCopiada.TasaCambio;
+            tasaExistente.EstaActivo = tasaCopiada.EstaActivo;
+            tasaExistente.FechaActualizacion = fechaActualizacion;
+        }
+
+        await contexto.TasasCambioRango.AddRangeAsync(tasasNuevas);
         await contexto.SaveChangesAsync();
     }
 

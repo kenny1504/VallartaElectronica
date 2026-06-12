@@ -48,6 +48,7 @@ public interface IServicioTasaCambio
     /// Una tarea que representa la operación asincrónica de creación del registro.
     /// </return>
     Task CrearAsync(TasaCambioRango tasaCambioRango);
+    Task<int> CopiarAsync(DateTime? fechaOrigen, DateTime fechaDestino, bool copiarTodas, IReadOnlyCollection<int> tasasSeleccionadas, int? paisIdFiltro = null);
 
     /// <summary>
     /// Actualiza una instancia existente de <see cref="TasaCambioRango"/> en el repositorio.

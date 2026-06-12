@@ -31,6 +31,7 @@ public interface IRepositorioTasaCambio
     /// Una tarea que representa la operación asincrónica, conteniendo la entidad <see cref="TasaCambioRango"/> si se encuentra; de lo contrario, <c>null</c>.
     /// </returns>
     Task<TasaCambioRango?> ObtenerPorIdAsync(int id, bool soloLectura = true);
+    Task<IReadOnlyCollection<TasaCambioRango>> ObtenerPorIdsAsync(IReadOnlyCollection<int> ids);
 
     /// <summary>
     /// Obtiene la tasa de cambio aplicable según los parámetros proporcionados.
@@ -44,6 +45,7 @@ public interface IRepositorioTasaCambio
     /// basada en los parámetros proporcionados, o <see langword="null"/> si no existe una tasa aplicable.
     /// </returns>
     Task<TasaCambioRango?> ObtenerTasaAplicableAsync(int paisId, int sucursalId, DateTime fechaTasa, decimal montoUsd);
+    Task<TasaCambioRango?> ObtenerPorRangoAsync(int paisId, int sucursalId, DateTime fechaTasa, decimal montoDesdeUsd, decimal? montoHastaUsd);
     Task<TasaCambioRango?> ObtenerTasaVigentePorRangoAsync(int paisId, int sucursalId, DateTime fechaTasa, decimal montoDesdeUsd, decimal? montoHastaUsd);
     Task<DatosCalculoCotizacionDto?> ObtenerDatosCalculoAsync(int paisId, int sucursalId, DateTime fechaTasa, decimal montoUsd);
 
@@ -68,6 +70,8 @@ public interface IRepositorioTasaCambio
     /// rango de montos en USD, la tasa de cambio aplicable y la fecha.
     /// </param>
     Task AgregarAsync(TasaCambioRango tasaCambioRango);
+    Task AgregarRangoAsync(IReadOnlyCollection<TasaCambioRango> tasasCambioRango);
+    Task GuardarCopiaAsync(IReadOnlyCollection<TasaCambioRango> tasasCambioRango);
 
     /// Actualiza un rango de tasa de cambio existente en el repositorio.
     /// <param name="tasaCambioRango">

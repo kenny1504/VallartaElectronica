@@ -114,6 +114,29 @@ public class AdministracionTasasCambioController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Copiar(CopiarTasasCambioViewModel modelo)
+    {
+        if (!ModelState.IsValid)
+        {
+            TempData["MensajeError"] = "Selecciona la fecha destino para copiar las tasas.";
+            return RedireccionarAListado(modelo.FechaOrigen, modelo.PaisIdFiltro);
+        }
+
+        try
+        {
+            var tasasCopiadas = await servicioTasaCambio.CopiarAsync(modelo.FechaOrigen, modelo.FechaDestino, modelo.CopiarTodas, modelo.TasasSeleccionadas, modelo.PaisIdFiltro);
+            TempData["MensajeExito"] = $"{tasasCopiadas} tasa(s) copiadas al {modelo.FechaDestino:MM/dd/yyyy}.";
+            return RedirectToAction(nameof(Index), new { fechaFiltro = modelo.FechaDestino.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), modelo.PaisIdFiltro });
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["MensajeError"] = $"No se pudieron copiar las tasas: {ex.Message}";
+            return RedireccionarAListado(modelo.FechaOrigen, modelo.PaisIdFiltro);
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ActualizarPublicidadSvg(string fechaTasa)
     {
         if (!DateTime.TryParseExact(fechaTasa, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fechaParseada))
@@ -143,6 +166,11 @@ public class AdministracionTasasCambioController(
         }
 
         return DateTime.Today;
+    }
+
+    private RedirectToActionResult RedireccionarAListado(DateTime? fechaFiltro, int? paisIdFiltro)
+    {
+        return RedirectToAction(nameof(Index), new { fechaFiltro = fechaFiltro?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), paisIdFiltro });
     }
 
     private static TasaCambioRango Mapear(FormularioTasaCambioViewModel modelo) =>

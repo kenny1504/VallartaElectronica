@@ -602,7 +602,10 @@ function inicializarActualizacionPublicidadSvg() {
     const texto = boton.querySelector("[data-texto]");
     const loader = boton.querySelector("[data-loader]");
     const url = boton.dataset.url;
-    const urlPublicidadSvg = "/uploads/publicidad/tasas.svg";
+    const archivosPublicidadSvg = [
+        { titulo: "Publicidad", url: "/uploads/publicidad/tasas.svg" },
+        { titulo: "Historia", url: "/uploads/publicidad/tasas-post.svg", permiteAbrir: false, permiteDescargaPng: true, nombreDescarga: "tasas-post.png" }
+    ];
 
     function obtenerTokenAntifalsificacion() {
         return document.querySelector("input[name='__RequestVerificationToken']")?.value || "";
@@ -641,64 +644,155 @@ function inicializarActualizacionPublicidadSvg() {
         return { isConfirmed: true };
     }
 
+    async function cargarImagen(url) {
+        return new Promise((resolve, reject) => {
+            const imagen = new Image();
+            imagen.crossOrigin = "anonymous";
+            imagen.onload = () => resolve(imagen);
+            imagen.onerror = () => reject(new Error("No se pudo cargar el SVG para descargarlo."));
+            imagen.src = url;
+        });
+    }
+
+    function descargarBlob(blob, nombreArchivo) {
+        const urlObjeto = URL.createObjectURL(blob);
+        const enlace = document.createElement("a");
+        enlace.href = urlObjeto;
+        enlace.download = nombreArchivo;
+        document.body.appendChild(enlace);
+        enlace.click();
+        enlace.remove();
+        window.setTimeout(() => URL.revokeObjectURL(urlObjeto), 1000);
+    }
+
+    async function descargarSvgComoPng(urlSvg, nombreArchivo) {
+        const imagen = await cargarImagen(urlSvg);
+        const ancho = Math.max(imagen.naturalWidth || imagen.width || 0, 1);
+        const alto = Math.max(imagen.naturalHeight || imagen.height || 0, 1);
+        const lienzo = document.createElement("canvas");
+        lienzo.width = ancho;
+        lienzo.height = alto;
+        const contexto = lienzo.getContext("2d");
+        contexto.drawImage(imagen, 0, 0, ancho, alto);
+
+        const blob = await new Promise(resolve => lienzo.toBlob(resolve, "image/png", 1));
+        if (!blob) {
+            throw new Error("No se pudo generar el archivo PNG.");
+        }
+
+        descargarBlob(blob, nombreArchivo);
+    }
+
     async function mostrarVistaPreviaPublicidadSvg() {
-        const urlVistaPrevia = `${urlPublicidadSvg}?v=${new Date().getTime()}`;
+        const marcaTiempo = new Date().getTime();
+        const vistasPrevias = archivosPublicidadSvg.map(archivo => ({
+            ...archivo,
+            urlVistaPrevia: `${archivo.url}?v=${marcaTiempo}`
+        }));
 
         if (!window.Swal?.fire) {
-            window.open(urlVistaPrevia, "_blank");
+            vistasPrevias.forEach(archivo => window.open(archivo.urlVistaPrevia, "_blank"));
             return;
         }
 
-        const resultadoVistaPrevia = await window.Swal.fire({
+        await window.Swal.fire({
             title: "Vista previa",
             width: "90%",
             html: `
-                <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50" style="height:min(700px, 75vh);">
-                    <div id="loaderVistaPreviaPublicidadSvg" class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white text-sm font-semibold text-slate-600">
-                        <span class="h-8 w-8 animate-spin rounded-full border-4 border-azulMarca/20 border-t-azulMarca"></span>
-                        <span>Cargando vista previa...</span>
-                    </div>
-                    <img
-                        id="imagenVistaPreviaPublicidadSvg"
-                        src="${urlVistaPrevia}"
-                        alt="Vista previa de publicidad SVG"
-                        class="h-full w-full object-contain opacity-0 transition"
-                        loading="eager" />
+                <div class="grid gap-4 md:grid-cols-2">
+                    ${vistasPrevias.map((archivo, indice) => `
+                        <section class="min-w-0">
+                            <h3 class="mb-2 text-center text-sm font-black uppercase tracking-[0.18em] text-slate-600">${archivo.titulo}</h3>
+                            <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50" style="height:min(620px, 70vh);">
+                                <div id="loaderVistaPreviaPublicidadSvg${indice}" class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white text-sm font-semibold text-slate-600">
+                                    <span class="h-8 w-8 animate-spin rounded-full border-4 border-azulMarca/20 border-t-azulMarca"></span>
+                                    <span>Cargando vista previa...</span>
+                                </div>
+                                <img
+                                    id="imagenVistaPreviaPublicidadSvg${indice}"
+                                    src="${archivo.urlVistaPrevia}"
+                                    alt="Vista previa ${archivo.titulo}"
+                                    class="h-full w-full object-contain opacity-0 transition"
+                                    loading="eager" />
+                            </div>
+                            ${archivo.permiteAbrir === false ? "" : `
+                                <a
+                                    href="${archivo.urlVistaPrevia}"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-azulMarca px-5 py-3 text-sm font-bold text-white transition hover:bg-tinta">
+                                    Abrir ${archivo.titulo.toLowerCase()} en nueva pestana
+                                </a>
+                            `}
+                            ${archivo.permiteDescargaPng ? `
+                                <button
+                                    type="button"
+                                    data-descargar-png="${indice}"
+                                    class="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700">
+                                    Descargar historia PNG
+                                </button>
+                            ` : ""}
+                        </section>
+                    `).join("")}
                 </div>
             `,
             showCloseButton: true,
-            showDenyButton: true,
             confirmButtonText: "Cerrar",
-            denyButtonText: "Abrir en nueva pestaña",
             buttonsStyling: false,
             customClass: {
-                confirmButton: obtenerClasesBotonPrincipal(),
-                denyButton: "inline-flex items-center justify-center rounded-xl bg-azulMarca px-5 py-3 text-sm font-bold text-white transition hover:bg-tinta"
+                confirmButton: obtenerClasesBotonPrincipal()
             },
             didOpen: () => {
-                const imagen = document.getElementById("imagenVistaPreviaPublicidadSvg");
-                const loaderPreview = document.getElementById("loaderVistaPreviaPublicidadSvg");
-                imagen?.addEventListener("load", () => {
-                    loaderPreview?.classList.add("hidden");
-                    imagen.classList.remove("opacity-0");
-                }, { once: true });
-                imagen?.addEventListener("error", () => {
-                    if (loaderPreview) {
-                        loaderPreview.innerHTML = "<span>No se pudo cargar la vista previa. Usa Abrir en nueva pestana.</span>";
-                    }
-                }, { once: true });
+                vistasPrevias.forEach((_, indice) => {
+                    const imagen = document.getElementById(`imagenVistaPreviaPublicidadSvg${indice}`);
+                    const loaderPreview = document.getElementById(`loaderVistaPreviaPublicidadSvg${indice}`);
+                    imagen?.addEventListener("load", () => {
+                        loaderPreview?.classList.add("hidden");
+                        imagen.classList.remove("opacity-0");
+                    }, { once: true });
+                    imagen?.addEventListener("error", () => {
+                        if (loaderPreview) {
+                            loaderPreview.innerHTML = "<span>No se pudo cargar la vista previa. Usa el boton para abrirla en nueva pestana.</span>";
+                        }
+                    }, { once: true });
+                });
+
+                document.querySelectorAll("[data-descargar-png]").forEach(botonDescarga => {
+                    botonDescarga.addEventListener("click", async () => {
+                        const indice = Number(botonDescarga.dataset.descargarPng);
+                        const archivo = vistasPrevias[indice];
+                        if (!archivo) {
+                            return;
+                        }
+
+                        const textoOriginal = botonDescarga.textContent;
+                        botonDescarga.disabled = true;
+                        botonDescarga.textContent = "Generando PNG...";
+
+                        try {
+                            await descargarSvgComoPng(archivo.urlVistaPrevia, archivo.nombreDescarga || "historia.png");
+                            botonDescarga.textContent = "PNG descargado";
+                            window.setTimeout(() => {
+                                botonDescarga.textContent = textoOriginal;
+                                botonDescarga.disabled = false;
+                            }, 1200);
+                        } catch {
+                            botonDescarga.textContent = "No se pudo descargar";
+                            window.setTimeout(() => {
+                                botonDescarga.textContent = textoOriginal;
+                                botonDescarga.disabled = false;
+                            }, 1800);
+                        }
+                    });
+                });
             }
         });
-
-        if (resultadoVistaPrevia.isDenied) {
-            window.open(`${urlPublicidadSvg}?v=${new Date().getTime()}`, "_blank");
-        }
     }
 
     boton.addEventListener("click", async () => {
         const confirmacion = await mostrarAlerta({
             title: "Actualizar publicidad",
-            text: "Se reemplazaran las tasas del SVG con las tasas vigentes mas recientes.",
+            text: "Se reemplazaran las tasas de la publicidad y de la historia con las tasas vigentes mas recientes.",
             icon: "question",
             showCancelButton: true,
             confirmButtonText: "Actualizar",
@@ -777,6 +871,114 @@ function inicializarActualizacionPublicidadSvg() {
             });
         } finally {
             establecerCargando(false);
+        }
+    });
+}
+
+function inicializarCopiaTasasCambio() {
+    const formulario = document.getElementById("formCopiarTasasCambio");
+    if (!formulario) {
+        return;
+    }
+
+    const selectorTodas = document.getElementById("seleccionarTodasTasasCambio");
+    const campoCopiarTodas = document.getElementById("copiarTodasTasasCambio");
+    const campoFechaDestino = document.getElementById("fechaDestinoCopiarTasas");
+    const campoFechaOrigen = formulario.querySelector("input[name='FechaOrigen']");
+    const checkboxes = Array.from(document.querySelectorAll(".seleccion-tasa-cambio"));
+    let modoCopia = "seleccionadas";
+    let envioConfirmado = false;
+
+    function mostrarMensaje(titulo, texto) {
+        if (window.Swal?.fire) {
+            window.Swal.fire({
+                title: titulo,
+                text: texto,
+                icon: "warning",
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "inline-flex items-center justify-center rounded-xl bg-tinta px-5 py-3 text-sm font-bold text-white transition hover:bg-azulMarca"
+                }
+            });
+            return;
+        }
+
+        window.alert(texto || titulo);
+    }
+
+    async function confirmarCopia(copiarTodas, totalSeleccionadas) {
+        const detalle = copiarTodas
+            ? "Se copiaran todas las tasas seleccionadas hacia la fecha destino. Si ya existen tasas con el mismo pais, sucursal y rango, seran sobreescritas."
+            : `Se copiaran ${totalSeleccionadas} tasa(s) seleccionada(s) hacia la fecha destino. Si ya existen tasas con el mismo pais, sucursal y rango, seran sobreescritas.`;
+
+        if (window.Swal?.fire) {
+            const resultado = await window.Swal.fire({
+                title: "Confirmar traslado",
+                text: detalle,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Si, continuar",
+                cancelButtonText: "Cancelar",
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "inline-flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700",
+                    cancelButton: "inline-flex items-center justify-center rounded-xl bg-rose-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-rose-700"
+                }
+            });
+
+            return resultado.isConfirmed;
+        }
+
+        return window.confirm(detalle);
+    }
+
+    selectorTodas?.addEventListener("change", () => {
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectorTodas.checked;
+        });
+    });
+
+    formulario.querySelectorAll("[data-modo-copia]").forEach(boton => {
+        boton.addEventListener("click", () => {
+            modoCopia = boton.dataset.modoCopia || "seleccionadas";
+        });
+    });
+
+    formulario.addEventListener("submit", async evento => {
+        if (envioConfirmado) {
+            envioConfirmado = false;
+            return;
+        }
+
+        evento.preventDefault();
+
+        const boton = evento.submitter;
+        if (boton?.dataset.modoCopia) {
+            modoCopia = boton.dataset.modoCopia;
+        }
+
+        const copiarTodas = modoCopia === "todas";
+        const totalSeleccionadas = checkboxes.filter(checkbox => checkbox.checked).length;
+        campoCopiarTodas.value = copiarTodas ? "true" : "false";
+
+        if (!campoFechaDestino?.value) {
+            mostrarMensaje("Fecha requerida", "Selecciona la fecha destino para copiar las tasas.");
+            return;
+        }
+
+        if (copiarTodas && !campoFechaOrigen?.value) {
+            mostrarMensaje("Fecha origen requerida", "Filtra por una fecha especifica antes de copiar todas las tasas.");
+            return;
+        }
+
+        if (!copiarTodas && totalSeleccionadas === 0) {
+            mostrarMensaje("Seleccion requerida", "Selecciona al menos una tasa para copiar.");
+            return;
+        }
+
+        if (await confirmarCopia(copiarTodas, totalSeleccionadas)) {
+            envioConfirmado = true;
+            formulario.requestSubmit(boton);
         }
     });
 }
@@ -1091,6 +1293,7 @@ document.addEventListener("DOMContentLoaded", () => {
     inicializarCalculadoraPublica();
     inicializarFormularioTasaCambio();
     inicializarActualizacionPublicidadSvg();
+    inicializarCopiaTasasCambio();
     inicializarFormularioPublicidad();
     inicializarPublicidadPublica();
     inicializarToasts();
