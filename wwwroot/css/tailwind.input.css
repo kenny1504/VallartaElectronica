@@ -98,6 +98,165 @@
   .animacion-entrada-vista {
     animation: aparecerVista 480ms cubic-bezier(0.22, 1, 0.36, 1);
   }
+
+  .decoracion-independencia {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    overflow: hidden;
+  }
+
+  .decoracion-independencia__cinta {
+    position: absolute;
+    width: min(33rem, 92vw);
+    height: clamp(3.5rem, 9vw, 5.75rem);
+    opacity: 0.92;
+    filter: drop-shadow(0 16px 28px rgba(20, 50, 74, 0.14));
+  }
+
+  .decoracion-independencia__cinta::before,
+  .decoracion-independencia__cinta::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background:
+      repeating-linear-gradient(
+        165deg,
+        #ffffff 0 12px,
+        #ffffff 12px 24px,
+        #df2027 24px 36px,
+        #df2027 36px 48px
+      );
+  }
+
+  .decoracion-independencia__cinta::after {
+    inset: auto;
+    left: 8%;
+    top: -10%;
+    width: 30%;
+    height: 64%;
+    border-radius: 1.25rem;
+    background:
+      radial-gradient(circle at 22% 28%, #ffffff 0 2px, transparent 2.5px),
+      radial-gradient(circle at 48% 58%, #ffffff 0 2px, transparent 2.5px),
+      radial-gradient(circle at 72% 30%, #ffffff 0 2px, transparent 2.5px),
+      radial-gradient(circle at 82% 72%, #ffffff 0 2px, transparent 2.5px),
+      linear-gradient(135deg, #14324a, #0f4c85);
+  }
+
+  .decoracion-independencia__cinta--superior {
+    top: 5.75rem;
+    left: -9rem;
+    transform: rotate(-12deg);
+  }
+
+  .decoracion-independencia__cinta--inferior {
+    right: -9rem;
+    bottom: 0.25rem;
+    transform: rotate(-10deg);
+  }
+
+  .decoracion-independencia__estrellas span {
+    position: absolute;
+    width: clamp(0.7rem, 1.6vw, 1.25rem);
+    aspect-ratio: 1;
+    background: currentColor;
+    color: #df2027;
+    clip-path: polygon(50% 0, 61% 34%, 98% 35%, 68% 56%, 79% 91%, 50% 70%, 21% 91%, 32% 56%, 2% 35%, 39% 34%);
+    opacity: 0.65;
+    animation: flotarEstrellaIndependencia 6s ease-in-out infinite;
+  }
+
+  .decoracion-independencia__estrellas span:nth-child(1) {
+    left: 9%;
+    top: 19%;
+    color: #ffffff;
+    animation-delay: -1.2s;
+  }
+
+  .decoracion-independencia__estrellas span:nth-child(2) {
+    left: 24%;
+    top: 13%;
+    color: #3aa0f3;
+    animation-delay: -4.1s;
+  }
+
+  .decoracion-independencia__estrellas span:nth-child(3) {
+    right: 17%;
+    top: 18%;
+    color: #df2027;
+    animation-delay: -2.4s;
+  }
+
+  .decoracion-independencia__estrellas span:nth-child(4) {
+    right: 7%;
+    top: 33%;
+    color: #ffffff;
+    animation-delay: -5.2s;
+  }
+
+  .decoracion-independencia__estrellas span:nth-child(5) {
+    left: 7%;
+    bottom: 24%;
+    color: #df2027;
+    animation-delay: -3.6s;
+  }
+
+  .decoracion-independencia__estrellas span:nth-child(6) {
+    left: 31%;
+    bottom: 12%;
+    color: #ffffff;
+    animation-delay: -0.8s;
+  }
+
+  .decoracion-independencia__estrellas span:nth-child(7) {
+    right: 31%;
+    bottom: 19%;
+    color: #3aa0f3;
+    animation-delay: -2.9s;
+  }
+
+  .decoracion-independencia__estrellas span:nth-child(8) {
+    right: 10%;
+    bottom: 10%;
+    color: #df2027;
+    animation-delay: -4.8s;
+  }
+
+  .decoracion-independencia__insignia {
+    position: absolute;
+    top: 5.8rem;
+    left: 50%;
+    display: grid;
+    min-width: min(17rem, calc(100vw - 2rem));
+    transform: translateX(-50%);
+    border: 1px solid rgba(255, 255, 255, 0.84);
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(234, 246, 255, 0.92));
+    box-shadow: 0 16px 36px rgba(20, 50, 74, 0.14);
+    padding: 0.48rem 1.15rem 0.56rem;
+    text-align: center;
+    color: #14324a;
+  }
+
+  .decoracion-independencia__insignia span {
+    font-size: 0.7rem;
+    font-weight: 900;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #df2027;
+  }
+
+  .decoracion-independencia__insignia strong {
+    font-size: 0.82rem;
+    font-weight: 900;
+    line-height: 1.25;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
 }
 
 @keyframes aparecerVista {
@@ -109,5 +268,43 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes flotarEstrellaIndependencia {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+
+  50% {
+    transform: translate3d(0, -0.8rem, 0) rotate(12deg) scale(1.12);
+  }
+}
+
+@media (max-width: 640px) {
+  .decoracion-independencia__cinta {
+    opacity: 0.78;
+  }
+
+  .decoracion-independencia__cinta--superior {
+    left: -13rem;
+    top: 5.25rem;
+  }
+
+  .decoracion-independencia__cinta--inferior {
+    right: -13rem;
+    bottom: -0.75rem;
+  }
+
+  .decoracion-independencia__insignia {
+    top: 5.35rem;
+    padding-inline: 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .decoracion-independencia__estrellas span {
+    animation: none;
   }
 }
