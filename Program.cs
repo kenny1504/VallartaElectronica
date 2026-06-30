@@ -69,8 +69,7 @@ app.Use(async (contexto, siguiente) =>
     var archivosSvgTasas = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "tasas.svg",
-        "tasas-post.svg",
-        "tasa-guate.svg"
+        "tasas-post.svg"
     };
     var nombreArchivoSvg = Path.GetFileName(contexto.Request.Path.Value) ?? string.Empty;
     var esSvgTasas = contexto.Request.Path.StartsWithSegments("/uploads/publicidad") &&

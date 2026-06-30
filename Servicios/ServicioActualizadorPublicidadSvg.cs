@@ -22,13 +22,6 @@ public class ServicioActualizadorPublicidadSvg(
         new("rate_mas1000_deposito", 1, "Mexico", 3, ["Deposito a cuenta", "Deposito"], 1001, 2999)
     ];
 
-    private static readonly IReadOnlyCollection<ConfiguracionTasaSvg> ConfiguracionesGuatemala =
-    [
-        new("rate_guatemala_industrial", 2, "Guatemala", 4, ["Industrial"], null, null),
-        new("rate_guatemala_banrural", 2, "Guatemala", 8, ["Banrural"], null, null),
-        new("rate_guatemala_gyt", 2, "Guatemala", 10, ["G y T", "GyT", "G&T"], null, null)
-    ];
-
     private static readonly IReadOnlyDictionary<string, AtributosTextoSvg> AtributosTextoHistoria =
         new Dictionary<string, AtributosTextoSvg>(StringComparer.Ordinal)
         {
@@ -43,8 +36,7 @@ public class ServicioActualizadorPublicidadSvg(
     private static readonly IReadOnlyCollection<ArchivoSvgPublicidad> ArchivosSvg =
     [
         new("uploads/publicidad/tasas.svg", ConfiguracionesMexico),
-        new("uploads/publicidad/tasas-post.svg", ConfiguracionesMexico, AtributosTextoHistoria),
-        new("uploads/publicidad/tasa-guate.svg", ConfiguracionesGuatemala)
+        new("uploads/publicidad/tasas-post.svg", ConfiguracionesMexico, AtributosTextoHistoria)
     ];
 
     public async Task<ResultadoActualizacionPublicidadSvg> ActualizarAsync(DateTime fechaTasa)
@@ -93,7 +85,7 @@ public class ServicioActualizadorPublicidadSvg(
                 string.Join(", ", archivos.Select(x => x.RutaFisica)),
                 totalTasasActualizadas);
 
-            return new ResultadoActualizacionPublicidadSvg(true, "Publicidad, historia y Guatemala actualizadas correctamente.");
+            return new ResultadoActualizacionPublicidadSvg(true, "Publicidad e historia actualizadas correctamente.");
         }
         catch (Exception ex)
         {
