@@ -44,12 +44,76 @@
 
         .pantalla-publicitaria__visor {
             position: relative;
+            z-index: 1;
             width: 100vw;
             height: 100vh;
             max-width: calc(100vh * 16 / 9);
             max-height: calc(100vw * 9 / 16);
             background: #000;
             overflow: hidden;
+        }
+
+        .pantalla-publicitaria__banderas {
+            position: fixed;
+            top: clamp(1rem, 2.8vw, 2.25rem);
+            left: 50%;
+            z-index: 4;
+            display: flex;
+            width: min(32rem, calc(100vw - 2rem));
+            transform: translateX(-50%);
+            align-items: center;
+            justify-content: space-between;
+            gap: clamp(0.5rem, 2vw, 1.25rem);
+            opacity: 0;
+            filter: saturate(0.88) drop-shadow(0 16px 26px rgba(0, 0, 0, 0.25));
+            pointer-events: none;
+        }
+
+        .pantalla-publicitaria__banderas .decoracion-mundial__bandera {
+            width: clamp(4.25rem, 11vw, 7.5rem);
+            height: clamp(2.4rem, 6.2vw, 4.2rem);
+            opacity: 1;
+        }
+
+        .pantalla-publicitaria__balon-fugaz {
+            position: fixed;
+            top: 16vh;
+            left: 0;
+            z-index: 5;
+            width: clamp(5.75rem, 10vw, 11rem);
+            aspect-ratio: 1;
+            border-radius: 999px;
+            background:
+                radial-gradient(circle at 50% 50%, #151515 0 13%, transparent 14%),
+                radial-gradient(circle at 50% 10%, #151515 0 9%, transparent 10%),
+                radial-gradient(circle at 86% 38%, #151515 0 8%, transparent 9%),
+                radial-gradient(circle at 70% 86%, #151515 0 8%, transparent 9%),
+                radial-gradient(circle at 30% 86%, #151515 0 8%, transparent 9%),
+                radial-gradient(circle at 14% 38%, #151515 0 8%, transparent 9%),
+                conic-gradient(from 18deg, #ffffff 0 12%, #e6edf5 12% 24%, #ffffff 24% 36%, #e6edf5 36% 48%, #ffffff 48% 60%, #e6edf5 60% 72%, #ffffff 72% 84%, #e6edf5 84% 100%);
+            box-shadow:
+                inset -0.6rem -0.7rem 1rem rgba(2, 6, 23, 0.3),
+                inset 0.46rem 0.42rem 0.85rem rgba(255, 255, 255, 0.78),
+                0 1.4rem 2.4rem rgba(2, 6, 23, 0.28),
+                0 0 1.15rem rgba(255, 255, 255, 0.42);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .pantalla-publicitaria--evento-balon .pantalla-publicitaria__banderas {
+            animation: mostrarBanderasBalonFugaz 7s linear;
+        }
+
+        .pantalla-publicitaria--evento-balon .pantalla-publicitaria__balon-fugaz {
+            animation: cruzarBalonFugaz 6.8s linear;
+        }
+
+        .pantalla-publicitaria__balon-fugaz::after {
+            position: absolute;
+            inset: 16%;
+            content: "";
+            border: 1px solid rgba(20, 50, 74, 0.2);
+            border-radius: inherit;
         }
 
         .pantalla-publicitaria__visor--lleno {
@@ -124,6 +188,95 @@
                 max-height: 100vh;
             }
         }
+
+        @@keyframes cruzarBalonFugaz {
+            0% {
+                opacity: 0;
+                transform: translate3d(-24vw, 14vh, 0) rotate(0deg) scale(0.98);
+            }
+
+            5% {
+                opacity: 1;
+                transform: translate3d(-10vw, 7vh, 0) rotate(90deg) scale(1);
+            }
+
+            14% {
+                opacity: 1;
+                transform: translate3d(8vw, 0, 0) rotate(210deg) scale(1.02);
+            }
+
+            24% {
+                opacity: 1;
+                transform: translate3d(27vw, 12vh, 0) rotate(360deg) scale(0.98);
+            }
+
+            34% {
+                opacity: 1;
+                transform: translate3d(45vw, 18vh, 0) rotate(510deg) scale(0.96);
+            }
+
+            45% {
+                opacity: 1;
+                transform: translate3d(63vw, 7vh, 0) rotate(675deg) scale(1.01);
+            }
+
+            58% {
+                opacity: 1;
+                transform: translate3d(80vw, 1vh, 0) rotate(855deg) scale(1.02);
+            }
+
+            72% {
+                opacity: 1;
+                transform: translate3d(98vw, 13vh, 0) rotate(1040deg) scale(0.98);
+            }
+
+            90% {
+                opacity: 1;
+                transform: translate3d(122vw, 5vh, 0) rotate(1260deg) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate3d(134vw, 6vh, 0) rotate(1380deg) scale(1);
+            }
+        }
+
+        @@keyframes mostrarBanderasBalonFugaz {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-0.35rem) scale(0.96);
+            }
+
+            8%,
+            90% {
+                opacity: 0.28;
+                transform: translateX(-50%) translateY(0) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-0.35rem) scale(0.96);
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .pantalla-publicitaria__banderas {
+                top: 0.75rem;
+                width: min(18rem, calc(100vw - 1rem));
+            }
+
+            .pantalla-publicitaria__balon-fugaz {
+                top: 12vh;
+                width: clamp(4.35rem, 18vw, 6.25rem);
+            }
+        }
+
+        @@media (prefers-reduced-motion: reduce) {
+            .pantalla-publicitaria__banderas,
+            .pantalla-publicitaria__balon-fugaz {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -157,6 +310,12 @@
                 }
             }
         </section>
+        <div class="pantalla-publicitaria__banderas" aria-hidden="true">
+            <span class="decoracion-mundial__bandera decoracion-mundial__bandera--canada"></span>
+            <span class="decoracion-mundial__bandera decoracion-mundial__bandera--mexico"></span>
+            <span class="decoracion-mundial__bandera decoracion-mundial__bandera--estados-unidos"></span>
+        </div>
+        <div class="pantalla-publicitaria__balon-fugaz" aria-hidden="true"></div>
         <button id="botonPantallaCompletaPublicidad"
                 class="boton-pantalla-completa"
                 type="button"
@@ -179,6 +338,9 @@
             var inicioRecursoActual = 0;
             var duracionRecursoActualMs = 0;
             var cargandoRecurso = false;
+            var temporizadorBalonFugaz = null;
+            var tiemposBalonFugazMs = [120000, 180000, 300000];
+            var duracionBalonFugazMs = 6800;
 
             try {
                 publicidades = JSON.parse(datosIniciales.textContent || "[]");
@@ -372,6 +534,36 @@
                 }, 1000);
             }
 
+            function obtenerEsperaBalonFugaz() {
+                var indice = Math.floor(Math.random() * tiemposBalonFugazMs.length);
+                return tiemposBalonFugazMs[indice];
+            }
+
+            function activarBalonFugaz() {
+                if (!modulo) {
+                    return;
+                }
+
+                modulo.classList.remove("pantalla-publicitaria--evento-balon");
+                void modulo.offsetWidth;
+                modulo.classList.add("pantalla-publicitaria--evento-balon");
+
+                window.setTimeout(function () {
+                    modulo.classList.remove("pantalla-publicitaria--evento-balon");
+                }, duracionBalonFugazMs);
+            }
+
+            function programarBalonFugaz() {
+                if (temporizadorBalonFugaz !== null) {
+                    window.clearTimeout(temporizadorBalonFugaz);
+                }
+
+                temporizadorBalonFugaz = window.setTimeout(function () {
+                    activarBalonFugaz();
+                    programarBalonFugaz();
+                }, obtenerEsperaBalonFugaz());
+            }
+
             if (botonPantallaCompleta) {
                 botonPantallaCompleta.addEventListener("click", function () {
                     try {
@@ -405,6 +597,8 @@
 
             if (publicidades.length > 0) {
                 iniciarRelojRevision();
+                window.setTimeout(activarBalonFugaz, 450);
+                programarBalonFugaz();
                 if (recursoActual) {
                     if (recursoActual.tagName === "VIDEO") {
                         recursoActual.muted = true;

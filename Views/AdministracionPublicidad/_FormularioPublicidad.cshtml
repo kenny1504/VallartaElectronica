@@ -1,6 +1,6 @@
 @model ElectronicaVallarta.ViewModels.FormularioPublicidadViewModel
 
-<form method="post" enctype="multipart/form-data" class="mx-auto max-w-5xl rounded-[2rem] border border-white/70 bg-white/90 p-8 shadow-panel">
+<form method="post" enctype="multipart/form-data" data-formulario-guardado="true" class="mx-auto max-w-5xl rounded-[2rem] border border-white/70 bg-white/90 p-8 shadow-panel">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="UrlRecursoActual" />

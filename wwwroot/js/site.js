@@ -983,6 +983,35 @@ function inicializarCopiaTasasCambio() {
     });
 }
 
+function inicializarLoadersGuardado() {
+    document.addEventListener("submit", evento => {
+        const formulario = evento.target;
+        if (!(formulario instanceof HTMLFormElement) || formulario.dataset.formularioGuardado !== "true") {
+            return;
+        }
+
+        const boton = evento.submitter instanceof HTMLButtonElement
+            ? evento.submitter
+            : formulario.querySelector("button[type='submit']");
+
+        if (!boton || boton.dataset.loaderGuardadoActivo === "true") {
+            return;
+        }
+
+        window.setTimeout(() => {
+            if (evento.defaultPrevented || !formulario.checkValidity()) {
+                return;
+            }
+
+            boton.dataset.loaderGuardadoActivo = "true";
+            boton.dataset.textoOriginal = boton.textContent.trim();
+            boton.disabled = true;
+            boton.classList.add("boton-guardando");
+            boton.innerHTML = "<span class=\"loader-guardado\" aria-hidden=\"true\"></span><span>Guardando...</span>";
+        }, 0);
+    });
+}
+
 function inicializarToasts() {
     const toasts = document.querySelectorAll("[data-toast]");
     if (toasts.length === 0) {
@@ -1294,6 +1323,7 @@ document.addEventListener("DOMContentLoaded", () => {
     inicializarFormularioTasaCambio();
     inicializarActualizacionPublicidadSvg();
     inicializarCopiaTasasCambio();
+    inicializarLoadersGuardado();
     inicializarFormularioPublicidad();
     inicializarPublicidadPublica();
     inicializarToasts();

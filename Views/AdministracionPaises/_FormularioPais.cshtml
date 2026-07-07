@@ -1,6 +1,6 @@
 @model ElectronicaVallarta.ViewModels.FormularioPaisViewModel
 
-<form method="post" class="mx-auto max-w-4xl rounded-[2rem] border border-white/70 bg-white/90 p-8 shadow-panel">
+<form method="post" data-formulario-guardado="true" class="mx-auto max-w-4xl rounded-[2rem] border border-white/70 bg-white/90 p-8 shadow-panel">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
 
