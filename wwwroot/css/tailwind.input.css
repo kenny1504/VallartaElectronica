@@ -314,6 +314,23 @@
     width: 100%;
   }
 
+  .seccion-administracion .decoracion-mundial {
+    z-index: 0;
+  }
+
+  .seccion-administracion .decoracion-mundial__banderas {
+    opacity: 0.42;
+    transform: translateX(-50%) scale(0.9);
+  }
+
+  .seccion-administracion .decoracion-mundial__confeti span {
+    opacity: 0.2;
+  }
+
+  .seccion-administracion .decoracion-mundial__costado {
+    opacity: 0.18;
+  }
+
 }
 
 @keyframes aparecerVista {
