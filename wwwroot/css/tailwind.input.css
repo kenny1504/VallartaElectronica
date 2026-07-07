@@ -114,7 +114,8 @@
     display: grid;
     width: clamp(4.4rem, 7vw, 6.6rem);
     justify-items: center;
-    filter: drop-shadow(0 18px 26px rgba(20, 50, 74, 0.24));
+    opacity: 0.74;
+    filter: drop-shadow(0 18px 26px rgba(20, 50, 74, 0.2));
     animation: flotarTrofeoMundial 6.5s ease-in-out infinite;
   }
 
@@ -148,6 +149,7 @@
     border: 2px solid rgba(255, 255, 255, 0.86);
     border-radius: 0.65rem;
     box-shadow: 0 16px 34px rgba(20, 50, 74, 0.16);
+    opacity: 0.9;
     transform: rotate(-6deg);
     animation: ondearBanderaMundial 5.5s ease-in-out infinite;
   }
@@ -220,7 +222,7 @@
     height: 0.88rem;
     border-radius: 0.12rem;
     background: #d52b1e;
-    opacity: 0.48;
+    opacity: 0.34;
     animation: flotarConfetiMundial 8s ease-in-out infinite;
   }
 
@@ -312,22 +314,6 @@
     width: 100%;
   }
 
-  .decoracion-mundial__costado span {
-    margin-top: -0.25rem;
-    border: 1px solid rgba(255, 255, 255, 0.82);
-    border-radius: 999px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(236, 253, 245, 0.9));
-    box-shadow: 0 12px 24px rgba(20, 50, 74, 0.14);
-    padding: 0.32rem 0.72rem;
-    text-align: center;
-    font-size: 0.6rem;
-    font-weight: 900;
-    line-height: 1.05;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #006847;
-    white-space: nowrap;
-  }
 }
 
 @keyframes aparecerVista {
@@ -390,7 +376,7 @@
   .decoracion-mundial__costado {
     top: 50%;
     width: 4.25rem;
-    opacity: 0.46;
+    opacity: 0.38;
   }
 
   .decoracion-mundial__banderas {
@@ -401,6 +387,10 @@
   .decoracion-mundial__bandera {
     width: clamp(4.4rem, 13vw, 6.5rem);
     height: clamp(2.45rem, 7.4vw, 3.65rem);
+  }
+
+  .decoracion-mundial__confeti span:nth-child(n+9) {
+    display: none;
   }
 }
 
@@ -435,32 +425,17 @@
   }
 
   .decoracion-mundial__costado {
-    top: 52%;
-    bottom: auto;
-    width: 2.9rem;
-    opacity: 0.4;
-  }
-
-  .decoracion-mundial__costado--izquierdo {
-    left: 0.7rem;
-  }
-
-  .decoracion-mundial__costado--derecho {
-    right: 0.7rem;
-  }
-
-  .decoracion-mundial__costado span {
     display: none;
   }
 
-  .decoracion-mundial__confeti span:nth-child(n+7) {
+  .decoracion-mundial__confeti span:nth-child(n+5) {
     display: none;
   }
 
   .decoracion-mundial__confeti span {
     width: 0.34rem;
     height: 0.66rem;
-    opacity: 0.34;
+    opacity: 0.28;
   }
 }
 
