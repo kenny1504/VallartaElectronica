@@ -110,7 +110,7 @@
   .decoracion-mundial__costado {
     position: absolute;
     z-index: 5;
-    top: 13rem;
+    top: 50%;
     display: grid;
     width: clamp(4.4rem, 7vw, 6.6rem);
     justify-items: center;
@@ -220,7 +220,7 @@
     height: 0.88rem;
     border-radius: 0.12rem;
     background: #d52b1e;
-    opacity: 0.68;
+    opacity: 0.48;
     animation: flotarConfetiMundial 8s ease-in-out infinite;
   }
 
@@ -367,11 +367,11 @@
 @keyframes flotarTrofeoMundial {
   0%,
   100% {
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: translate3d(0, -50%, 0) scale(1);
   }
 
   50% {
-    transform: translate3d(0, -0.55rem, 0) scale(1.03);
+    transform: translate3d(0, calc(-50% - 0.55rem), 0) scale(1.03);
   }
 }
 
@@ -388,9 +388,9 @@
 
 @media (max-width: 1535px) {
   .decoracion-mundial__costado {
-    top: 9.2rem;
+    top: 50%;
     width: 4.25rem;
-    opacity: 0.54;
+    opacity: 0.46;
   }
 
   .decoracion-mundial__banderas {
@@ -435,10 +435,10 @@
   }
 
   .decoracion-mundial__costado {
-    top: auto;
-    bottom: 5.25rem;
-    width: 3.4rem;
-    opacity: 0.62;
+    top: 52%;
+    bottom: auto;
+    width: 2.9rem;
+    opacity: 0.4;
   }
 
   .decoracion-mundial__costado--izquierdo {
@@ -460,7 +460,7 @@
   .decoracion-mundial__confeti span {
     width: 0.34rem;
     height: 0.66rem;
-    opacity: 0.5;
+    opacity: 0.34;
   }
 }
 
