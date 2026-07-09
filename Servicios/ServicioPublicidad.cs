@@ -3,6 +3,7 @@ using ElectronicaVallarta.Dominio.Enumeraciones;
 using ElectronicaVallarta.Interfaces.Repositorios;
 using ElectronicaVallarta.Interfaces.Servicios;
 using ElectronicaVallarta.Modelos.Dto;
+using System.Globalization;
 
 namespace ElectronicaVallarta.Servicios;
 
@@ -37,7 +38,7 @@ public class ServicioPublicidad(IRepositorioPublicidad repositorioPublicidad, IW
             Titulo = x.Titulo,
             Descripcion = x.Descripcion,
             TipoRecurso = x.TipoRecurso.ToString(),
-            UrlRecurso = x.UrlRecurso,
+            UrlRecurso = ConstruirUrlRecursoVersionada(x.UrlRecurso),
             DuracionSegundos = x.DuracionSegundos,
             Orden = x.Orden
         }).ToList();
@@ -155,6 +156,26 @@ public class ServicioPublicidad(IRepositorioPublicidad repositorioPublicidad, IW
         await archivo.CopyToAsync(flujo);
 
         return $"{RutaPublicaBase}/{nombreArchivo}";
+    }
+
+    private string ConstruirUrlRecursoVersionada(string urlRecurso)
+    {
+        if (string.IsNullOrWhiteSpace(urlRecurso) || !urlRecurso.StartsWith(RutaPublicaBase, StringComparison.OrdinalIgnoreCase))
+        {
+            return urlRecurso;
+        }
+
+        var rutaRelativa = urlRecurso.Split('?', '#')[0].TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+        var rutaFisica = Path.Combine(ambiente.WebRootPath, rutaRelativa);
+        if (!File.Exists(rutaFisica))
+        {
+            return urlRecurso;
+        }
+
+        var informacionArchivo = new FileInfo(rutaFisica);
+        var version = string.Create(CultureInfo.InvariantCulture, $"{informacionArchivo.LastWriteTimeUtc.Ticks}-{informacionArchivo.Length}");
+        var separador = urlRecurso.Contains('?', StringComparison.Ordinal) ? "&" : "?";
+        return $"{urlRecurso}{separador}v={version}";
     }
 
     private static bool EsExtensionPermitida(TipoRecursoPublicidad tipoRecurso, string extension) =>

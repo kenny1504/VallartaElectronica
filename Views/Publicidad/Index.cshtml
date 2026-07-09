@@ -170,11 +170,13 @@
             var visor = document.getElementById("publicidad-visor");
             var botonPantallaCompleta = document.getElementById("botonPantallaCompletaPublicidad");
             var datosIniciales = document.getElementById("datos-publicidad-inicial");
+            var urlPublicidad = modulo.getAttribute("data-url-publicidad");
             var repetirVideos = modulo.getAttribute("data-loop-videos") === "true";
             var publicidades = [];
             var indiceActual = 0;
             var temporizador = null;
             var relojRevision = null;
+            var relojActualizacion = null;
             var recursoActual = visor ? visor.querySelector(".publicidad-media--visible") : null;
             var inicioRecursoActual = 0;
             var duracionRecursoActualMs = 0;
@@ -372,6 +374,84 @@
                 }, 1000);
             }
 
+            function publicidadesCambiaron(publicidadesNuevas) {
+                if (!Array.isArray(publicidadesNuevas) || publicidadesNuevas.length !== publicidades.length) {
+                    return true;
+                }
+
+                for (var i = 0; i < publicidadesNuevas.length; i += 1) {
+                    var actual = publicidades[i];
+                    var nueva = publicidadesNuevas[i];
+                    if (!actual || !nueva ||
+                        actual.id !== nueva.id ||
+                        actual.urlRecurso !== nueva.urlRecurso ||
+                        actual.tipoRecurso !== nueva.tipoRecurso ||
+                        actual.duracionSegundos !== nueva.duracionSegundos ||
+                        actual.orden !== nueva.orden) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            function actualizarPublicidades(publicidadesNuevas) {
+                if (!Array.isArray(publicidadesNuevas) || publicidadesNuevas.length === 0 || !publicidadesCambiaron(publicidadesNuevas)) {
+                    return;
+                }
+
+                var publicidadAnterior = publicidades[indiceActual];
+                var idAnterior = publicidadAnterior ? publicidadAnterior.id : null;
+                var urlAnterior = publicidadAnterior ? publicidadAnterior.urlRecurso : null;
+                var tipoAnterior = publicidadAnterior ? publicidadAnterior.tipoRecurso : null;
+                var indiceNuevo = 0;
+
+                if (idAnterior !== null) {
+                    for (var i = 0; i < publicidadesNuevas.length; i += 1) {
+                        if (publicidadesNuevas[i].id === idAnterior) {
+                            indiceNuevo = i;
+                            break;
+                        }
+                    }
+                }
+
+                publicidades = publicidadesNuevas;
+                indiceActual = Math.min(indiceNuevo, publicidades.length - 1);
+
+                var publicidadActualizada = publicidades[indiceActual];
+                if (!cargandoRecurso &&
+                    publicidadActualizada &&
+                    (publicidadActualizada.urlRecurso !== urlAnterior || publicidadActualizada.tipoRecurso !== tipoAnterior)) {
+                    mostrarPublicidadActual();
+                }
+            }
+
+            function iniciarActualizacionPublicidades() {
+                if (!urlPublicidad || relojActualizacion !== null || typeof window.fetch !== "function") {
+                    return;
+                }
+
+                relojActualizacion = window.setInterval(function () {
+                    var separador = urlPublicidad.indexOf("?") === -1 ? "?" : "&";
+                    fetch(urlPublicidad + separador + "t=" + Date.now(), {
+                        cache: "no-store",
+                        headers: {
+                            "Cache-Control": "no-cache",
+                            "Pragma": "no-cache",
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    })
+                        .then(function (respuesta) {
+                            return respuesta.ok ? respuesta.json() : null;
+                        })
+                        .then(function (publicidadesNuevas) {
+                            actualizarPublicidades(publicidadesNuevas);
+                        })
+                        .catch(function () {
+                        });
+                }, 30000);
+            }
+
             if (botonPantallaCompleta) {
                 botonPantallaCompleta.addEventListener("click", function () {
                     try {
@@ -402,6 +482,8 @@
                     }
                 });
             }
+
+            iniciarActualizacionPublicidades();
 
             if (publicidades.length > 0) {
                 iniciarRelojRevision();
