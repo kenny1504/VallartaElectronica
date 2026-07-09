@@ -42,7 +42,7 @@ COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 
 RUN mkdir -p /app/wwwroot/uploads/publicidad \
     && mkdir -p /app/seed/uploads/publicidad \
-    && if [ -f /app/wwwroot/uploads/publicidad/tasas.svg ]; then cp /app/wwwroot/uploads/publicidad/tasas.svg /app/seed/uploads/publicidad/tasas.svg; fi \
+    && for archivo in tasas.svg tasas-post.svg; do if [ -f /app/wwwroot/uploads/publicidad/$archivo ]; then cp /app/wwwroot/uploads/publicidad/$archivo /app/seed/uploads/publicidad/$archivo; fi; done \
     && sed -i 's/\r$//' /app/docker-entrypoint.sh \
     && chmod -R 775 /app/wwwroot/uploads \
     && chmod +x /app/docker-entrypoint.sh

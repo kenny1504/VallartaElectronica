@@ -3,9 +3,11 @@ set -e
 
 mkdir -p /app/wwwroot/uploads/publicidad
 
-if [ ! -f /app/wwwroot/uploads/publicidad/tasas.svg ] && [ -f /app/seed/uploads/publicidad/tasas.svg ]; then
-  cp /app/seed/uploads/publicidad/tasas.svg /app/wwwroot/uploads/publicidad/tasas.svg
-fi
+for archivo in tasas.svg tasas-post.svg; do
+  if [ ! -f /app/wwwroot/uploads/publicidad/$archivo ] && [ -f /app/seed/uploads/publicidad/$archivo ]; then
+    cp /app/seed/uploads/publicidad/$archivo /app/wwwroot/uploads/publicidad/$archivo
+  fi
+done
 
 chmod -R 775 /app/wwwroot/uploads || true
 
