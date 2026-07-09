@@ -9,6 +9,9 @@
 <form method="post"
       class="mx-auto max-w-5xl rounded-[2rem] border border-white/70 bg-white/90 p-8 shadow-panel"
       id="formulario-tasa-cambio"
+      data-loader-guardado
+      data-loader-titulo="Guardando tasa"
+      data-loader-detalle="Se esta guardando la tasa de cambio."
       data-sucursal-seleccionada="@Model.SucursalId">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />

@@ -49,6 +49,38 @@ function solicitarJson(url) {
     });
 }
 
+function mostrarLoaderGuardado(opciones = {}) {
+    const loader = document.getElementById("loaderGuardadoGlobal");
+    if (!loader) {
+        return;
+    }
+
+    const titulo = document.getElementById("loaderGuardadoTitulo");
+    const detalle = document.getElementById("loaderGuardadoDetalle");
+    if (titulo) {
+        titulo.textContent = opciones.titulo || "Guardando cambios";
+    }
+
+    if (detalle) {
+        detalle.textContent = opciones.detalle || "Por favor espera mientras se completa la operacion.";
+    }
+
+    loader.classList.add("loader-guardado-global--visible");
+    loader.setAttribute("aria-hidden", "false");
+    document.body.style.cursor = "progress";
+}
+
+function ocultarLoaderGuardado() {
+    const loader = document.getElementById("loaderGuardadoGlobal");
+    if (!loader) {
+        return;
+    }
+
+    loader.classList.remove("loader-guardado-global--visible");
+    loader.setAttribute("aria-hidden", "true");
+    document.body.style.cursor = "";
+}
+
 function formatearMontoUsd(monto) {
     return Number(monto).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -823,6 +855,10 @@ function inicializarActualizacionPublicidadSvg() {
         }
 
         establecerCargando(true);
+        mostrarLoaderGuardado({
+            titulo: "Actualizando publicidad",
+            detalle: `Se esta regenerando el SVG con las tasas del ${fechaTasa}.`
+        });
         if (window.Swal?.fire) {
             window.Swal.fire({
                 title: "Actualizando publicidad",
@@ -871,6 +907,7 @@ function inicializarActualizacionPublicidadSvg() {
             });
         } finally {
             establecerCargando(false);
+            ocultarLoaderGuardado();
         }
     });
 }
@@ -978,8 +1015,32 @@ function inicializarCopiaTasasCambio() {
 
         if (await confirmarCopia(copiarTodas, totalSeleccionadas)) {
             envioConfirmado = true;
+            mostrarLoaderGuardado({
+                titulo: "Copiando tasas",
+                detalle: "Se estan guardando las tasas en la fecha seleccionada."
+            });
             formulario.requestSubmit(boton);
         }
+    });
+}
+
+function inicializarLoaderFormulariosGuardado() {
+    const formularios = document.querySelectorAll("form[data-loader-guardado]");
+    formularios.forEach(formulario => {
+        formulario.addEventListener("submit", evento => {
+            if (evento.defaultPrevented) {
+                return;
+            }
+
+            if (typeof formulario.checkValidity === "function" && !formulario.checkValidity()) {
+                return;
+            }
+
+            const submitter = evento.submitter;
+            const titulo = formulario.dataset.loaderTitulo || submitter?.dataset.loaderTitulo || "Guardando cambios";
+            const detalle = formulario.dataset.loaderDetalle || submitter?.dataset.loaderDetalle || "Por favor espera mientras se completa la operacion.";
+            mostrarLoaderGuardado({ titulo, detalle });
+        });
     });
 }
 
@@ -1292,6 +1353,7 @@ function inicializarPublicidadPublica() {
 document.addEventListener("DOMContentLoaded", () => {
     inicializarCalculadoraPublica();
     inicializarFormularioTasaCambio();
+    inicializarLoaderFormulariosGuardado();
     inicializarActualizacionPublicidadSvg();
     inicializarCopiaTasasCambio();
     inicializarFormularioPublicidad();

@@ -98,6 +98,57 @@
   .animacion-entrada-vista {
     animation: aparecerVista 480ms cubic-bezier(0.22, 1, 0.36, 1);
   }
+
+  .loader-guardado-global {
+    @apply fixed inset-0 z-[80] hidden items-center justify-center bg-tinta/35 px-4 backdrop-blur-sm;
+  }
+
+  .loader-guardado-global--visible {
+    @apply flex;
+  }
+
+  .loader-guardado-global__panel {
+    @apply w-[min(24rem,calc(100vw-2rem))] rounded-[2rem] border border-white/70 bg-white/95 px-6 py-7 text-center shadow-panel;
+  }
+
+  .loader-guardado-global__animacion {
+    @apply relative mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-azulClaroMarca;
+  }
+
+  .loader-guardado-global__animacion::before {
+    @apply absolute inset-0 rounded-full border-4 border-azulMarca/20 content-[''];
+    animation: pulsoLoaderGuardado 1300ms ease-out infinite;
+  }
+
+  .loader-guardado-global__animacion::after {
+    @apply absolute inset-3 rounded-full border-4 border-transparent border-t-rojoMarca content-[''];
+    animation: girarLoaderGuardadoGlobal 900ms linear infinite;
+  }
+
+  .loader-guardado-global__animacion span {
+    @apply h-2.5 w-2.5 rounded-full bg-azulMarca;
+    animation: saltarPuntoLoaderGuardado 900ms ease-in-out infinite;
+  }
+
+  .loader-guardado-global__animacion span + span {
+    @apply ml-1.5;
+  }
+
+  .loader-guardado-global__animacion span:nth-child(2) {
+    animation-delay: 120ms;
+  }
+
+  .loader-guardado-global__animacion span:nth-child(3) {
+    animation-delay: 240ms;
+  }
+
+  .loader-guardado-global__titulo {
+    @apply text-lg font-black text-tinta;
+  }
+
+  .loader-guardado-global__detalle {
+    @apply mt-2 text-sm leading-6 text-slate-600;
+  }
 }
 
 @keyframes aparecerVista {
@@ -109,5 +160,36 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes girarLoaderGuardadoGlobal {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulsoLoaderGuardado {
+  0% {
+    opacity: 0.72;
+    transform: scale(0.86);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.24);
+  }
+}
+
+@keyframes saltarPuntoLoaderGuardado {
+  0%,
+  100% {
+    opacity: 0.42;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-0.42rem);
   }
 }

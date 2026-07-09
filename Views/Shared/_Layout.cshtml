@@ -23,6 +23,30 @@
         <main class="animacion-entrada-vista mx-auto max-w-7xl overflow-x-hidden px-4 py-8 sm:px-6 lg:px-8">
             @RenderBody()
         </main>
+
+        <footer class="relative z-10 mt-4 border-t border-borde bg-white/85 px-4 py-3 text-center text-sm font-semibold text-slate-600 shadow-sm sm:px-6 lg:px-8">
+            <span>Sistema desarrollado por</span>
+            <a href="https://www.ksoftech.com"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="font-bold text-tinta transition hover:text-azulMarca">www.ksoftech.com</a>
+        </footer>
+    </div>
+
+    <div id="loaderGuardadoGlobal"
+         class="loader-guardado-global"
+         role="status"
+         aria-live="polite"
+         aria-hidden="true">
+        <div class="loader-guardado-global__panel">
+            <div class="loader-guardado-global__animacion" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <p id="loaderGuardadoTitulo" class="loader-guardado-global__titulo">Guardando cambios</p>
+            <p id="loaderGuardadoDetalle" class="loader-guardado-global__detalle">Por favor espera mientras se completa la operacion.</p>
+        </div>
     </div>
 
     <a href="https://wa.me/19512388556"
