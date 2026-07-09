@@ -182,38 +182,6 @@
             outline: none;
         }
 
-        .leyenda-desarrollo {
-            position: fixed;
-            right: 1.25rem;
-            bottom: 1.25rem;
-            z-index: 18;
-            padding: 0.48rem 0.78rem;
-            border: 1px solid rgba(255, 255, 255, 0.28);
-            border-radius: 999px;
-            background: rgba(2, 6, 23, 0.46);
-            color: rgba(255, 255, 255, 0.88);
-            font-family: inherit;
-            font-size: clamp(0.76rem, 1.2vw, 0.92rem);
-            font-weight: 650;
-            letter-spacing: 0;
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
-            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.86);
-            backdrop-filter: blur(10px);
-            pointer-events: auto;
-        }
-
-        .leyenda-desarrollo a {
-            color: inherit;
-            font-weight: 750;
-            text-decoration: none;
-        }
-
-        .leyenda-desarrollo a:hover,
-        .leyenda-desarrollo a:focus-visible {
-            color: #ffffff;
-            outline: none;
-        }
-
         @@media (max-aspect-ratio: 4 / 3) {
             .pantalla-publicitaria__visor {
                 max-width: 100vw;
@@ -352,10 +320,6 @@
                 class="boton-pantalla-completa"
                 type="button"
                 aria-label="Activar pantalla completa"></button>
-        <p class="leyenda-desarrollo">
-            Sistema desarrollado por
-            <a href="https://www.ksoftech.com" target="_blank" rel="noopener noreferrer">www.ksoftech.com</a>
-        </p>
     </main>
 
     <script id="datos-publicidad-inicial" type="application/json">@Html.Raw(publicidadesIniciales)</script>
