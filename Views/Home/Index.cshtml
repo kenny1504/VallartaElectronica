@@ -168,13 +168,3 @@
     <script id="datos-sucursales-calculadora" type="application/json">@Html.Raw(datosSucursales)</script>
     <script id="datos-tasas-calculadora" type="application/json">@Html.Raw(datosTasas)</script>
 </section>
-
-<div id="modal-publicidad-historia" class="fixed inset-0 z-[70] hidden items-center justify-center bg-tinta/70 p-2 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="titulo-publicidad-historia" aria-hidden="true">
-    <div class="relative flex max-h-[calc(100vh-1rem)] w-full max-w-[23rem] justify-center rounded-3xl bg-white p-1.5 shadow-2xl sm:max-h-[calc(100vh-2rem)] sm:max-w-md sm:p-2 lg:max-w-xl">
-        <h2 id="titulo-publicidad-historia" class="sr-only">Publicidad de tasas de cambio</h2>
-        <button type="button" id="cerrar-publicidad-historia" class="absolute right-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-2xl font-bold leading-none text-tinta shadow-md transition hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-azulMarca/30" aria-label="Cerrar publicidad">
-            <span aria-hidden="true">×</span>
-        </button>
-        <img id="imagen-publicidad-historia" src="@Url.Content("~/uploads/publicidad/tasas-post.svg")" alt="Publicidad de las tasas de cambio vigentes" class="max-h-[calc(100vh-1rem)] max-w-full rounded-2xl object-contain sm:max-h-[calc(100vh-3rem)]" />
-    </div>
-</div>

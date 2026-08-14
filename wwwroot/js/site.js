@@ -1397,52 +1397,6 @@ function inicializarPublicidadPublica() {
     cargarPublicidad();
 }
 
-function inicializarPublicidadHistoria() {
-    const modal = document.getElementById("modal-publicidad-historia");
-    const imagen = document.getElementById("imagen-publicidad-historia");
-    const botonCerrar = document.getElementById("cerrar-publicidad-historia");
-    if (!modal || !imagen || !botonCerrar) {
-        return;
-    }
-
-    function cerrarPublicidad() {
-        modal.classList.add("hidden");
-        modal.classList.remove("flex");
-        modal.setAttribute("aria-hidden", "true");
-    }
-
-    function mostrarPublicidad() {
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
-        modal.setAttribute("aria-hidden", "false");
-        botonCerrar.focus();
-    }
-
-    botonCerrar.addEventListener("click", cerrarPublicidad);
-    modal.addEventListener("click", evento => {
-        if (evento.target === modal) {
-            cerrarPublicidad();
-        }
-    });
-    document.addEventListener("keydown", evento => {
-        if (evento.key === "Escape" && !modal.classList.contains("hidden")) {
-            cerrarPublicidad();
-        }
-    });
-
-    if (imagen.complete) {
-        if (imagen.naturalWidth > 0) {
-            mostrarPublicidad();
-        } else {
-            cerrarPublicidad();
-        }
-        return;
-    }
-
-    imagen.addEventListener("load", mostrarPublicidad, { once: true });
-    imagen.addEventListener("error", cerrarPublicidad, { once: true });
-}
-
 document.addEventListener("DOMContentLoaded", () => {
     inicializarCalculadoraPublica();
     inicializarFormularioTasaCambio();
@@ -1451,6 +1405,5 @@ document.addEventListener("DOMContentLoaded", () => {
     inicializarCopiaTasasCambio();
     inicializarFormularioPublicidad();
     inicializarPublicidadPublica();
-    inicializarPublicidadHistoria();
     inicializarToasts();
 });
