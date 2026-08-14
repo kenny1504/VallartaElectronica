@@ -1074,6 +1074,12 @@ function inicializarLoaderFormulariosGuardado() {
             }
 
             if (typeof formulario.checkValidity === "function" && !formulario.checkValidity()) {
+                formulario.reportValidity?.();
+                return;
+            }
+
+            const validadorJquery = window.jQuery?.data(formulario, "validator");
+            if (validadorJquery && !window.jQuery(formulario).valid()) {
                 return;
             }
 

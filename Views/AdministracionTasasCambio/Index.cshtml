@@ -17,6 +17,8 @@
         </div>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
             @Html.AntiForgeryToken()
+            <a asp-action="Reporte" asp-route-fechaFiltro="@(Model.FechaFiltro?.ToString("yyyy-MM-dd"))" asp-route-paisIdFiltro="@Model.PaisIdFiltro" asp-route-mostrarTodos="@Model.MostrarTodos" target="_blank" rel="noopener" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-tinta transition hover:-translate-y-1 hover:bg-slate-50 focus:ring-4 focus:ring-slate-200">Imprimir reporte</a>
+            <a asp-action="EdicionMasiva" asp-route-paisId="@Model.PaisIdFiltro" class="boton-exito inline-flex items-center justify-center hover:-translate-y-1 focus:ring-4 focus:ring-emerald-200">Actualizar por pais</a>
             <button id="btnActualizarPublicidadSvg"
                     type="button"
                     data-url="@Url.Action("ActualizarPublicidadSvg", "AdministracionTasasCambio")"

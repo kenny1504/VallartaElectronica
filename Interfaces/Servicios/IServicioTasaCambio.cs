@@ -49,6 +49,7 @@ public interface IServicioTasaCambio
     /// </return>
     Task CrearAsync(TasaCambioRango tasaCambioRango);
     Task<int> CopiarAsync(DateTime? fechaOrigen, DateTime fechaDestino, bool copiarTodas, IReadOnlyCollection<int> tasasSeleccionadas, int? paisIdFiltro = null);
+    Task<int> ActualizarTasasEnLoteAsync(DateTime fechaTasa, int paisId, IReadOnlyCollection<ActualizacionTasaCambioMasivaDto> actualizaciones);
 
     /// <summary>
     /// Actualiza una instancia existente de <see cref="TasaCambioRango"/> en el repositorio.

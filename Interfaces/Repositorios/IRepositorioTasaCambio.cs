@@ -72,6 +72,7 @@ public interface IRepositorioTasaCambio
     Task AgregarAsync(TasaCambioRango tasaCambioRango);
     Task AgregarRangoAsync(IReadOnlyCollection<TasaCambioRango> tasasCambioRango);
     Task GuardarCopiaAsync(IReadOnlyCollection<TasaCambioRango> tasasCambioRango);
+    Task<int> ActualizarValoresEnLoteAsync(DateTime fechaTasa, int paisId, IReadOnlyCollection<ActualizacionTasaCambioMasivaDto> actualizaciones);
 
     /// Actualiza un rango de tasa de cambio existente en el repositorio.
     /// <param name="tasaCambioRango">

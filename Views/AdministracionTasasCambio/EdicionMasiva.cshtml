@@ -1,0 +1,109 @@
+@model ElectronicaVallarta.ViewModels.EdicionMasivaTasasCambioViewModel
+
+@{
+    ViewData["Title"] = "Actualizar tasas por pais";
+}
+
+<section class="space-y-6">
+    <partial name="~/Views/Shared/_BarraAdministracion.cshtml" />
+
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-emerald-700">Actualizacion diaria</p>
+            <h1 class="mt-2 text-3xl font-black text-tinta">Actualizar tasas por pais</h1>
+            <p class="mt-2 max-w-3xl text-sm leading-7 text-slate-600">Selecciona la fecha y el pais. Cambia unicamente las tasas necesarias y guardalas todas en una sola operacion.</p>
+        </div>
+        <a asp-action="Index" asp-route-fechaFiltro="@Model.FechaTasa.ToString("yyyy-MM-dd")" asp-route-paisIdFiltro="@Model.PaisId" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700 transition hover:bg-slate-50">Volver al listado</a>
+    </div>
+
+    <form method="get" class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
+        <div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end">
+            <div class="space-y-2">
+                <label for="fechaFiltro" class="text-sm font-semibold text-slate-700">Fecha de las tasas</label>
+                <input id="fechaFiltro" name="fechaFiltro" type="date" value="@Model.FechaTasa.ToString("yyyy-MM-dd")" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100" />
+            </div>
+            <div class="space-y-2">
+                <label for="paisId" class="text-sm font-semibold text-slate-700">Pais</label>
+                <select id="paisId" name="paisId" asp-items="Model.Paises" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                    <option value="">Selecciona un pais</option>
+                </select>
+            </div>
+            <button type="submit" class="rounded-2xl border border-azulMarca/20 bg-azulClaroMarca px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-azulMarca transition hover:bg-azulMarca hover:text-white">Ver tasas</button>
+        </div>
+    </form>
+
+    @if (!Model.PaisId.HasValue)
+    {
+        <div class="rounded-[2rem] border border-dashed border-slate-300 bg-white/80 px-6 py-12 text-center shadow-panel">
+            <h2 class="text-xl font-black text-tinta">Selecciona un pais para empezar</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-600">La hoja mostrara todos los pagadores y rangos registrados para la fecha elegida.</p>
+        </div>
+    }
+    else if (!Model.Tasas.Any())
+    {
+        <div class="rounded-[2rem] border border-dashed border-slate-300 bg-white/80 px-6 py-12 text-center shadow-panel">
+            <h2 class="text-xl font-black text-tinta">No hay tasas para esta fecha</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-600">Copia las tasas de una fecha anterior desde el listado y luego vuelve a esta pantalla para actualizarlas.</p>
+        </div>
+    }
+    else
+    {
+        <form asp-action="EdicionMasiva" method="post" class="overflow-hidden rounded-[2rem] border border-white/70 bg-white/90 shadow-panel" data-loader-guardado data-loader-titulo="Guardando tasas" data-loader-detalle="Se estan actualizando las tasas del pais seleccionado.">
+            @Html.AntiForgeryToken()
+            <input asp-for="FechaTasa" type="hidden" />
+            <input asp-for="PaisId" type="hidden" />
+
+            <div class="flex flex-col gap-3 border-b border-slate-200 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">@Model.NombrePais</p>
+                    <h2 class="mt-1 text-xl font-black text-tinta">Tasas del @Model.FechaTasa.ToString("MM/dd/yyyy")</h2>
+                </div>
+                <button type="submit" class="boton-exito focus:ring-4 focus:ring-emerald-200">Guardar todas las tasas</button>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="mx-5 mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 sm:mx-6"></div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead class="bg-slate-50/80">
+                        <tr class="text-left text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+                            <th class="px-6 py-4">Sucursal</th>
+                            <th class="px-6 py-4">Rango USD</th>
+                            <th class="px-6 py-4">Tasa de cambio</th>
+                            <th class="px-6 py-4">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                    @for (var indice = 0; indice < Model.Tasas.Count; indice++)
+                    {
+                        var tasa = Model.Tasas[indice];
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="px-6 py-4 font-semibold text-tinta">
+                                <input asp-for="Tasas[indice].Id" type="hidden" />
+                                @tasa.NombreSucursal
+                            </td>
+                            <td class="px-6 py-4 text-slate-600">@tasa.MontoDesdeUsd.ToString("N2") - @(tasa.MontoHastaUsd.HasValue ? tasa.MontoHastaUsd.Value.ToString("N2") : "En adelante")</td>
+                            <td class="min-w-48 px-6 py-4">
+                                <label class="sr-only" asp-for="Tasas[indice].TasaCambio">Tasa para @tasa.NombreSucursal</label>
+                                <input asp-for="Tasas[indice].TasaCambio" inputmode="decimal" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-bold text-tinta outline-none transition focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100" />
+                                <span asp-validation-for="Tasas[indice].TasaCambio" class="mt-1 block text-xs text-rose-600"></span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.15em] @(tasa.EstaActivo ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-600")">@(tasa.EstaActivo ? "Activo" : "Inactivo")</span>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-end border-t border-slate-200 px-5 py-5 sm:px-6">
+                <button type="submit" class="boton-exito focus:ring-4 focus:ring-emerald-200">Guardar todas las tasas</button>
+            </div>
+        </form>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

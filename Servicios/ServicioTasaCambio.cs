@@ -55,6 +55,30 @@ public class ServicioTasaCambio(
         return tasasCopiadas.Count;
     }
 
+    public async Task<int> ActualizarTasasEnLoteAsync(DateTime fechaTasa, int paisId, IReadOnlyCollection<ActualizacionTasaCambioMasivaDto> actualizaciones)
+    {
+        var actualizacionesValidas = actualizaciones
+            .Where(x => x.Id > 0)
+            .ToList();
+
+        if (actualizacionesValidas.Count == 0)
+        {
+            throw new InvalidOperationException("No hay tasas para actualizar.");
+        }
+
+        if (actualizacionesValidas.Select(x => x.Id).Distinct().Count() != actualizacionesValidas.Count)
+        {
+            throw new InvalidOperationException("La solicitud contiene tasas repetidas.");
+        }
+
+        if (actualizacionesValidas.Any(x => x.TasaCambio <= 0))
+        {
+            throw new InvalidOperationException("Todas las tasas deben ser mayores a cero.");
+        }
+
+        return await repositorioTasaCambio.ActualizarValoresEnLoteAsync(fechaTasa.Date, paisId, actualizacionesValidas);
+    }
+
     public async Task ActualizarAsync(TasaCambioRango tasaCambioRango)
     {
         var tasaActual = await repositorioTasaCambio.ObtenerPorIdAsync(tasaCambioRango.Id, false)

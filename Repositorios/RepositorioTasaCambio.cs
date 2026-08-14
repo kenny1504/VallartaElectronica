@@ -222,6 +222,51 @@ public class RepositorioTasaCambio(ContextoAplicacion contexto) : IRepositorioTa
         await contexto.SaveChangesAsync();
     }
 
+    public async Task<int> ActualizarValoresEnLoteAsync(DateTime fechaTasa, int paisId, IReadOnlyCollection<ActualizacionTasaCambioMasivaDto> actualizaciones)
+    {
+        var valoresPorId = actualizaciones.ToDictionary(x => x.Id, x => x.TasaCambio);
+        var tasas = await contexto.TasasCambioRango
+            .AsTracking()
+            .Where(x => valoresPorId.Keys.Contains(x.Id) &&
+                        x.FechaTasa == fechaTasa.Date &&
+                        x.PaisId == paisId)
+            .ToListAsync();
+
+        if (tasas.Count != valoresPorId.Count)
+        {
+            throw new InvalidOperationException("Una o mas tasas ya no pertenecen a la fecha o pais seleccionados.");
+        }
+
+        var fechaActualizacion = DateTime.UtcNow;
+        foreach (var tasa in tasas)
+        {
+            tasa.TasaCambio = valoresPorId[tasa.Id];
+            tasa.FechaActualizacion = fechaActualizacion;
+        }
+
+        var cambiosGuardados = await contexto.SaveChangesAsync();
+        if (cambiosGuardados == 0)
+        {
+            throw new InvalidOperationException("No se detectaron cambios para guardar.");
+        }
+
+        var valoresGuardados = await contexto.TasasCambioRango
+            .AsNoTracking()
+            .Where(x => valoresPorId.Keys.Contains(x.Id) &&
+                        x.FechaTasa == fechaTasa.Date &&
+                        x.PaisId == paisId)
+            .Select(x => new { x.Id, x.TasaCambio })
+            .ToListAsync();
+
+        if (valoresGuardados.Count != valoresPorId.Count ||
+            valoresGuardados.Any(x => x.TasaCambio != valoresPorId[x.Id]))
+        {
+            throw new InvalidOperationException("No se pudo confirmar el guardado de las tasas.");
+        }
+
+        return tasas.Count;
+    }
+
     public async Task ActualizarAsync(TasaCambioRango tasaCambioRango)
     {
         contexto.TasasCambioRango.Update(tasaCambioRango);

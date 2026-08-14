@@ -1,0 +1,91 @@
+@model ElectronicaVallarta.ViewModels.ListadoTasasCambioViewModel
+
+@{
+    Layout = null;
+    var tituloFecha = Model.MostrarTodos || !Model.FechaFiltro.HasValue
+        ? "Todas las fechas"
+        : Model.FechaFiltro.Value.ToString("MM/dd/yyyy");
+    var tituloPais = Model.PaisIdFiltro.HasValue
+        ? Model.Paises.FirstOrDefault(x => x.Value == Model.PaisIdFiltro.Value.ToString())?.Text ?? "Pais seleccionado"
+        : "Todos los paises";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reporte de tasas - Electronica Vallarta</title>
+    <style>
+        :root { color: #14324a; font-family: Arial, sans-serif; }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f4fbff; }
+        .reporte { width: min(100% - 32px, 1100px); margin: 32px auto; background: #fff; border: 1px solid #d6e4f4; border-radius: 20px; padding: 36px; }
+        .encabezado { display: flex; justify-content: space-between; gap: 24px; align-items: center; border-bottom: 2px solid #d6e4f4; padding-bottom: 24px; }
+        .logo { width: 190px; height: auto; }
+        h1 { margin: 0; font-size: 26px; }
+        .subtitulo { margin: 8px 0 0; color: #526475; font-size: 14px; }
+        .acciones { margin: 24px 0; text-align: right; }
+        button { border: 0; border-radius: 10px; background: #14324a; color: #fff; cursor: pointer; font-weight: 700; padding: 12px 18px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { background: #edf7ff; color: #526475; font-size: 11px; letter-spacing: .14em; text-align: left; text-transform: uppercase; }
+        th, td { border-bottom: 1px solid #d6e4f4; padding: 14px 12px; }
+        td:last-child { font-weight: 700; text-align: right; }
+        .vacio { padding: 40px; color: #526475; text-align: center; }
+        @@media print {
+            body { background: #fff; }
+            .reporte { width: 100%; margin: 0; border: 0; border-radius: 0; padding: 0; }
+            .acciones { display: none; }
+            @@page { margin: 14mm; }
+        }
+    </style>
+</head>
+<body>
+    <main class="reporte">
+        <header class="encabezado">
+            <div>
+                <h1>Reporte de tasas de cambio</h1>
+                <p class="subtitulo">Fecha: @tituloFecha · Pais: @tituloPais</p>
+            </div>
+            <img src="@Url.Content("~/img/electronica.png")" alt="Electronica Vallarta" class="logo" />
+        </header>
+
+        <div class="acciones">
+            <button type="button" id="botonImprimirReporte">Imprimir</button>
+        </div>
+
+        @if (Model.Tasas.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pais</th>
+                        <th>Sucursal</th>
+                        <th>Rango USD</th>
+                        <th>Tasa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var tasa in Model.Tasas)
+                {
+                    <tr>
+                        <td>@tasa.NombrePais</td>
+                        <td>@tasa.NombreSucursal</td>
+                        <td>@tasa.MontoDesdeUsd.ToString("N2") - @(tasa.MontoHastaUsd.HasValue ? tasa.MontoHastaUsd.Value.ToString("N2") : "En adelante")</td>
+                        <td>@tasa.TasaCambio.ToString("N4")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="vacio">No hay tasas disponibles para los filtros seleccionados.</p>
+        }
+    </main>
+
+    <script>
+        document.getElementById("botonImprimirReporte")?.addEventListener("click", () => window.print());
+    </script>
+</body>
+</html>
