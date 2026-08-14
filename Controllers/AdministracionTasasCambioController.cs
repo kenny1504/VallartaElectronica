@@ -251,7 +251,7 @@ public class AdministracionTasasCambioController(
             return fechaParseada.Date;
         }
 
-        return DateTime.Today;
+        return DateTime.Today.AddDays(-1);
     }
 
     private static DateTime ObtenerFechaFiltroEdicionMasiva(string? fechaFiltro)
