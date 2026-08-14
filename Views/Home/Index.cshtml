@@ -31,7 +31,8 @@
                 <div class="flex items-center justify-center gap-4">
                     <div class="text-center">
                         <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-azulMarca sm:text-sm">Actualizado</p>
-                        <p id="fecha-actualizacion-cliente" class="mt-1 text-xl font-black text-tinta sm:mt-2 sm:text-3xl">--/--/----</p>
+                        <p id="fecha-actualizacion-cliente" class="mt-1 text-xl font-black text-tinta sm:mt-2 sm:text-3xl" aria-live="polite">--/--/----</p>
+                        <p id="hora-actualizacion-cliente" class="mt-1 text-xs font-semibold text-slate-600" aria-live="polite">Hora: --:--</p>
                     </div>
                     <p class="hidden max-w-[12rem] text-right text-sm leading-6 text-slate-600 sm:block">
                         Tasas visibles para consulta rapida y cotizacion inmediata.
@@ -41,8 +42,19 @@
         </div>
     </div>
 
-    <div class="grid gap-6 xl:grid-cols-[minmax(0,1.28fr)_minmax(21rem,0.82fr)]">
-        <div class="min-w-0 tarjeta-panel overflow-hidden">
+    <div role="note" aria-label="Aviso sobre pagos en efectivo" class="flex items-start gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-amber-900 shadow-sm sm:items-center sm:px-5">
+        <span class="inline-flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-amber-100 text-amber-600" aria-hidden="true">
+            <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current">
+                <path fill-rule="evenodd" d="M10.29 3.86c.76-1.3 2.66-1.3 3.42 0l8.03 13.77c.77 1.32-.18 2.97-1.71 2.97H3.97c-1.53 0-2.48-1.65-1.71-2.97l8.03-13.77ZM12 8a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V9a1 1 0 0 1 1-1Zm0 9.25a1.25 1.25 0 1 0 0-2.5 1.25 1.25 0 0 0 0 2.5Z" clip-rule="evenodd" />
+            </svg>
+        </span>
+        <p class="min-w-0 flex-1 text-left text-xs font-semibold leading-5 sm:text-sm">
+            Al pagar en efectivo aplica un impuesto del <strong class="font-black">1%</strong>. Evítalo con <strong class="font-black">tarjeta de débito o Apple Pay</strong>.
+        </p>
+    </div>
+
+    <div class="grid gap-4 xl:gap-6 xl:grid-cols-[minmax(0,1.28fr)_minmax(21rem,0.82fr)]">
+        <div class="order-1 min-w-0 tarjeta-panel overflow-hidden">
             <div class="border-b border-borde px-5 py-4 sm:px-7 sm:py-5">
                 <h2 class="text-2xl font-black text-tinta">Calculadora de Envio</h2>
                 <p class="mt-2 text-sm leading-7 text-slate-600">Tu envias en USD y te mostramos de inmediato cuanto recibe en el pais destino.</p>
@@ -83,13 +95,42 @@
                     
                 </form>
 
-                <div id="contenedor-resultado" class="overflow-x-hidden rounded-[1.75rem] border border-borde bg-azulClaroMarca/70 p-5 text-sm leading-7 text-slate-600">
+                <div id="contenedor-resultado" class="overflow-x-hidden rounded-[1.75rem] border border-borde bg-azulClaroMarca/70 p-3 text-sm leading-7 text-slate-600 sm:p-5">
                     Completa los datos para ver la cotizacion en tiempo real.
                 </div>
             </div>
         </div>
 
-        <aside class="min-w-0 space-y-4">
+        <section id="seccion-contacto" aria-labelledby="titulo-contacto" class="order-2 tarjeta-panel flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-5 sm:px-7 sm:py-5 xl:col-span-2 xl:order-3">
+            <div class="flex items-center gap-4">
+                <span class="inline-flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-azulClaroMarca text-azulMarca sm:h-12 sm:w-12 sm:rounded-2xl" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" class="h-6 w-6 fill-current sm:h-7 sm:w-7">
+                        <path d="M12 2a7 7 0 0 0-7 7v3a3 3 0 0 0 3 3h1v-5H7V9a5 5 0 0 1 10 0v1h-2v5h1a3 3 0 0 0 3-3V9a7 7 0 0 0-7-7Zm2 15H10v-2h4v2Zm1 3H9v-2h6v2Z" />
+                    </svg>
+                </span>
+                <div>
+                    <h2 id="titulo-contacto" class="text-base font-black text-tinta sm:text-lg">Estamos para orientarte</h2>
+                    <p class="mt-1 text-xs leading-5 text-slate-600 sm:text-sm sm:leading-6">Comunícate con nuestro equipo por llamada o WhatsApp.</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end sm:gap-3">
+                <a href="tel:+19519435215" class="inline-flex items-center justify-center gap-2 rounded-xl border border-azulMarca/20 bg-azulClaroMarca px-3 py-2 text-xs font-bold text-tinta transition hover:bg-azulMarca hover:text-white sm:px-4 sm:py-2.5 sm:text-sm">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" aria-hidden="true">
+                        <path d="M6.62 10.79a15.46 15.46 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.31.56 3.57.56a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.61 21 3 13.39 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.26.19 2.45.56 3.57a1 1 0 0 1-.24 1.02l-2.2 2.2Z" />
+                    </svg>
+                    <span>(951) 943-5215</span>
+                </a>
+                <a href="https://wa.me/19512388556" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[#1fb859] sm:px-4 sm:py-2.5 sm:text-sm">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" aria-hidden="true">
+                        <path d="M19.05 4.91A9.82 9.82 0 0 0 12.03 2c-5.46 0-9.9 4.44-9.9 9.9 0 1.74.45 3.43 1.31 4.93L2 22l5.32-1.39a9.9 9.9 0 0 0 4.71 1.2h.01c5.46 0 9.9-4.44 9.9-9.9 0-2.64-1.03-5.11-2.89-7m-7.02 15.23h-.01a8.26 8.26 0 0 1-4.2-1.15l-.3-.18-3.16.83.84-3.08-.2-.32a8.23 8.23 0 0 1-1.27-4.35c0-4.54 3.69-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.41a8.18 8.18 0 0 1 2.4 5.82c0 4.54-3.69 8.24-8.23 8.24m4.51-6.16c-.25-.13-1.47-.72-1.7-.8s-.39-.12-.56.12-.64.8-.78.96-.28.19-.53.06a6.77 6.77 0 0 1-1.99-1.23 7.5 7.5 0 0 1-1.38-1.71c-.14-.25-.02-.39.11-.52.11-.11.25-.28.37-.42s.16-.24.25-.4.04-.31-.02-.44-.56-1.35-.77-1.85c-.2-.48-.4-.41-.56-.42h-.47c-.17 0-.44.06-.67.31s-.88.86-.88 2.1.9 2.45 1.02 2.62 1.76 2.69 4.27 3.77c.6.26 1.06.41 1.42.52.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.17s.21-1.06.15-1.17-.22-.17-.47-.3" />
+                    </svg>
+                    <span>WhatsApp: (951) 238-8556</span>
+                </a>
+            </div>
+        </section>
+
+        <aside class="order-3 min-w-0 space-y-4 xl:order-2">
             <div class="tarjeta-panel overflow-hidden">
                 <div class="border-b border-borde px-6 py-5 sm:px-7">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
@@ -127,3 +168,13 @@
     <script id="datos-sucursales-calculadora" type="application/json">@Html.Raw(datosSucursales)</script>
     <script id="datos-tasas-calculadora" type="application/json">@Html.Raw(datosTasas)</script>
 </section>
+
+<div id="modal-publicidad-historia" class="fixed inset-0 z-[70] hidden items-center justify-center bg-tinta/70 p-2 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="titulo-publicidad-historia" aria-hidden="true">
+    <div class="relative flex max-h-[calc(100vh-1rem)] w-full max-w-[23rem] justify-center rounded-3xl bg-white p-1.5 shadow-2xl sm:max-h-[calc(100vh-2rem)] sm:max-w-md sm:p-2 lg:max-w-xl">
+        <h2 id="titulo-publicidad-historia" class="sr-only">Publicidad de tasas de cambio</h2>
+        <button type="button" id="cerrar-publicidad-historia" class="absolute right-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-2xl font-bold leading-none text-tinta shadow-md transition hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-azulMarca/30" aria-label="Cerrar publicidad">
+            <span aria-hidden="true">×</span>
+        </button>
+        <img id="imagen-publicidad-historia" src="@Url.Content("~/uploads/publicidad/tasas-post.svg")" alt="Publicidad de las tasas de cambio vigentes" class="max-h-[calc(100vh-1rem)] max-w-full rounded-2xl object-contain sm:max-h-[calc(100vh-3rem)]" />
+    </div>
+</div>

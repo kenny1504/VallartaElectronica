@@ -64,6 +64,7 @@ public class HomeController(
                 PaisId = x.PaisId,
                 SucursalId = x.SucursalId,
                 FechaTasa = x.FechaTasa,
+                FechaUltimaActualizacion = x.FechaActualizacion ?? x.FechaCreacion,
                 NombreSucursal = x.Sucursal!.Nombre,
                 NombrePais = x.Pais!.Nombre,
                 MontoDesdeUsd = x.MontoDesdeUsd,

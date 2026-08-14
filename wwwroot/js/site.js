@@ -130,6 +130,7 @@ function inicializarCalculadoraPublica() {
     const leyendaMonedaEntrada = document.getElementById("leyenda-moneda-entrada");
     const campoFechaCliente = document.getElementById("fechaCliente");
     const etiquetaFechaActualizacion = document.getElementById("fecha-actualizacion-cliente");
+    const etiquetaHoraActualizacion = document.getElementById("hora-actualizacion-cliente");
     const contenedorResultado = document.getElementById("contenedor-resultado");
     const contenedorListaTasas = document.getElementById("lista-tasas");
     const descripcionTasas = document.getElementById("descripcion-tasas");
@@ -142,7 +143,7 @@ function inicializarCalculadoraPublica() {
     const paisInicial = modulo.dataset.paisInicial ?? "";
     const sucursalInicial = modulo.dataset.sucursalInicial ?? "";
     let temporizadorCalculo = null;
-    let debeDesplazarResultado = false;
+    let temporizadorDesplazamientoResultado = null;
     let rangoVisible = "menor";
     let ultimaClaveCalculada = "";
     let modoMonedaEntrada = "usd";
@@ -166,18 +167,39 @@ function inicializarCalculadoraPublica() {
             campoFechaCliente.value = fechaCliente;
         }
 
-        if (etiquetaFechaActualizacion) {
-            etiquetaFechaActualizacion.textContent = formatearFechaVisible(fechaCliente);
-        }
-
         return fechaCliente;
     }
 
-    function desplazarResultadoEnMovil() {
-        if (window.innerWidth >= 768) {
-            return;
+    function actualizarFechaHoraActualizacion() {
+        const fechasActualizacion = tasas
+            .map(tasa => new Date(tasa.fechaUltimaActualizacion))
+            .filter(fecha => !Number.isNaN(fecha.getTime()));
+        const fechaMasReciente = fechasActualizacion.length
+            ? new Date(Math.max(...fechasActualizacion.map(fecha => fecha.getTime())))
+            : null;
+
+        if (etiquetaFechaActualizacion) {
+            etiquetaFechaActualizacion.textContent = fechaMasReciente
+                ? new Intl.DateTimeFormat("es-MX", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric"
+                }).format(fechaMasReciente)
+                : "--/--/----";
         }
 
+        if (etiquetaHoraActualizacion) {
+            etiquetaHoraActualizacion.textContent = fechaMasReciente
+                ? `Hora: ${new Intl.DateTimeFormat("es-MX", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true
+                }).format(fechaMasReciente)}`
+                : "Hora: --:--";
+        }
+    }
+
+    function desplazarResultado() {
         const margenSuperior = 88;
         const posicionObjetivo = contenedorResultado.getBoundingClientRect().top + window.scrollY - margenSuperior;
 
@@ -185,6 +207,32 @@ function inicializarCalculadoraPublica() {
             top: Math.max(posicionObjetivo, 0),
             behavior: "smooth"
         });
+    }
+
+    function cancelarDesplazamientoResultadoPendiente() {
+        if (temporizadorDesplazamientoResultado !== null) {
+            window.clearTimeout(temporizadorDesplazamientoResultado);
+            temporizadorDesplazamientoResultado = null;
+        }
+
+        window.scrollTo({ top: window.scrollY, behavior: "auto" });
+    }
+
+    function programarDesplazamientoResultado() {
+        cancelarDesplazamientoResultadoPendiente();
+        const claveSolicitudProgramada = obtenerClaveSolicitudActual();
+
+        temporizadorDesplazamientoResultado = window.setTimeout(async () => {
+            temporizadorDesplazamientoResultado = null;
+            await calcularCotizacion();
+
+            if (claveSolicitudProgramada !== obtenerClaveSolicitudActual() ||
+                !contenedorResultado.querySelector("[data-resultado-exitoso='true']")) {
+                return;
+            }
+
+            desplazarResultado();
+        }, 3000);
     }
 
     function obtenerPaisSeleccionado() {
@@ -403,6 +451,7 @@ function inicializarCalculadoraPublica() {
         }
 
         renderizarTasas();
+        actualizarFechaHoraActualizacion();
         sincronizarCampoEntrada();
     }
 
@@ -453,11 +502,6 @@ function inicializarCalculadoraPublica() {
         }
 
         if (claveActual === ultimaClaveCalculada) {
-            if (debeDesplazarResultado) {
-                desplazarResultadoEnMovil();
-                debeDesplazarResultado = false;
-            }
-
             return;
         }
 
@@ -472,21 +516,15 @@ function inicializarCalculadoraPublica() {
         contenedorResultado.innerHTML = await respuesta.text();
         ultimaClaveCalculada = claveActual;
         sincronizarCampoEntrada();
-        if (debeDesplazarResultado) {
-            desplazarResultadoEnMovil();
-        }
-
-        debeDesplazarResultado = false;
     }
 
     function programarCalculo(opciones = {}) {
-        const { desplazar = false, demora = 280 } = opciones;
+        const { demora = 280 } = opciones;
 
         if (temporizadorCalculo !== null) {
             window.clearTimeout(temporizadorCalculo);
         }
 
-        debeDesplazarResultado = desplazar;
         temporizadorCalculo = window.setTimeout(() => {
             calcularCotizacion();
         }, demora);
@@ -500,6 +538,7 @@ function inicializarCalculadoraPublica() {
     sincronizarCampoEntrada();
 
     selectorPais.addEventListener("change", () => {
+        cancelarDesplazamientoResultadoPendiente();
         cargarSucursales(false);
         rangoVisible = obtenerRangoSugerido();
         renderizarTasas();
@@ -508,12 +547,14 @@ function inicializarCalculadoraPublica() {
     });
 
     selectorSucursal.addEventListener("change", () => {
+        cancelarDesplazamientoResultadoPendiente();
         renderizarTasas();
         sincronizarCampoEntrada();
         programarCalculo({ demora: 180 });
     });
 
     campoMontoVisible.addEventListener("input", () => {
+        cancelarDesplazamientoResultadoPendiente();
         if (modoMonedaEntrada === "destino") {
             const tasaDestino = obtenerTasaParaEntradaDestino();
             const montoDestino = obtenerMontoVisibleActual();
@@ -532,6 +573,7 @@ function inicializarCalculadoraPublica() {
         renderizarTasas();
         // Esperar un poco mas evita consultas intermedias mientras el usuario sigue escribiendo.
         programarCalculo({ demora: 900 });
+        programarDesplazamientoResultado();
     });
 
     campoMontoVisible.addEventListener("blur", () => {
@@ -539,7 +581,6 @@ function inicializarCalculadoraPublica() {
             campoMontoVisible.value = Number(campoMonto.value).toFixed(2);
         }
 
-        programarCalculo({ desplazar: true, demora: 0 });
     });
 
     botonMonedaEntrada?.addEventListener("click", () => {
@@ -558,7 +599,7 @@ function inicializarCalculadoraPublica() {
         rangoVisible = "mayor";
         renderizarTasas();
         sincronizarCampoEntrada();
-        programarCalculo({ desplazar: true, demora: 0 });
+        programarCalculo({ demora: 0 });
     });
 
     pestanaRangoMenor?.addEventListener("click", () => {
@@ -1350,6 +1391,52 @@ function inicializarPublicidadPublica() {
     cargarPublicidad();
 }
 
+function inicializarPublicidadHistoria() {
+    const modal = document.getElementById("modal-publicidad-historia");
+    const imagen = document.getElementById("imagen-publicidad-historia");
+    const botonCerrar = document.getElementById("cerrar-publicidad-historia");
+    if (!modal || !imagen || !botonCerrar) {
+        return;
+    }
+
+    function cerrarPublicidad() {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        modal.setAttribute("aria-hidden", "true");
+    }
+
+    function mostrarPublicidad() {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        modal.setAttribute("aria-hidden", "false");
+        botonCerrar.focus();
+    }
+
+    botonCerrar.addEventListener("click", cerrarPublicidad);
+    modal.addEventListener("click", evento => {
+        if (evento.target === modal) {
+            cerrarPublicidad();
+        }
+    });
+    document.addEventListener("keydown", evento => {
+        if (evento.key === "Escape" && !modal.classList.contains("hidden")) {
+            cerrarPublicidad();
+        }
+    });
+
+    if (imagen.complete) {
+        if (imagen.naturalWidth > 0) {
+            mostrarPublicidad();
+        } else {
+            cerrarPublicidad();
+        }
+        return;
+    }
+
+    imagen.addEventListener("load", mostrarPublicidad, { once: true });
+    imagen.addEventListener("error", cerrarPublicidad, { once: true });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     inicializarCalculadoraPublica();
     inicializarFormularioTasaCambio();
@@ -1358,5 +1445,6 @@ document.addEventListener("DOMContentLoaded", () => {
     inicializarCopiaTasasCambio();
     inicializarFormularioPublicidad();
     inicializarPublicidadPublica();
+    inicializarPublicidadHistoria();
     inicializarToasts();
 });
