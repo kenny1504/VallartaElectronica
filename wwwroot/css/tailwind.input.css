@@ -99,6 +99,183 @@
     animation: aparecerVista 480ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
+  .decoracion-mes-patrio {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    overflow: hidden;
+  }
+
+  .decoracion-mes-patrio__encabezado {
+    position: absolute;
+    top: 5.55rem;
+    left: 50%;
+    z-index: 30;
+    display: flex;
+    width: min(34rem, calc(100vw - 2rem));
+    transform: translateX(-50%);
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+  }
+
+  .decoracion-mes-patrio__bandera {
+    position: relative;
+    width: clamp(4.5rem, 11vw, 6.5rem);
+    height: clamp(2.55rem, 6.25vw, 3.7rem);
+    flex: none;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.88);
+    border-radius: 0.65rem;
+    background: linear-gradient(90deg, #006847 0 33.33%, #ffffff 33.33% 66.66%, #ce1126 66.66% 100%);
+    box-shadow: 0 14px 30px rgba(20, 50, 74, 0.15);
+    opacity: 0.86;
+    transform: rotate(-7deg);
+    animation: ondearBanderaPatria 5.8s ease-in-out infinite;
+  }
+
+  .decoracion-mes-patrio__bandera::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0.75rem;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    border: 2px solid #8c6a22;
+    border-radius: 999px;
+    background: radial-gradient(circle, #c49a39 0 34%, transparent 38%);
+  }
+
+  .decoracion-mes-patrio__bandera--derecha {
+    transform: rotate(7deg);
+    animation-name: ondearBanderaPatriaDerecha;
+    animation-delay: -2.9s;
+  }
+
+  .decoracion-mes-patrio__insignia {
+    display: grid;
+    min-width: min(13rem, calc(100vw - 11rem));
+    border: 1px solid rgba(255, 255, 255, 0.88);
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(244, 255, 249, 0.95), rgba(255, 255, 255, 0.96) 50%, rgba(255, 244, 244, 0.95));
+    box-shadow: 0 14px 32px rgba(20, 50, 74, 0.13);
+    padding: 0.42rem 1rem 0.5rem;
+    text-align: center;
+    color: #14324a;
+    opacity: 0.92;
+  }
+
+  .decoracion-mes-patrio__insignia span {
+    font-size: 0.62rem;
+    font-weight: 900;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #006847;
+  }
+
+  .decoracion-mes-patrio__insignia strong {
+    margin-top: 0.12rem;
+    font-size: 0.82rem;
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: 0.05em;
+    color: #b51f2f;
+  }
+
+  .decoracion-mes-patrio__costado {
+    position: absolute;
+    top: 50%;
+    z-index: 5;
+    width: clamp(3.8rem, 6vw, 5.4rem);
+    opacity: 0.62;
+    filter: drop-shadow(0 16px 24px rgba(20, 50, 74, 0.18));
+    animation: flotarMaracaPatria 6.8s ease-in-out infinite;
+  }
+
+  .decoracion-mes-patrio__costado--izquierdo {
+    left: max(1.5rem, calc((100vw - 80rem) / 2 - 7.5rem));
+  }
+
+  .decoracion-mes-patrio__costado--derecho {
+    right: max(1.5rem, calc((100vw - 80rem) / 2 - 7.5rem));
+    animation-delay: -3.4s;
+  }
+
+  .decoracion-mes-patrio__costado svg {
+    width: 100%;
+  }
+
+  .decoracion-mes-patrio__confeti span {
+    position: absolute;
+    z-index: 20;
+    width: 0.42rem;
+    height: 0.78rem;
+    border-radius: 0.14rem;
+    background: #006847;
+    opacity: 0.28;
+    animation: flotarConfetiPatrio 8.5s ease-in-out infinite;
+  }
+
+  .decoracion-mes-patrio__confeti span:nth-child(1) { left: 6%; top: 15%; animation-delay: -1.4s; }
+  .decoracion-mes-patrio__confeti span:nth-child(2) { left: 13%; top: 32%; background: #ce1126; animation-delay: -5.2s; }
+  .decoracion-mes-patrio__confeti span:nth-child(3) { left: 25%; top: 11%; background: #ffffff; box-shadow: 0 0 0 1px rgba(20, 50, 74, 0.08); animation-delay: -3.1s; }
+  .decoracion-mes-patrio__confeti span:nth-child(4) { left: 35%; top: 8%; background: #ce1126; animation-delay: -6.6s; }
+  .decoracion-mes-patrio__confeti span:nth-child(5) { right: 34%; top: 9%; background: #006847; animation-delay: -2.5s; }
+  .decoracion-mes-patrio__confeti span:nth-child(6) { right: 24%; top: 13%; background: #ffffff; box-shadow: 0 0 0 1px rgba(20, 50, 74, 0.08); animation-delay: -7.2s; }
+  .decoracion-mes-patrio__confeti span:nth-child(7) { right: 13%; top: 29%; background: #ce1126; animation-delay: -4.4s; }
+  .decoracion-mes-patrio__confeti span:nth-child(8) { right: 6%; top: 16%; animation-delay: -0.8s; }
+  .decoracion-mes-patrio__confeti span:nth-child(9) { left: 4%; bottom: 27%; background: #ffffff; box-shadow: 0 0 0 1px rgba(20, 50, 74, 0.08); animation-delay: -6.1s; }
+  .decoracion-mes-patrio__confeti span:nth-child(10) { left: 16%; bottom: 13%; background: #ce1126; animation-delay: -2.9s; }
+  .decoracion-mes-patrio__confeti span:nth-child(11) { right: 16%; bottom: 16%; animation-delay: -5.8s; }
+  .decoracion-mes-patrio__confeti span:nth-child(12) { right: 4%; bottom: 29%; background: #ffffff; box-shadow: 0 0 0 1px rgba(20, 50, 74, 0.08); animation-delay: -3.7s; }
+
+  .decoracion-mes-patrio__estrellas span {
+    position: absolute;
+    z-index: 19;
+    width: clamp(0.7rem, 1.45vw, 1.2rem);
+    aspect-ratio: 1;
+    background: #006847;
+    clip-path: polygon(50% 0, 61% 34%, 98% 35%, 68% 56%, 79% 91%, 50% 70%, 21% 91%, 32% 56%, 2% 35%, 39% 34%);
+    opacity: 0.42;
+    filter: drop-shadow(0 4px 7px rgba(20, 50, 74, 0.1));
+    animation: flotarEstrellaPatria 7s ease-in-out infinite;
+  }
+
+  .decoracion-mes-patrio__estrellas span:nth-child(1) { left: 9%; top: 21%; animation-delay: -1.2s; }
+  .decoracion-mes-patrio__estrellas span:nth-child(2) { left: 19%; top: 14%; background: #ce1126; animation-delay: -4.6s; }
+  .decoracion-mes-patrio__estrellas span:nth-child(3) { left: 29%; top: 29%; background: #ffffff; animation-delay: -2.4s; }
+  .decoracion-mes-patrio__estrellas span:nth-child(4) { right: 29%; top: 26%; animation-delay: -5.5s; }
+  .decoracion-mes-patrio__estrellas span:nth-child(5) { right: 18%; top: 15%; background: #ffffff; animation-delay: -3.5s; }
+  .decoracion-mes-patrio__estrellas span:nth-child(6) { right: 8%; top: 23%; background: #ce1126; animation-delay: -0.7s; }
+  .decoracion-mes-patrio__estrellas span:nth-child(7) { left: 8%; bottom: 20%; background: #ce1126; animation-delay: -5.9s; }
+  .decoracion-mes-patrio__estrellas span:nth-child(8) { left: 24%; bottom: 11%; animation-delay: -2.8s; }
+  .decoracion-mes-patrio__estrellas span:nth-child(9) { right: 24%; bottom: 15%; background: #ce1126; animation-delay: -4.1s; }
+  .decoracion-mes-patrio__estrellas span:nth-child(10) { right: 8%; bottom: 23%; background: #ffffff; animation-delay: -1.8s; }
+
+  .seccion-administracion .decoracion-mes-patrio {
+    z-index: 0;
+  }
+
+  .seccion-administracion .decoracion-mes-patrio__encabezado {
+    opacity: 0.42;
+    transform: translateX(-50%) scale(0.9);
+  }
+
+  .seccion-administracion .decoracion-mes-patrio__confeti span {
+    opacity: 0.16;
+  }
+
+  .seccion-administracion .decoracion-mes-patrio__estrellas span {
+    opacity: 0.16;
+  }
+
+  .seccion-administracion .decoracion-mes-patrio__costado {
+    opacity: 0.14;
+  }
+
   .loader-guardado-global {
     @apply fixed inset-0 z-[80] hidden items-center justify-center bg-tinta/35 px-4 backdrop-blur-sm;
   }
@@ -160,6 +337,154 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes ondearBanderaPatria {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-7deg);
+  }
+
+  50% {
+    transform: translate3d(0, -0.3rem, 0) rotate(-4deg);
+  }
+}
+
+@keyframes ondearBanderaPatriaDerecha {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(7deg);
+  }
+
+  50% {
+    transform: translate3d(0, -0.3rem, 0) rotate(4deg);
+  }
+}
+
+@keyframes flotarMaracaPatria {
+  0%,
+  100% {
+    transform: translate3d(0, -50%, 0) rotate(-3deg);
+  }
+
+  50% {
+    transform: translate3d(0, calc(-50% - 0.5rem), 0) rotate(3deg);
+  }
+}
+
+@keyframes flotarConfetiPatrio {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+
+  50% {
+    transform: translate3d(0.2rem, 1rem, 0) rotate(90deg);
+  }
+}
+
+@keyframes flotarEstrellaPatria {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-5deg) scale(0.96);
+  }
+
+  50% {
+    transform: translate3d(0.25rem, -0.65rem, 0) rotate(8deg) scale(1.08);
+  }
+}
+
+@media (max-width: 1535px) {
+  .decoracion-mes-patrio__costado {
+    width: 3.7rem;
+    opacity: 0.32;
+  }
+
+  .decoracion-mes-patrio__encabezado {
+    width: min(31rem, calc(100vw - 2rem));
+  }
+
+  .decoracion-mes-patrio__confeti span:nth-child(n+9) {
+    display: none;
+  }
+
+  .decoracion-mes-patrio__estrellas span:nth-child(n+9) {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .decoracion-mes-patrio__encabezado {
+    top: 5.35rem;
+    width: min(22rem, calc(100vw - 1rem));
+    gap: 0.45rem;
+  }
+
+  .decoracion-mes-patrio__bandera {
+    width: clamp(3.4rem, 19vw, 4.5rem);
+    height: clamp(1.95rem, 11vw, 2.55rem);
+    border-radius: 0.5rem;
+  }
+
+  .decoracion-mes-patrio__bandera::after {
+    width: 0.45rem;
+    border-width: 1px;
+  }
+
+  .decoracion-mes-patrio__insignia {
+    min-width: min(10rem, calc(100vw - 9rem));
+    padding: 0.34rem 0.65rem 0.4rem;
+  }
+
+  .decoracion-mes-patrio__insignia span {
+    font-size: 0.54rem;
+  }
+
+  .decoracion-mes-patrio__insignia strong {
+    font-size: 0.7rem;
+  }
+
+  .decoracion-mes-patrio__costado {
+    display: none;
+  }
+
+  .decoracion-mes-patrio__confeti span:nth-child(n+5) {
+    display: none;
+  }
+
+  .decoracion-mes-patrio__estrellas span:nth-child(n+7) {
+    display: none;
+  }
+
+  .decoracion-mes-patrio__confeti span {
+    width: 0.32rem;
+    height: 0.6rem;
+    opacity: 0.22;
+  }
+
+  .decoracion-mes-patrio__estrellas span {
+    width: clamp(0.58rem, 3vw, 0.82rem);
+    opacity: 0.3;
+  }
+}
+
+@media (max-width: 420px) {
+  .decoracion-mes-patrio__insignia {
+    min-width: 8.6rem;
+  }
+
+  .decoracion-mes-patrio__insignia span {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .decoracion-mes-patrio__bandera,
+  .decoracion-mes-patrio__costado,
+  .decoracion-mes-patrio__confeti span,
+  .decoracion-mes-patrio__estrellas span {
+    animation: none;
   }
 }
 
