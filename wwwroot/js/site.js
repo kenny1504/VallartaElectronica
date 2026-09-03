@@ -1397,12 +1397,171 @@ function inicializarPublicidadPublica() {
     cargarPublicidad();
 }
 
+function inicializarContenidoMetaTasas() {
+    const botonGenerar = document.getElementById("btnGenerarContenidoMeta");
+    const contenedor = document.getElementById("contenidoMetaTasas");
+    const campoContenido = document.getElementById("textoContenidoMeta");
+    const botonCopiar = document.getElementById("btnCopiarContenidoMeta");
+    const campoFechaFiltro = document.getElementById("fechaFiltro");
+    const mensajeContenido = document.getElementById("mensajeContenidoMeta");
+
+    if (!botonGenerar || !contenedor || !campoContenido || !botonCopiar) {
+        return;
+    }
+
+    function formatearNumero(valor, maximoDecimales = 4) {
+        return Number(valor).toLocaleString("en-US", {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: maximoDecimales
+        });
+    }
+
+    function formatearFecha(fecha) {
+        const [anio, mes, dia] = String(fecha || "").slice(0, 10).split("-");
+        return anio && mes && dia ? `${dia}/${mes}/${anio}` : "--/--/----";
+    }
+
+    function obtenerTextoRangoMeta(tasa) {
+        const desde = formatearNumero(tasa.montoDesdeUsd);
+        if (tasa.montoHastaUsd === null || tasa.montoHastaUsd === undefined) {
+            return `USD $${desde} en adelante`;
+        }
+
+        return `USD $${desde} a $${formatearNumero(tasa.montoHastaUsd)}`;
+    }
+
+    function generarContenido(tasas) {
+        const tasasOrdenadas = [...tasas].sort((izquierda, derecha) =>
+            String(izquierda.nombrePais).localeCompare(String(derecha.nombrePais), "es") ||
+            String(izquierda.nombreSucursal).localeCompare(String(derecha.nombreSucursal), "es") ||
+            Number(izquierda.montoDesdeUsd) - Number(derecha.montoDesdeUsd));
+        const fechaTasa = tasasOrdenadas[0]?.fechaTasa;
+        const bloquesPaises = [];
+
+        tasasOrdenadas.forEach(tasa => {
+            const ultimoPais = bloquesPaises[bloquesPaises.length - 1];
+            const esMismoPais = ultimoPais && ultimoPais.nombre === tasa.nombrePais && ultimoPais.moneda === tasa.codigoMoneda;
+            const pais = esMismoPais
+                ? ultimoPais
+                : { nombre: tasa.nombrePais, moneda: tasa.codigoMoneda, pagadores: [] };
+
+            if (!esMismoPais) {
+                bloquesPaises.push(pais);
+            }
+
+            let pagador = pais.pagadores.find(item => item.nombre === tasa.nombreSucursal);
+            if (!pagador) {
+                pagador = { nombre: tasa.nombreSucursal, tasas: [] };
+                pais.pagadores.push(pagador);
+            }
+
+            pagador.tasas.push(tasa);
+        });
+
+        const contenidoTasas = bloquesPaises.map(pais => [
+            `${String(pais.nombre).toLocaleUpperCase("es-MX")} — ${pais.moneda}`,
+            ...pais.pagadores.flatMap(pagador => [
+                "",
+                pagador.nombre,
+                "",
+                ...pagador.tasas.map(tasa => `- ${obtenerTextoRangoMeta(tasa)} → ${formatearNumero(tasa.tasaCambio)} ${tasa.codigoMoneda}`)
+            ])
+        ].flat().join("\n")).join("\n\n");
+
+        return `TASAS OFICIALES VIGENTES\nFecha: ${formatearFecha(fechaTasa)}\n\n${contenidoTasas}\n\nREGLAS\n\n- Estas son las tasas oficiales de Electrónica Vallarta.\n- Los rangos corresponden al monto enviado en USD.\n- Los límites son inclusivos.\n- Selecciona la tasa considerando país, pagador y monto.\n- Para calcular cuánto reciben: USD × tasa.\n- Para calcular cuánto deben enviar: monto deseado ÷ tasa.\n- No inventes tasas, comisiones ni cargos.`;
+    }
+
+    function establecerCargando(estaCargando) {
+        botonGenerar.disabled = estaCargando;
+        botonGenerar.querySelector("[data-texto]").textContent = estaCargando ? "Generando contenido" : "Generar contenido para Meta";
+        botonGenerar.querySelector("[data-loader]").classList.toggle("hidden", !estaCargando);
+    }
+
+    function mostrarNotificacion(tipo, mensaje) {
+        const toast = document.createElement("div");
+        toast.className = `toast-notificacion ${tipo === "error" ? "toast-error" : "toast-exito"}`;
+        toast.setAttribute("role", "status");
+        toast.textContent = mensaje;
+        document.body.appendChild(toast);
+        window.setTimeout(() => toast.remove(), 4200);
+    }
+
+    function mostrarMensajeContenido(tipo, mensaje) {
+        if (!mensajeContenido) {
+            mostrarNotificacion(tipo, mensaje);
+            return;
+        }
+
+        mensajeContenido.textContent = mensaje;
+        mensajeContenido.className = `mt-4 rounded-2xl border px-4 py-3 text-sm font-semibold ${tipo === "error"
+            ? "border-rose-200 bg-rose-50 text-rose-700"
+            : "border-emerald-200 bg-emerald-50 text-emerald-700"}`;
+    }
+
+    botonGenerar.addEventListener("click", async () => {
+        const url = new URL(botonGenerar.dataset.urlTasas, window.location.origin);
+        const fechaFiltro = campoFechaFiltro?.value;
+        if (fechaFiltro) {
+            url.searchParams.set("fechaCliente", fechaFiltro);
+        }
+
+        establecerCargando(true);
+        try {
+            const tasas = await solicitarJson(url.toString());
+            if (!Array.isArray(tasas) || tasas.length === 0) {
+                campoContenido.value = "";
+                botonCopiar.disabled = true;
+                mostrarNotificacion("error", "No hay tasas activas para generar el contenido.");
+                return;
+            }
+
+            campoContenido.value = generarContenido(tasas);
+            botonCopiar.disabled = false;
+            mensajeContenido?.classList.add("hidden");
+            if (!contenedor.open) {
+                contenedor.showModal();
+            }
+        } catch {
+            mostrarNotificacion("error", "No se pudieron obtener las tasas para generar el contenido.");
+        } finally {
+            establecerCargando(false);
+        }
+    });
+
+    botonCopiar.addEventListener("click", async () => {
+        if (!campoContenido.value) {
+            return;
+        }
+
+        try {
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(campoContenido.value);
+            } else {
+                campoContenido.select();
+                if (!document.execCommand("copy")) {
+                    throw new Error("No se pudo copiar el contenido");
+                }
+                campoContenido.setSelectionRange(0, 0);
+            }
+
+            mostrarMensajeContenido("exito", "Contenido copiado correctamente al portapapeles.");
+        } catch {
+            mostrarMensajeContenido("error", "No se pudo copiar el contenido. Selecciónalo y cópialo manualmente.");
+        }
+    });
+
+    contenedor.querySelector("[data-cerrar-contenido-meta]")?.addEventListener("click", () => {
+        contenedor.close();
+    });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     inicializarCalculadoraPublica();
     inicializarFormularioTasaCambio();
     inicializarLoaderFormulariosGuardado();
     inicializarActualizacionPublicidadSvg();
     inicializarCopiaTasasCambio();
+    inicializarContenidoMetaTasas();
     inicializarFormularioPublicidad();
     inicializarPublicidadPublica();
     inicializarToasts();

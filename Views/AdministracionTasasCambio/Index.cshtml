@@ -19,6 +19,13 @@
             @Html.AntiForgeryToken()
             <a asp-action="Reporte" asp-route-fechaFiltro="@(Model.FechaFiltro?.ToString("yyyy-MM-dd"))" asp-route-paisIdFiltro="@Model.PaisIdFiltro" asp-route-mostrarTodos="@Model.MostrarTodos" target="_blank" rel="noopener" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-tinta transition hover:-translate-y-1 hover:bg-slate-50 focus:ring-4 focus:ring-slate-200">Imprimir reporte</a>
             <a asp-action="EdicionMasiva" asp-route-paisId="@Model.PaisIdFiltro" class="boton-exito inline-flex items-center justify-center hover:-translate-y-1 focus:ring-4 focus:ring-emerald-200">Actualizar por pais</a>
+            <button id="btnGenerarContenidoMeta"
+                    type="button"
+                    data-url-tasas="@Url.Action("ObtenerTasasDia", "Home")"
+                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white shadow-panel transition hover:-translate-y-1 hover:bg-amber-600 focus:ring-4 focus:ring-amber-200 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-70">
+                <span data-texto>Generar contenido para Meta</span>
+                <span data-loader class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/50 border-t-white"></span>
+            </button>
             <button id="btnActualizarPublicidadSvg"
                     type="button"
                     data-url="@Url.Action("ActualizarPublicidadSvg", "AdministracionTasasCambio")"
@@ -49,6 +56,25 @@
             </div>
         </div>
     </form>
+
+    <dialog id="contenidoMetaTasas" class="w-[min(56rem,calc(100vw-2rem))] rounded-[2rem] border border-white/70 bg-white p-0 text-tinta shadow-panel backdrop:bg-tinta/50 backdrop:backdrop-blur-sm" aria-labelledby="tituloContenidoMeta">
+        <div class="max-h-[calc(100vh-2rem)] overflow-y-auto p-5 sm:p-7">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[0.25em] text-mar">Meta Business Agent</p>
+                <h2 id="tituloContenidoMeta" class="mt-2 text-xl font-black text-tinta">Contenido de tasas</h2>
+                <p class="mt-1 text-sm leading-6 text-slate-600">Contenido listo para copiar y pegar manualmente en WhatsApp Business.</p>
+            </div>
+            <div class="flex flex-col gap-3 sm:flex-row">
+                <button id="btnCopiarContenidoMeta" type="button" class="inline-flex items-center justify-center rounded-2xl bg-tinta px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white transition hover:bg-azulMarca focus:ring-4 focus:ring-azulMarca/20 disabled:cursor-not-allowed disabled:opacity-60" disabled>Copiar contenido</button>
+                <button type="button" data-cerrar-contenido-meta class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-slate-700 transition hover:bg-slate-50 focus:ring-4 focus:ring-slate-200">Cerrar</button>
+            </div>
+        </div>
+        <label for="textoContenidoMeta" class="sr-only">Contenido generado para Meta Business Agent</label>
+        <textarea id="textoContenidoMeta" rows="18" readonly class="mt-5 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-sm leading-6 text-tinta outline-none" placeholder="El contenido generado aparecera aqui."></textarea>
+        <p id="mensajeContenidoMeta" class="mt-4 hidden rounded-2xl border px-4 py-3 text-sm font-semibold" role="status" aria-live="polite"></p>
+        </div>
+    </dialog>
 
     <form id="formCopiarTasasCambio" asp-action="Copiar" method="post" class="rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-panel">
         @Html.AntiForgeryToken()
