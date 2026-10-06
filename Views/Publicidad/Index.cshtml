@@ -118,10 +118,150 @@
             outline: none;
         }
 
+        .bandada-murcielagos-publicidad {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 280ms ease, visibility 280ms ease;
+        }
+
+        .bandada-murcielagos-publicidad--activa {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .bandada-murcielagos-publicidad::after {
+            position: absolute;
+            inset: 0;
+            content: "";
+            opacity: 0;
+            background:
+                radial-gradient(ellipse at 15% 78%, rgba(126, 34, 206, 0.28), transparent 30%),
+                radial-gradient(ellipse at 85% 24%, rgba(249, 115, 22, 0.22), transparent 28%),
+                linear-gradient(100deg, transparent 20%, rgba(30, 10, 43, 0.18) 48%, transparent 76%);
+        }
+
+        .bandada-murcielagos-publicidad--activa::after {
+            animation: barridoHalloweenPublicidad 8.8s ease-in-out both;
+        }
+
+        .murcielago-publicidad {
+            position: absolute;
+            z-index: 2;
+            top: var(--inicio-y);
+            left: -12vw;
+            width: var(--tamano);
+            aspect-ratio: 2 / 1;
+            opacity: 0;
+            filter:
+                drop-shadow(0 0.35rem 0.45rem rgba(0, 0, 0, 0.5))
+                drop-shadow(0 0 0.65rem rgba(126, 34, 206, 0.22));
+            animation: cruzarMurcielagoPublicidad var(--duracion) cubic-bezier(0.2, 0.64, 0.38, 1) var(--demora) both;
+            will-change: transform, opacity;
+        }
+
+        .murcielago-publicidad--inverso {
+            right: -12vw;
+            left: auto;
+            animation-name: cruzarMurcielagoPublicidadInverso;
+        }
+
+        .murcielago-publicidad::before {
+            position: absolute;
+            inset: 0;
+            content: "";
+            background:
+                radial-gradient(circle at 46% 44%, #ff9d2e 0 1.8%, transparent 2.5%),
+                radial-gradient(circle at 54% 44%, #ff9d2e 0 1.8%, transparent 2.5%),
+                linear-gradient(135deg, #120719, #39134a 58%, #18091f);
+            clip-path: polygon(50% 31%, 60% 12%, 67% 36%, 100% 10%, 90% 55%, 69% 63%, 59% 82%, 50% 66%, 41% 82%, 31% 63%, 10% 55%, 0 10%, 33% 36%, 40% 12%);
+            transform-origin: 50% 48%;
+            animation: batirAlasPublicidad 320ms ease-in-out infinite alternate;
+        }
+
+        @@keyframes cruzarMurcielagoPublicidad {
+            0% {
+                opacity: 0;
+                transform: translate3d(-8vw, 0, 0) rotate(-9deg) scale(0.72);
+            }
+
+            9%,
+            86% {
+                opacity: var(--opacidad);
+            }
+
+            48% {
+                transform: translate3d(66vw, var(--desvio-medio), 0) rotate(5deg) scale(1.08);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate3d(132vw, var(--desvio-final), 0) rotate(var(--rotacion)) scale(0.84);
+            }
+        }
+
+        @@keyframes cruzarMurcielagoPublicidadInverso {
+            0% {
+                opacity: 0;
+                transform: translate3d(8vw, 0, 0) rotate(9deg) scale(0.72) scaleX(-1);
+            }
+
+            9%,
+            86% {
+                opacity: var(--opacidad);
+            }
+
+            48% {
+                transform: translate3d(-66vw, var(--desvio-medio), 0) rotate(-5deg) scale(1.08) scaleX(-1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate3d(-132vw, var(--desvio-final), 0) rotate(var(--rotacion)) scale(0.84) scaleX(-1);
+            }
+        }
+
+        @@keyframes batirAlasPublicidad {
+            from {
+                transform: scaleY(1) rotate(-2deg);
+            }
+
+            to {
+                transform: scaleY(0.52) rotate(2deg);
+            }
+        }
+
+        @@keyframes barridoHalloweenPublicidad {
+            0%,
+            100% {
+                opacity: 0;
+                transform: translateX(-8%);
+            }
+
+            18%,
+            78% {
+                opacity: 1;
+            }
+
+            50% {
+                transform: translateX(8%);
+            }
+        }
+
         @@media (max-aspect-ratio: 4 / 3) {
             .pantalla-publicitaria__visor {
                 max-width: 100vw;
                 max-height: 100vh;
+            }
+        }
+
+        @@media (prefers-reduced-motion: reduce) {
+            .bandada-murcielagos-publicidad {
+                display: none;
             }
         }
     </style>
@@ -157,6 +297,10 @@
                 }
             }
         </section>
+        <div id="bandadaMurcielagosPublicidad"
+             class="bandada-murcielagos-publicidad"
+             data-intervalo-ms="120000"
+             aria-hidden="true"></div>
         <button id="botonPantallaCompletaPublicidad"
                 class="boton-pantalla-completa"
                 type="button"
@@ -169,6 +313,7 @@
             var modulo = document.getElementById("modulo-publicidad");
             var visor = document.getElementById("publicidad-visor");
             var botonPantallaCompleta = document.getElementById("botonPantallaCompletaPublicidad");
+            var bandadaMurcielagos = document.getElementById("bandadaMurcielagosPublicidad");
             var datosIniciales = document.getElementById("datos-publicidad-inicial");
             var urlPublicidad = modulo.getAttribute("data-url-publicidad");
             var repetirVideos = modulo.getAttribute("data-loop-videos") === "true";
@@ -181,6 +326,76 @@
             var inicioRecursoActual = 0;
             var duracionRecursoActualMs = 0;
             var cargandoRecurso = false;
+            var relojBandadaMurcielagos = null;
+            var limpiezaBandadaMurcielagos = null;
+
+            function limpiarBandadaMurcielagos() {
+                if (!bandadaMurcielagos) {
+                    return;
+                }
+
+                bandadaMurcielagos.classList.remove("bandada-murcielagos-publicidad--activa");
+                bandadaMurcielagos.replaceChildren();
+                limpiezaBandadaMurcielagos = null;
+            }
+
+            function crearMurcielagoPublicidad(indice) {
+                var murcielago = document.createElement("span");
+                var viajaEnSentidoInverso = indice % 5 === 0;
+                var inicioY = 5 + Math.random() * 78;
+                var tamano = 3.2 + Math.random() * 5.4;
+                var demora = Math.random() * 2.6;
+                var duracion = 4.8 + Math.random() * 2.7;
+                var desvioMedio = -8 + Math.random() * 17;
+                var desvioFinal = -15 + Math.random() * 31;
+                var rotacion = -12 + Math.random() * 25;
+                var opacidad = 0.74 + Math.random() * 0.24;
+
+                murcielago.className = "murcielago-publicidad" + (viajaEnSentidoInverso ? " murcielago-publicidad--inverso" : "");
+                murcielago.style.setProperty("--inicio-y", inicioY.toFixed(2) + "%");
+                murcielago.style.setProperty("--tamano", tamano.toFixed(2) + "rem");
+                murcielago.style.setProperty("--demora", demora.toFixed(2) + "s");
+                murcielago.style.setProperty("--duracion", duracion.toFixed(2) + "s");
+                murcielago.style.setProperty("--desvio-medio", desvioMedio.toFixed(2) + "vh");
+                murcielago.style.setProperty("--desvio-final", desvioFinal.toFixed(2) + "vh");
+                murcielago.style.setProperty("--rotacion", rotacion.toFixed(2) + "deg");
+                murcielago.style.setProperty("--opacidad", opacidad.toFixed(2));
+                return murcielago;
+            }
+
+            function mostrarBandadaMurcielagos() {
+                if (!bandadaMurcielagos ||
+                    document.hidden ||
+                    window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                    return;
+                }
+
+                if (limpiezaBandadaMurcielagos !== null) {
+                    window.clearTimeout(limpiezaBandadaMurcielagos);
+                }
+
+                bandadaMurcielagos.replaceChildren();
+                var fragmento = document.createDocumentFragment();
+                for (var indice = 0; indice < 24; indice += 1) {
+                    fragmento.appendChild(crearMurcielagoPublicidad(indice));
+                }
+
+                bandadaMurcielagos.appendChild(fragmento);
+                bandadaMurcielagos.classList.remove("bandada-murcielagos-publicidad--activa");
+                void bandadaMurcielagos.offsetWidth;
+                bandadaMurcielagos.classList.add("bandada-murcielagos-publicidad--activa");
+                limpiezaBandadaMurcielagos = window.setTimeout(limpiarBandadaMurcielagos, 9200);
+            }
+
+            function iniciarBandadaMurcielagos() {
+                if (!bandadaMurcielagos || relojBandadaMurcielagos !== null) {
+                    return;
+                }
+
+                var intervalo = Number(bandadaMurcielagos.getAttribute("data-intervalo-ms")) || 120000;
+                mostrarBandadaMurcielagos();
+                relojBandadaMurcielagos = window.setInterval(mostrarBandadaMurcielagos, intervalo);
+            }
 
             try {
                 publicidades = JSON.parse(datosIniciales.textContent || "[]");
@@ -484,6 +699,7 @@
             }
 
             iniciarActualizacionPublicidades();
+            iniciarBandadaMurcielagos();
 
             if (publicidades.length > 0) {
                 iniciarRelojRevision();

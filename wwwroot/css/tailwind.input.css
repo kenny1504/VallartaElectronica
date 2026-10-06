@@ -99,180 +99,168 @@
     animation: aparecerVista 480ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .decoracion-mes-patrio {
+  .decoracion-halloween {
     pointer-events: none;
     position: fixed;
     inset: 0;
     z-index: 35;
     overflow: hidden;
+    background:
+      radial-gradient(circle at 0 42%, rgba(106, 35, 154, 0.09), transparent 25%),
+      radial-gradient(circle at 100% 46%, rgba(242, 120, 22, 0.1), transparent 24%);
   }
 
-  .decoracion-mes-patrio__encabezado {
+  .decoracion-halloween__encabezado {
     position: absolute;
     top: 5.55rem;
     left: 50%;
     z-index: 30;
     display: flex;
-    width: min(34rem, calc(100vw - 2rem));
+    width: min(31rem, calc(100vw - 2rem));
     transform: translateX(-50%);
     align-items: center;
     justify-content: space-between;
     gap: 0.8rem;
   }
 
-  .decoracion-mes-patrio__bandera {
-    position: relative;
-    width: clamp(4.5rem, 11vw, 6.5rem);
-    height: clamp(2.55rem, 6.25vw, 3.7rem);
+  .decoracion-halloween__murcielago {
+    width: clamp(3.9rem, 8vw, 5.2rem);
+    height: clamp(1.7rem, 3.6vw, 2.4rem);
     flex: none;
-    overflow: hidden;
-    border: 2px solid rgba(255, 255, 255, 0.88);
-    border-radius: 0.65rem;
-    background: linear-gradient(90deg, #006847 0 33.33%, #ffffff 33.33% 66.66%, #ce1126 66.66% 100%);
-    box-shadow: 0 14px 30px rgba(20, 50, 74, 0.15);
-    opacity: 0.86;
-    transform: rotate(-7deg);
-    animation: ondearBanderaPatria 5.8s ease-in-out infinite;
+    background:
+      radial-gradient(circle at 46% 45%, #ffad42 0 2.2%, transparent 2.8%),
+      radial-gradient(circle at 54% 45%, #ffad42 0 2.2%, transparent 2.8%),
+      #190a27;
+    clip-path: polygon(50% 34%, 61% 18%, 67% 40%, 100% 18%, 91% 58%, 69% 62%, 60% 78%, 50% 64%, 40% 78%, 31% 62%, 9% 58%, 0 18%, 33% 40%, 39% 18%);
+    opacity: 0.92;
+    filter: drop-shadow(0 7px 9px rgba(53, 16, 76, 0.32));
+    animation: volarMurcielagoHalloween 6.4s ease-in-out infinite;
   }
 
-  .decoracion-mes-patrio__bandera::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 0.75rem;
-    aspect-ratio: 1;
-    transform: translate(-50%, -50%);
-    border: 2px solid #8c6a22;
-    border-radius: 999px;
-    background: radial-gradient(circle, #c49a39 0 34%, transparent 38%);
+  .decoracion-halloween__murcielago--derecho {
+    animation-delay: -3.2s;
   }
 
-  .decoracion-mes-patrio__bandera--derecha {
-    transform: rotate(7deg);
-    animation-name: ondearBanderaPatriaDerecha;
-    animation-delay: -2.9s;
-  }
-
-  .decoracion-mes-patrio__insignia {
+  .decoracion-halloween__insignia {
     display: grid;
     min-width: min(13rem, calc(100vw - 11rem));
-    border: 1px solid rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(255, 166, 55, 0.82);
     border-radius: 999px;
-    background: linear-gradient(135deg, rgba(244, 255, 249, 0.95), rgba(255, 255, 255, 0.96) 50%, rgba(255, 244, 244, 0.95));
-    box-shadow: 0 14px 32px rgba(20, 50, 74, 0.13);
+    background: linear-gradient(135deg, #1b0c29, #4b1764 58%, #281038);
+    box-shadow:
+      0 12px 28px rgba(42, 13, 59, 0.28),
+      0 0 0.9rem rgba(242, 140, 40, 0.13);
     padding: 0.42rem 1rem 0.5rem;
     text-align: center;
-    color: #14324a;
-    opacity: 0.92;
+    opacity: 0.98;
   }
 
-  .decoracion-mes-patrio__insignia span {
+  .decoracion-halloween__insignia span {
     font-size: 0.62rem;
     font-weight: 900;
     line-height: 1;
     text-transform: uppercase;
     letter-spacing: 0.18em;
-    color: #006847;
+    color: #e9d5ff;
   }
 
-  .decoracion-mes-patrio__insignia strong {
+  .decoracion-halloween__insignia strong {
     margin-top: 0.12rem;
     font-size: 0.82rem;
     font-weight: 900;
     line-height: 1.15;
-    letter-spacing: 0.05em;
-    color: #b51f2f;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #ffb347;
+    text-shadow: 0 1px 8px rgba(255, 145, 35, 0.3);
   }
 
-  .decoracion-mes-patrio__costado {
+  .decoracion-halloween__costado {
     position: absolute;
     top: 50%;
     z-index: 5;
-    width: clamp(3.8rem, 6vw, 5.4rem);
-    opacity: 0.62;
-    filter: drop-shadow(0 16px 24px rgba(20, 50, 74, 0.18));
-    animation: flotarMaracaPatria 6.8s ease-in-out infinite;
+    width: clamp(4rem, 6.2vw, 5.8rem);
+    opacity: 0.78;
+    filter:
+      drop-shadow(0 16px 24px rgba(45, 26, 61, 0.24))
+      drop-shadow(0 0 10px rgba(242, 140, 40, 0.12));
+    animation: flotarCalabazaHalloween 7s ease-in-out infinite;
   }
 
-  .decoracion-mes-patrio__costado--izquierdo {
+  .decoracion-halloween__costado--izquierdo {
     left: max(1.5rem, calc((100vw - 80rem) / 2 - 7.5rem));
   }
 
-  .decoracion-mes-patrio__costado--derecho {
+  .decoracion-halloween__costado--derecho {
     right: max(1.5rem, calc((100vw - 80rem) / 2 - 7.5rem));
-    animation-delay: -3.4s;
+    animation-delay: -3.5s;
   }
 
-  .decoracion-mes-patrio__costado svg {
+  .decoracion-halloween__costado svg {
     width: 100%;
   }
 
-  .decoracion-mes-patrio__confeti span {
+  .decoracion-halloween__particulas span {
     position: absolute;
     z-index: 20;
     width: 0.42rem;
-    height: 0.78rem;
-    border-radius: 0.14rem;
-    background: #006847;
-    opacity: 0.28;
-    animation: flotarConfetiPatrio 8.5s ease-in-out infinite;
+    aspect-ratio: 1;
+    border-radius: 999px;
+    background: #f28c28;
+    opacity: 0.34;
+    box-shadow: 0 0 0.65rem rgba(242, 140, 40, 0.32);
+    animation: flotarParticulaHalloween 8.5s ease-in-out infinite;
   }
 
-  .decoracion-mes-patrio__confeti span:nth-child(1) { left: 6%; top: 15%; animation-delay: -1.4s; }
-  .decoracion-mes-patrio__confeti span:nth-child(2) { left: 13%; top: 32%; background: #ce1126; animation-delay: -5.2s; }
-  .decoracion-mes-patrio__confeti span:nth-child(3) { left: 25%; top: 11%; background: #ffffff; box-shadow: 0 0 0 1px rgba(20, 50, 74, 0.08); animation-delay: -3.1s; }
-  .decoracion-mes-patrio__confeti span:nth-child(4) { left: 35%; top: 8%; background: #ce1126; animation-delay: -6.6s; }
-  .decoracion-mes-patrio__confeti span:nth-child(5) { right: 34%; top: 9%; background: #006847; animation-delay: -2.5s; }
-  .decoracion-mes-patrio__confeti span:nth-child(6) { right: 24%; top: 13%; background: #ffffff; box-shadow: 0 0 0 1px rgba(20, 50, 74, 0.08); animation-delay: -7.2s; }
-  .decoracion-mes-patrio__confeti span:nth-child(7) { right: 13%; top: 29%; background: #ce1126; animation-delay: -4.4s; }
-  .decoracion-mes-patrio__confeti span:nth-child(8) { right: 6%; top: 16%; animation-delay: -0.8s; }
-  .decoracion-mes-patrio__confeti span:nth-child(9) { left: 4%; bottom: 27%; background: #ffffff; box-shadow: 0 0 0 1px rgba(20, 50, 74, 0.08); animation-delay: -6.1s; }
-  .decoracion-mes-patrio__confeti span:nth-child(10) { left: 16%; bottom: 13%; background: #ce1126; animation-delay: -2.9s; }
-  .decoracion-mes-patrio__confeti span:nth-child(11) { right: 16%; bottom: 16%; animation-delay: -5.8s; }
-  .decoracion-mes-patrio__confeti span:nth-child(12) { right: 4%; bottom: 29%; background: #ffffff; box-shadow: 0 0 0 1px rgba(20, 50, 74, 0.08); animation-delay: -3.7s; }
+  .decoracion-halloween__particulas span:nth-child(1) { left: 6%; top: 15%; animation-delay: -1.4s; }
+  .decoracion-halloween__particulas span:nth-child(2) { left: 13%; top: 32%; background: #8b5cf6; animation-delay: -5.2s; }
+  .decoracion-halloween__particulas span:nth-child(3) { left: 25%; top: 11%; background: #fff4dc; animation-delay: -3.1s; }
+  .decoracion-halloween__particulas span:nth-child(4) { left: 35%; top: 8%; background: #8b5cf6; animation-delay: -6.6s; }
+  .decoracion-halloween__particulas span:nth-child(5) { right: 34%; top: 9%; animation-delay: -2.5s; }
+  .decoracion-halloween__particulas span:nth-child(6) { right: 24%; top: 13%; background: #fff4dc; animation-delay: -7.2s; }
+  .decoracion-halloween__particulas span:nth-child(7) { right: 13%; top: 29%; background: #8b5cf6; animation-delay: -4.4s; }
+  .decoracion-halloween__particulas span:nth-child(8) { right: 6%; top: 16%; animation-delay: -0.8s; }
+  .decoracion-halloween__particulas span:nth-child(9) { left: 4%; bottom: 27%; background: #fff4dc; animation-delay: -6.1s; }
+  .decoracion-halloween__particulas span:nth-child(10) { left: 16%; bottom: 13%; background: #8b5cf6; animation-delay: -2.9s; }
+  .decoracion-halloween__particulas span:nth-child(11) { right: 16%; bottom: 16%; animation-delay: -5.8s; }
+  .decoracion-halloween__particulas span:nth-child(12) { right: 4%; bottom: 29%; background: #fff4dc; animation-delay: -3.7s; }
 
-  .decoracion-mes-patrio__estrellas span {
+  .decoracion-halloween__siluetas span {
     position: absolute;
     z-index: 19;
-    width: clamp(0.7rem, 1.45vw, 1.2rem);
-    aspect-ratio: 1;
-    background: #006847;
-    clip-path: polygon(50% 0, 61% 34%, 98% 35%, 68% 56%, 79% 91%, 50% 70%, 21% 91%, 32% 56%, 2% 35%, 39% 34%);
-    opacity: 0.42;
-    filter: drop-shadow(0 4px 7px rgba(20, 50, 74, 0.1));
-    animation: flotarEstrellaPatria 7s ease-in-out infinite;
+    width: clamp(1rem, 2vw, 1.65rem);
+    height: clamp(0.45rem, 0.9vw, 0.75rem);
+    background: #1b0b27;
+    clip-path: polygon(50% 33%, 62% 8%, 70% 38%, 100% 18%, 90% 62%, 67% 64%, 50% 100%, 33% 64%, 10% 62%, 0 18%, 30% 38%, 38% 8%);
+    opacity: 0.62;
+    filter: drop-shadow(0 4px 6px rgba(45, 12, 64, 0.2));
+    animation: volarSiluetaHalloween 7.5s ease-in-out infinite;
   }
 
-  .decoracion-mes-patrio__estrellas span:nth-child(1) { left: 9%; top: 21%; animation-delay: -1.2s; }
-  .decoracion-mes-patrio__estrellas span:nth-child(2) { left: 19%; top: 14%; background: #ce1126; animation-delay: -4.6s; }
-  .decoracion-mes-patrio__estrellas span:nth-child(3) { left: 29%; top: 29%; background: #ffffff; animation-delay: -2.4s; }
-  .decoracion-mes-patrio__estrellas span:nth-child(4) { right: 29%; top: 26%; animation-delay: -5.5s; }
-  .decoracion-mes-patrio__estrellas span:nth-child(5) { right: 18%; top: 15%; background: #ffffff; animation-delay: -3.5s; }
-  .decoracion-mes-patrio__estrellas span:nth-child(6) { right: 8%; top: 23%; background: #ce1126; animation-delay: -0.7s; }
-  .decoracion-mes-patrio__estrellas span:nth-child(7) { left: 8%; bottom: 20%; background: #ce1126; animation-delay: -5.9s; }
-  .decoracion-mes-patrio__estrellas span:nth-child(8) { left: 24%; bottom: 11%; animation-delay: -2.8s; }
-  .decoracion-mes-patrio__estrellas span:nth-child(9) { right: 24%; bottom: 15%; background: #ce1126; animation-delay: -4.1s; }
-  .decoracion-mes-patrio__estrellas span:nth-child(10) { right: 8%; bottom: 23%; background: #ffffff; animation-delay: -1.8s; }
+  .decoracion-halloween__siluetas span:nth-child(1) { left: 8%; top: 22%; animation-delay: -1.2s; }
+  .decoracion-halloween__siluetas span:nth-child(2) { left: 20%; top: 15%; background: #6b238e; animation-delay: -4.6s; }
+  .decoracion-halloween__siluetas span:nth-child(3) { left: 29%; top: 30%; animation-delay: -2.4s; }
+  .decoracion-halloween__siluetas span:nth-child(4) { right: 29%; top: 27%; background: #d96816; animation-delay: -5.5s; }
+  .decoracion-halloween__siluetas span:nth-child(5) { right: 19%; top: 16%; animation-delay: -3.5s; }
+  .decoracion-halloween__siluetas span:nth-child(6) { right: 8%; top: 24%; background: #6b238e; animation-delay: -0.7s; }
+  .decoracion-halloween__siluetas span:nth-child(7) { left: 9%; bottom: 20%; animation-delay: -5.9s; }
+  .decoracion-halloween__siluetas span:nth-child(8) { right: 9%; bottom: 23%; background: #d96816; animation-delay: -2.8s; }
 
-  .seccion-administracion .decoracion-mes-patrio {
+  .seccion-administracion .decoracion-halloween {
     z-index: 0;
   }
 
-  .seccion-administracion .decoracion-mes-patrio__encabezado {
+  .seccion-administracion .decoracion-halloween__encabezado {
     opacity: 0.42;
     transform: translateX(-50%) scale(0.9);
   }
 
-  .seccion-administracion .decoracion-mes-patrio__confeti span {
+  .seccion-administracion .decoracion-halloween__particulas span,
+  .seccion-administracion .decoracion-halloween__siluetas span {
     opacity: 0.16;
   }
 
-  .seccion-administracion .decoracion-mes-patrio__estrellas span {
-    opacity: 0.16;
-  }
-
-  .seccion-administracion .decoracion-mes-patrio__costado {
+  .seccion-administracion .decoracion-halloween__costado {
     opacity: 0.14;
   }
 
@@ -340,29 +328,18 @@
   }
 }
 
-@keyframes ondearBanderaPatria {
+@keyframes volarMurcielagoHalloween {
   0%,
   100% {
-    transform: translate3d(0, 0, 0) rotate(-7deg);
+    transform: translate3d(0, 0, 0) rotate(-4deg) scaleY(1);
   }
 
   50% {
-    transform: translate3d(0, -0.3rem, 0) rotate(-4deg);
+    transform: translate3d(0, -0.35rem, 0) rotate(4deg) scaleY(0.82);
   }
 }
 
-@keyframes ondearBanderaPatriaDerecha {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) rotate(7deg);
-  }
-
-  50% {
-    transform: translate3d(0, -0.3rem, 0) rotate(4deg);
-  }
-}
-
-@keyframes flotarMaracaPatria {
+@keyframes flotarCalabazaHalloween {
   0%,
   100% {
     transform: translate3d(0, -50%, 0) rotate(-3deg);
@@ -373,117 +350,105 @@
   }
 }
 
-@keyframes flotarConfetiPatrio {
+@keyframes flotarParticulaHalloween {
   0%,
   100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
+    transform: translate3d(0, 0, 0) scale(0.85);
   }
 
   50% {
-    transform: translate3d(0.2rem, 1rem, 0) rotate(90deg);
+    transform: translate3d(0.2rem, 0.85rem, 0) scale(1.15);
   }
 }
 
-@keyframes flotarEstrellaPatria {
+@keyframes volarSiluetaHalloween {
   0%,
   100% {
-    transform: translate3d(0, 0, 0) rotate(-5deg) scale(0.96);
+    transform: translate3d(0, 0, 0) rotate(-5deg) scaleY(1);
   }
 
   50% {
-    transform: translate3d(0.25rem, -0.65rem, 0) rotate(8deg) scale(1.08);
+    transform: translate3d(0.35rem, -0.7rem, 0) rotate(7deg) scaleY(0.75);
   }
 }
 
 @media (max-width: 1535px) {
-  .decoracion-mes-patrio__costado {
+  .decoracion-halloween__costado {
     width: 3.7rem;
-    opacity: 0.32;
+    opacity: 0.5;
   }
 
-  .decoracion-mes-patrio__encabezado {
-    width: min(31rem, calc(100vw - 2rem));
+  .decoracion-halloween__encabezado {
+    width: min(28rem, calc(100vw - 2rem));
   }
 
-  .decoracion-mes-patrio__confeti span:nth-child(n+9) {
-    display: none;
-  }
-
-  .decoracion-mes-patrio__estrellas span:nth-child(n+9) {
+  .decoracion-halloween__particulas span:nth-child(n+9),
+  .decoracion-halloween__siluetas span:nth-child(n+7) {
     display: none;
   }
 }
 
 @media (max-width: 1023px) {
-  .decoracion-mes-patrio__encabezado {
+  .decoracion-halloween__encabezado {
     top: 5.35rem;
-    width: min(22rem, calc(100vw - 1rem));
+    width: min(21rem, calc(100vw - 1rem));
     gap: 0.45rem;
   }
 
-  .decoracion-mes-patrio__bandera {
-    width: clamp(3.4rem, 19vw, 4.5rem);
-    height: clamp(1.95rem, 11vw, 2.55rem);
-    border-radius: 0.5rem;
+  .decoracion-halloween__murcielago {
+    width: clamp(3rem, 16vw, 4rem);
+    height: clamp(1.3rem, 7vw, 1.75rem);
   }
 
-  .decoracion-mes-patrio__bandera::after {
-    width: 0.45rem;
-    border-width: 1px;
-  }
-
-  .decoracion-mes-patrio__insignia {
+  .decoracion-halloween__insignia {
     min-width: min(10rem, calc(100vw - 9rem));
     padding: 0.34rem 0.65rem 0.4rem;
   }
 
-  .decoracion-mes-patrio__insignia span {
+  .decoracion-halloween__insignia span {
     font-size: 0.54rem;
   }
 
-  .decoracion-mes-patrio__insignia strong {
+  .decoracion-halloween__insignia strong {
     font-size: 0.7rem;
   }
 
-  .decoracion-mes-patrio__costado {
+  .decoracion-halloween__costado {
     display: none;
   }
 
-  .decoracion-mes-patrio__confeti span:nth-child(n+5) {
+  .decoracion-halloween__particulas span:nth-child(n+5),
+  .decoracion-halloween__siluetas span:nth-child(n+5) {
     display: none;
   }
 
-  .decoracion-mes-patrio__estrellas span:nth-child(n+7) {
-    display: none;
-  }
-
-  .decoracion-mes-patrio__confeti span {
+  .decoracion-halloween__particulas span {
     width: 0.32rem;
-    height: 0.6rem;
     opacity: 0.22;
   }
 
-  .decoracion-mes-patrio__estrellas span {
-    width: clamp(0.58rem, 3vw, 0.82rem);
-    opacity: 0.3;
+  .decoracion-halloween__siluetas span {
+    width: clamp(0.9rem, 4vw, 1.2rem);
+    height: clamp(0.4rem, 1.8vw, 0.54rem);
+    opacity: 0.26;
   }
 }
 
 @media (max-width: 420px) {
-  .decoracion-mes-patrio__insignia {
+  .decoracion-halloween__insignia {
     min-width: 8.6rem;
   }
 
-  .decoracion-mes-patrio__insignia span {
+  .decoracion-halloween__insignia span {
     display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .decoracion-mes-patrio__bandera,
-  .decoracion-mes-patrio__costado,
-  .decoracion-mes-patrio__confeti span,
-  .decoracion-mes-patrio__estrellas span {
+  .decoracion-halloween__murcielago,
+  .decoracion-halloween__costado,
+  .decoracion-halloween__particulas span,
+  .decoracion-halloween__siluetas span {
     animation: none;
   }
 }
